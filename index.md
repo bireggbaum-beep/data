@@ -1,6 +1,5 @@
 ---
 title: Pathophysiologie der Schleimhautdegeneration
-layout: page
 ---
 
 # Die Pathophysiologie der Schleimhautdegeneration: Eine Kaskade aus Malabsorption und endothelialer Dysfunktion
