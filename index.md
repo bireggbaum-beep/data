@@ -1,3 +1,7 @@
+---
+title: Pathophysiologie der Schleimhautdegeneration
+---
+
 # Die Pathophysiologie der Schleimhautdegeneration: Eine Kaskade aus Malabsorption und endothelialer Dysfunktion
 
 Die beschriebene Symptomatik – chronisch gereizte, trockene und infektanfällige Schleimhäute – lässt sich auf eine Kaskade zurückführen, die ihren Ursprung in einer Störung des Darms hat. Es handelt sich nicht um isolierte Mängel, sondern um die logische Konsequenz einer systemischen Störung, die sowohl die Nährstoffversorgung als auch die Durchblutung beeinträchtigt.
