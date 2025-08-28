@@ -1,0 +1,10 @@
+# Wählt das Theme aus, das eine Sidebar unterstützt
+theme: jekyll-theme-cayman
+
+# Metadaten für deine Seite
+title: Pathophysiologie der Schleimhautdegeneration
+description: Eine wissenschaftliche Deduktion der Ursachen für chronisch gereizte Schleimhäute.
+
+# Diese Zeile aktiviert die "Table of Contents" als Sidebar
+# (Dies ist ein spezifischer Trick für das Cayman-Theme)
+show_downloads: false
