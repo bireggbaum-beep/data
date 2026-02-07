@@ -1,5 +1,142 @@
 [
   {
+    "id": "tunnel_rat",
+    "title": "The Tunnel Rat",
+    "type": "Bestiary",
+    "world": "dungeon",
+    "cr": 0.25,
+    "xp": 20,
+    "text": "The tunnel rat is not a real rat. It walks on two legs. It has a small knife in its hand. Its eyes are yellow. They shine in the dark. Tunnel rats live in old places under the ground. They eat old food and dead things. Sometimes they eat each other. One tunnel rat is not dangerous. But they never walk alone. When you see one, twenty more are watching you.",
+    "vocab": [
+      ["tunnel", "ein langer Gang unter der Erde"],
+      ["knife", "Messer"],
+      ["shine", "leuchten, glänzen"]
+    ],
+    "questions": [
+      "How many legs does a tunnel rat walk on?",
+      "What colour are its eyes?",
+      "Why is one tunnel rat not dangerous?"
+    ]
+  },
+  {
+    "id": "broken_lantern",
+    "title": "The Broken Lantern",
+    "type": "Item",
+    "world": "dungeon",
+    "cr": 0.25,
+    "xp": 25,
+    "text": "This old lamp has a crack in its glass. It still works, but the fire inside is green, not orange. When you hold it up, you can see strange things. Old blood on the floor shines bright. You can see footprints in the dust. Sometimes you see a face in the corner of your eye. The lamp shows what happened here before. Not everyone wants to know.",
+    "vocab": [
+      ["lantern", "Laterne"],
+      ["crack", "Riss"],
+      ["footprints", "Fussabdrücke"]
+    ],
+    "questions": [
+      "What colour is the fire in the lantern?",
+      "What can you see when you hold it up?",
+      "Why might some people not want to use it?"
+    ]
+  },
+  {
+    "id": "school_bell",
+    "title": "The School Bell",
+    "type": "Daily Life",
+    "world": "real",
+    "cr": 0.25,
+    "xp": 25,
+    "text": "Every morning is the same. The alarm rings at seven. The bed is warm. The floor is cold. Breakfast is too fast — always too fast. The bus comes at 7:42. If you miss it, you walk. If you walk, you are late. Today the bell rings when you get to school. Your heart beats fast. You run to the classroom. The door is still open. You sit down one second before the teacher turns around. Safe. Tomorrow you will wake up earlier. But the bed will still be warm.",
+    "vocab": [
+      ["alarm", "Wecker"],
+      ["miss", "verpassen"],
+      ["beats", "schlägt (Herz)"]
+    ],
+    "questions": [
+      "What time does the bus come?",
+      "Is the person late or on time?",
+      "Why will tomorrow probably be the same?"
+    ]
+  },
+  {
+    "id": "mimic_warning",
+    "title": "A Warning About Mimics",
+    "type": "Adventurer's Note",
+    "world": "dungeon",
+    "cr": 0.5,
+    "xp": 50,
+    "text": "If you are reading this, you are alive. Good. Now listen: not everything in this place is what it looks like. That box over there? It might be hungry. That wooden door? It might have teeth. We call them Mimics. They copy things and wait. When someone touches them, they attack. My advice: throw a stone at everything before you touch it. If it screams, don't open it. If it runs away, don't follow it. And if you see two doors that look the same next to each other — leave. Just leave. Trust me.",
+    "vocab": [
+      ["mimic", "ein Monster das Dinge kopiert"],
+      ["wooden", "aus Holz"],
+      ["trust", "vertrauen"],
+      ["advice", "Ratschlag"]
+    ],
+    "questions": [
+      "What do Mimics do?",
+      "What advice does the writer give?",
+      "What should you do if you see two identical doors?"
+    ]
+  },
+  {
+    "id": "whispering_moss",
+    "title": "The Whispering Moss",
+    "type": "Environmental Hazard",
+    "world": "dungeon",
+    "cr": 0.5,
+    "xp": 45,
+    "text": "The green moss on the walls is not normal. It whispers. At first, you think it is the wind. Then you see there is no wind down here. The moss repeats the last words of everyone who died in this corridor. Pieces of screams. Last prayers. Sometimes useful things: 'Trap ahead' or 'Don't trust the dwarf.' The longer you listen, the harder it is to stop. Some adventurers sit down next to the moss and never get up again. They just listen, forever, to voices that cannot help them anymore.",
+    "vocab": [
+      ["moss", "Moos"],
+      ["whispers", "flüstert"],
+      ["prayers", "Gebete"],
+      ["trap", "Falle"]
+    ],
+    "questions": [
+      "What does the moss whisper?",
+      "Why can listening be dangerous?",
+      "What useful things might you hear?"
+    ]
+  },
+  {
+    "id": "spartan_checkpoint",
+    "title": "The Spartan Checkpoint",
+    "type": "Encounter",
+    "world": "greece",
+    "cr": 0.5,
+    "xp": 55,
+    "text": "Two soldiers stand on the road. They wear red clothes and have long, sharp sticks. 'Stop!' says one soldier. He looks old and strong. 'You cannot go to Sparta. Where are you from? Why are you here?' He looks at your face. He looks at your bag. He looks at your clothes. 'Tell me the truth,' he says. 'Do not lie to us.' His eyes are cold. The other soldier says nothing. He just watches. You must answer now.",
+    "vocab": [
+      ["soldiers", "Soldaten"],
+      ["sharp", "scharf"],
+      ["truth", "Wahrheit"],
+      ["lie", "lügen"]
+    ],
+    "questions": [
+      "What do the soldiers wear?",
+      "What does the soldier want to know?",
+      "Why is this situation dangerous?"
+    ]
+  },
+  {
+    "id": "brainrot",
+    "title": "The Attention Thief",
+    "type": "Warning",
+    "world": "real",
+    "cr": 0.5,
+    "xp": 45,
+    "text": "They call it 'brainrot content.' Short videos. Loud sounds. Bright colours. Always something new, every three seconds. Your brain loves it because it is easy. No thinking. Just watch, scroll, watch, scroll. But here is the problem: every video takes a little piece of your attention. After one hour of scrolling, try reading a book. It is hard. Your brain wants the next video. Scientists have studied this. The more brainrot you watch, the harder it is to concentrate. Your attention is like a muscle. If you only use it for three-second videos, it becomes weak.",
+    "vocab": [
+      ["brainrot", "Inhalte die das Gehirn faul machen"],
+      ["scroll", "scrollen, wischen"],
+      ["attention", "Aufmerksamkeit"],
+      ["concentrate", "sich konzentrieren"]
+    ],
+    "questions": [
+      "Why does your brain love short videos?",
+      "What happens after an hour of scrolling?",
+      "Why is attention compared to a muscle?"
+    ]
+  },
+  {
     "id": "bone_collector",
     "title": "The Bone Collector",
     "type": "Bestiary",
@@ -35,7 +172,7 @@
       ["goblins", "Kobolde, kleine grüne Monster"],
       ["ruins", "Ruinen"],
       ["doorway", "Türöffnung"],
-      ["map", "Karte, Landkarte"]
+      ["suppose", "annehmen, sollen"]
     ],
     "questions": [
       "How many goblins attacked?",
@@ -88,6 +225,27 @@
     ]
   },
   {
+    "id": "group_project",
+    "title": "The Group Project",
+    "type": "Daily Life",
+    "world": "real",
+    "cr": 1,
+    "xp": 85,
+    "text": "The teacher said the words everyone hates: 'Get into groups of four.' Your friends grabbed each other before you could move. Now they have four people already. They give you a sorry look. You look around. Everyone is making groups. Everyone has friends. You see three other students standing alone, looking as lost as you feel. The teacher points at all of you: 'You four. Together.' You don't know these people. One looks angry. One looks scared. One is already on their phone. This is your team now. The project is due in two weeks. Maybe it will be fine. Maybe you will become friends. Or maybe you will do all the work while they play games.",
+    "vocab": [
+      ["grabbed", "schnappten, griffen"],
+      ["due", "fällig"],
+      ["project", "Projekt"],
+      ["team", "Team, Gruppe"],
+      ["while", "während"]
+    ],
+    "questions": [
+      "Why couldn't the person join their friends' group?",
+      "Who ends up in their new group?",
+      "What might go wrong with this project?"
+    ]
+  },
+  {
     "id": "drowned_temple",
     "title": "The Drowned Temple",
     "type": "Dungeon Log",
@@ -102,7 +260,6 @@
       ["priests", "Priester"],
       ["drowned", "ertrunken"],
       ["ghosts", "Geister"],
-      ["rituals", "Rituale, Zeremonien"],
       ["pillar", "Säule"]
     ],
     "questions": [
@@ -170,9 +327,9 @@
       ["Pythia", "Pythia (Priesterin in Delphi)"],
       ["stool", "Hocker"],
       ["fumes", "Dämpfe"],
-      ["shadow", "Schatten"],
       ["beware", "sei vorsichtig, hüte dich"],
-      ["collapsed", "brach zusammen"]
+      ["collapsed", "brach zusammen"],
+      ["seek", "suchen"]
     ],
     "questions": [
       "Where does the Pythia sit?",
@@ -196,7 +353,6 @@
       ["robes", "Gewänder"],
       ["flesh", "Fleisch"],
       ["echoed", "hallte wider"],
-      ["descended", "stieg herab"],
       ["riddle", "Rätsel"]
     ],
     "questions": [
@@ -216,12 +372,12 @@
     "vocab": [
       ["floating", "schwebend"],
       ["nightmare", "Albtraum"],
-      ["ugly", "hässlich"],
       ["stalks", "Stiele, Stängel"],
       ["beam", "Strahl"],
       ["disappear", "verschwinden"],
-      ["stone", "Stein (hier: zu Stein werden)"],
-      ["collection", "Sammlung"]
+      ["patient", "geduldig"],
+      ["collection", "Sammlung"],
+      ["brave", "mutig"]
     ],
     "questions": [
       "What does Xanathar look like?",
