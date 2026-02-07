@@ -528,10 +528,6 @@
     <button class="reset-btn" id="resetBtn">Reset Progress</button>
 
     <script>
-        /**
-         * ROBUST LOADING FOR OPERA AND MOBILE BROWSERS
-         */
-        
         const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/main/texts.json';
 
         const FIXED_LEVELS = [
@@ -551,6 +547,11 @@
         let activeWorldFilter = 'all';
         let activeCrFilter = 'all';
 
+        // ------------------ TTS ENGINE STUFF ------------------
+        let currentReadingId = null;
+        let currentSentenceIndex = 0;
+        let ttsInterval = null; // Anti-Pausierung für Mobile
+
         function saveState() {
             localStorage.setItem('codex_of_shadows_progress', JSON.stringify(gameState));
         }
@@ -560,9 +561,7 @@
             if (saved) {
                 try {
                     gameState = JSON.parse(saved);
-                } catch (e) {
-                    console.error('Failed to load state:', e);
-                }
+                } catch (e) { console.error('Failed to load state:', e); }
             }
         }
 
@@ -585,9 +584,7 @@
         function generateFilterButtons() {
             const worldContainer = document.getElementById('worldFilters');
             if (!worldContainer) return;
-            
             worldContainer.innerHTML = '<span class="filter-label">World:</span><button class="filter-btn active" data-world="all">All</button>';
-            
             WORLDS.forEach(world => {
                 const btn = document.createElement('button');
                 btn.className = `filter-btn world-${world}`;
@@ -595,12 +592,9 @@
                 btn.textContent = world.charAt(0).toUpperCase() + world.slice(1);
                 worldContainer.appendChild(btn);
             });
-
             const crContainer = document.getElementById('crFilters');
             if (!crContainer) return;
-
             crContainer.innerHTML = '<span class="filter-label">CR:</span><button class="filter-btn active" data-cr="all">All</button>';
-            
             CR_LEVELS.forEach(cr => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-btn';
@@ -608,7 +602,6 @@
                 btn.textContent = cr < 1 ? (cr === 0.25 ? '¼' : '½') : cr.toString();
                 crContainer.appendChild(btn);
             });
-
             attachFilterListeners();
         }
 
@@ -621,7 +614,6 @@
                     renderTexts();
                 });
             });
-
             document.querySelectorAll('#crFilters .filter-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('#crFilters .filter-btn').forEach(b => b.classList.remove('active'));
@@ -635,122 +627,41 @@
         function getUnlockedCRs() {
             const unlocked = [];
             for (const level of LEVELS) {
-                if (gameState.level >= level.level) {
-                    unlocked.push(level.unlockedCR);
-                }
+                if (gameState.level >= level.level) unlocked.push(level.unlockedCR);
             }
             return unlocked;
         }
 
-        function isTextUnlocked(text) {
-            return getUnlockedCRs().includes(text.cr);
-        }
-
-        function isTextCompleted(text) {
-            return gameState.completedTexts.includes(text.id);
-        }
-
-        function getNextLevelXP() {
-            const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
-            return nextLevel ? nextLevel.xpRequired : LEVELS[LEVELS.length - 1].xpRequired;
-        }
-
-        function getCurrentLevelXP() {
-            const currentLevel = LEVELS.find(l => l.level === gameState.level);
-            return currentLevel ? currentLevel.xpRequired : 0;
-        }
-
-        function checkLevelUp() {
-            for (let i = LEVELS.length - 1; i >= 0; i--) {
-                if (gameState.xp >= LEVELS[i].xpRequired && gameState.level < LEVELS[i].level) {
-                    const oldLevel = gameState.level;
-                    gameState.level = LEVELS[i].level;
-                    saveState();
-                    showLevelUp(LEVELS[i]);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function showLevelUp(levelData) {
-            const newLevelEl = document.getElementById('newLevel');
-            const unlockTextEl = document.getElementById('unlockText');
-            if (newLevelEl) newLevelEl.textContent = levelData.level;
-            
-            const crDisplay = levelData.unlockedCR < 1 
-                ? (levelData.unlockedCR === 0.25 ? '¼' : '½') 
-                : levelData.unlockedCR;
-            
-            if (unlockTextEl) unlockTextEl.textContent = `CR ${crDisplay} texts unlocked!`;
-            
-            const overlay = document.getElementById('levelUpOverlay');
-            if (overlay) {
-                overlay.classList.add('show');
-                setTimeout(() => {
-                    overlay.classList.remove('show');
-                    updateUI();
-                    renderTexts();
-                }, 2500);
-            }
-        }
-
-        function completeText(textId) {
-            const text = TEXTS.find(t => t.id === textId);
-            if (!text || isTextCompleted(text)) return;
-
-            gameState.completedTexts.push(textId);
-            gameState.xp += text.xp;
-            saveState();
-            
-            if (!checkLevelUp()) {
-                updateUI();
-                renderTexts();
-            }
-        }
+        function isTextUnlocked(text) { return getUnlockedCRs().includes(text.cr); }
+        function isTextCompleted(text) { return gameState.completedTexts.includes(text.id); }
 
         function updateUI() {
             const currentLevelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
-            const lvlEl = document.getElementById('currentLevel');
-            const titleEl = document.getElementById('levelTitle');
-            const xpEl = document.getElementById('currentXP');
-            const nxtXpEl = document.getElementById('nextLevelXP');
-            const barEl = document.getElementById('xpBar');
-
-            if (lvlEl) lvlEl.textContent = gameState.level;
-            if (titleEl) titleEl.textContent = currentLevelData.title;
-            if (xpEl) xpEl.textContent = gameState.xp;
-            
-            const nextXP = getNextLevelXP();
-            const currentXP = getCurrentLevelXP();
-            if (nxtXpEl) nxtXpEl.textContent = nextXP;
-            
-            const progress = nextXP > currentXP 
-                ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 
-                : 100;
-            if (barEl) barEl.style.width = Math.min(100, Math.max(0, progress)) + '%';
+            document.getElementById('currentLevel').textContent = gameState.level;
+            document.getElementById('levelTitle').textContent = currentLevelData.title;
+            document.getElementById('currentXP').textContent = gameState.xp;
+            const nextXP = LEVELS.find(l => l.level === gameState.level + 1)?.xpRequired || LEVELS[LEVELS.length - 1].xpRequired;
+            const currentXP = LEVELS.find(l => l.level === gameState.level)?.xpRequired || 0;
+            document.getElementById('nextLevelXP').textContent = nextXP;
+            const progress = nextXP > currentXP ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 : 100;
+            document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
         }
 
         function renderTexts() {
             const container = document.getElementById('textContainer');
             if (!container) return;
-            
             let filtered = TEXTS;
             if (activeWorldFilter !== 'all') filtered = filtered.filter(t => t.world === activeWorldFilter);
             if (activeCrFilter !== 'all') filtered = filtered.filter(t => t.cr === parseFloat(activeCrFilter));
-
             filtered.sort((a, b) => a.cr - b.cr);
-
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="loading">No texts match your filters.</div>';
                 return;
             }
-
             container.innerHTML = filtered.map(text => {
                 const unlocked = isTextUnlocked(text);
                 const completed = isTextCompleted(text);
                 const crDisplay = text.cr < 1 ? (text.cr === 0.25 ? '¼' : '½') : text.cr;
-                
                 return `
                     <div class="text-card ${unlocked ? '' : 'locked'} ${completed ? 'completed' : ''}" data-id="${text.id}">
                         <div class="card-header" onclick="${unlocked ? `toggleCard('${text.id}')` : ''}">
@@ -760,187 +671,129 @@
                                     <span class="world-badge ${text.world}">${text.world}</span>
                                     <span class="cr-badge">CR ${crDisplay}</span>
                                     <span class="xp-badge">+${text.xp} XP</span>
-                                    <span>${text.type}</span>
                                 </div>
                             </div>
-                            <div class="card-status">
-                                ${!unlocked ? '<span class="lock-icon">🔒</span>' : (completed ? '✅' : '📖')}
-                            </div>
+                            <div class="card-status">${!unlocked ? '🔒' : (completed ? '✅' : '📖')}</div>
                         </div>
                         ${unlocked ? `
                             <div class="card-content" id="content-${text.id}">
                                 <div class="reading-text" id="text-${text.id}">${renderTextWithSentences(text.text, text.id)}</div>
-                                <div class="vocab-section">
-                                    <div class="section-title">📚 New Words</div>
-                                    <div class="vocab-list">${text.vocab.map(v => `<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div>
-                                </div>
-                                <div class="questions-section">
-                                    <div class="section-title">❓ Questions</div>
-                                    <ul class="questions-list">${text.questions.map(q => `<li>${q}</li>`).join('')}</ul>
-                                </div>
                                 <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Read Aloud</button>
                                 <div class="speed-control">
-                                    <span>🐢</span><input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8"><span>🐇</span><span id="speed-display-${text.id}">0.8x</span>
+                                    <span>🐢</span><input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8"><span>🐇</span>
                                 </div>
                                 <button class="complete-btn" onclick="completeText('${text.id}')" ${completed ? 'disabled' : ''}>${completed ? '✅ Completed' : '✓ Mark as Read'}</button>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                            </div>` : ''}
+                    </div>`;
             }).join('');
             applyZoom();
         }
 
-        function toggleCard(id) {
-            const content = document.getElementById(`content-${id}`);
-            if (content) content.classList.toggle('open');
-        }
-
+        function toggleCard(id) { document.getElementById(`content-${id}`)?.classList.toggle('open'); }
         function applyZoom() {
-            const slider = document.getElementById('zoomSlider');
-            if (!slider) return;
-            const size = slider.value;
+            const size = document.getElementById('zoomSlider')?.value || 18;
             document.querySelectorAll('.reading-text').forEach(el => el.style.fontSize = size + 'px');
-        }
-
-        /**
-         * ROBUST FETCH WITH TIMEOUT AND RETRY
-         */
-        async function fetchWithTimeout(url, options = {}, timeout = 6000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                clearTimeout(id);
-                return response;
-            } catch (error) {
-                clearTimeout(id);
-                throw error;
-            }
         }
 
         async function loadTexts() {
             const container = document.getElementById('textContainer');
-            if (!container) return;
-            
             try {
-                let response;
-                try {
-                    // Try 1
-                    response = await fetchWithTimeout(TEXTS_JSON_URL);
-                } catch (e) {
-                    // Try 2 after a short delay (useful for mobile network hiccups)
-                    console.warn("Retrying fetch...");
-                    await new Promise(r => setTimeout(r, 1000));
-                    response = await fetchWithTimeout(TEXTS_JSON_URL);
-                }
-
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                
+                const response = await fetch(TEXTS_JSON_URL);
                 TEXTS = await response.json();
-                generateLevels();
-                loadState();
-                updateUI();
-                renderTexts();
-            } catch (error) {
-                console.error('Error loading texts:', error);
-                container.innerHTML = `<div class="error">Failed to load data.<br><small>Connection error or Browser restriction.<br>Try refreshing the page.</small></div>`;
-            }
-        }
-
-        function splitTextIntoSentences(text) {
-            return text.match(/[^.!?]+[.!?]+/g) || [text];
+                generateLevels(); loadState(); updateUI(); renderTexts();
+            } catch (error) { container.innerHTML = `<div class="error">Loading failed.</div>`; }
         }
 
         function renderTextWithSentences(text, textId) {
-            const sents = splitTextIntoSentences(text);
+            const sents = text.match(/[^.!?]+[.!?]+/g) || [text];
             return sents.map((s, i) => `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`).join(' ');
         }
 
+        // ------------------ ROBUST TTS ENGINE ------------------
         function getEnglishVoice() {
             const voices = speechSynthesis.getVoices();
-            return voices.find(v => v.lang.startsWith('en')) || null;
+            return voices.find(v => v.lang.startsWith('en-GB')) || voices.find(v => v.lang.startsWith('en')) || null;
         }
-
-        function clearHighlights(textId) {
-            const container = document.getElementById(`text-${textId}`);
-            if (container) container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
-        }
-
-        function highlightSentence(textId, index) {
-            clearHighlights(textId);
-            const sent = document.getElementById(`sent-${textId}-${index}`);
-            if (sent) {
-                sent.classList.add('active');
-                sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-
-        let currentReadingId = null;
-        let currentSentenceIndex = 0;
 
         function speakSentence(textId, index) {
             const text = TEXTS.find(t => t.id === textId);
             if (!text) return;
-            const sents = splitTextIntoSentences(text.text);
+            const sents = text.text.match(/[^.!?]+[.!?]+/g) || [text.text];
+            
             if (index >= sents.length) {
-                const btn = document.getElementById(`read-btn-${textId}`);
-                if (btn) { btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud'; btn.classList.remove('playing'); }
-                clearHighlights(textId);
-                currentReadingId = null;
+                stopTTS(textId);
                 return;
             }
-            const speedSlider = document.getElementById(`speed-${textId}`);
-            const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+
             const utterance = new SpeechSynthesisUtterance(sents[index].trim());
-            utterance.lang = 'en-GB';
+            utterance.lang = 'en-US'; 
             const voice = getEnglishVoice();
             if (voice) utterance.voice = voice;
-            utterance.rate = speed;
-            utterance.onstart = () => highlightSentence(textId, index);
-            utterance.onend = () => { currentSentenceIndex = index + 1; speakSentence(textId, currentSentenceIndex); };
+            
+            utterance.rate = parseFloat(document.getElementById(`speed-${textId}`)?.value || 0.8);
+            
+            utterance.onstart = () => {
+                document.querySelectorAll(`#text-${textId} .sentence`).forEach(s => s.classList.remove('active'));
+                document.getElementById(`sent-${textId}-${index}`)?.classList.add('active');
+            };
+
+            utterance.onend = () => {
+                if (currentReadingId === textId) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
+            };
+
+            utterance.onerror = () => stopTTS(textId);
+
+            // Opera Fix: Interval um "Idle" zu verhindern
+            if (ttsInterval) clearInterval(ttsInterval);
+            ttsInterval = setInterval(() => {
+                if (speechSynthesis.speaking) speechSynthesis.resume();
+            }, 5000);
+
             speechSynthesis.speak(utterance);
         }
 
-        function toggleReadAloud(textId) {
+        function stopTTS(textId) {
+            speechSynthesis.cancel();
+            if (ttsInterval) clearInterval(ttsInterval);
             const btn = document.getElementById(`read-btn-${textId}`);
-            if (currentReadingId === textId && speechSynthesis.speaking) {
-                speechSynthesis.cancel();
+            if (btn) {
                 btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
                 btn.classList.remove('playing');
-                clearHighlights(textId);
-                currentReadingId = null;
-                return;
             }
-            if (speechSynthesis.speaking) speechSynthesis.cancel();
-            currentReadingId = textId;
-            currentSentenceIndex = 0;
-            btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
-            btn.classList.add('playing');
-            speakSentence(textId, 0);
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+            currentReadingId = null;
         }
 
-        // Init with DOM ready protection
-        window.addEventListener('DOMContentLoaded', () => {
+        function toggleReadAloud(textId) {
+            // Opera "Wake up"
+            if (speechSynthesis.paused) speechSynthesis.resume();
+
+            if (currentReadingId === textId) {
+                stopTTS(textId);
+            } else {
+                if (currentReadingId) stopTTS(currentReadingId);
+                currentReadingId = textId;
+                currentSentenceIndex = 0;
+                const btn = document.getElementById(`read-btn-${textId}`);
+                btn.innerHTML = '⏹ Stop';
+                btn.classList.add('playing');
+                speakSentence(textId, 0);
+            }
+        }
+
+        window.onload = () => {
+            loadTexts();
             document.getElementById('zoomSlider')?.addEventListener('input', applyZoom);
             document.getElementById('resetBtn')?.addEventListener('click', resetProgress);
-            loadTexts();
-        });
-
-        // Fullscreen and WakeLock
-        document.getElementById('fullscreenBtn')?.addEventListener('click', () => {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
-            else document.exitFullscreen().catch(() => {});
-        });
-
-        let wakeLock = null;
-        document.getElementById('wakeLockBtn')?.addEventListener('click', async function() {
-            if (wakeLock) { await wakeLock.release(); wakeLock = null; this.classList.remove('active'); }
-            else if ('wakeLock' in navigator) { 
-                try { wakeLock = await navigator.wakeLock.request('screen'); this.classList.add('active'); } 
-                catch(e) {}
+            // Stimmen im Hintergrund laden
+            speechSynthesis.getVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
             }
-        });
+        };
     </script>
 </body>
 </html>
