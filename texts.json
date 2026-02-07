@@ -1,0 +1,230 @@
+{
+    "id": "bone_collector",
+    "title": "The Bone Collector",
+    "type": "Bestiary",
+    "world": "dungeon",
+    "cr": 1,
+    "xp": 90,
+    "text": "Nobody knows what the Bone Collector was before it died. Now it is two metres of old cloth and clicking bones. It walks through dark places at night, collecting bones from the dead. It puts them carefully into bags: skulls in one bag, ribs in another, finger bones in a third. If you hide and stay quiet, it will walk past you. But if you have bones that don't belong to you — a lucky rabbit's foot, a necklace of teeth, a skull you took as a trophy — it will know. And it will want them back. It always gets what it wants.",
+    "vocab": [
+      ["cloth", "Stoff, Tuch"],
+      ["clicking", "klickende Geräusche machen"],
+      ["ribs", "Rippen"],
+      ["necklace", "Halskette"],
+      ["trophy", "Trophäe, Siegeszeichen"],
+      ["belong", "gehören"]
+    ],
+    "questions": [
+      "How tall is the Bone Collector?",
+      "What does it do with the bones it finds?",
+      "When will it attack you?"
+    ]
+  },
+  {
+    "id": "ambush_ruins",
+    "title": "Ambush in the Ruins",
+    "type": "Combat Scene",
+    "world": "dungeon",
+    "cr": 1,
+    "xp": 110,
+    "text": "The arrow came from nowhere. It hit the stone wall behind your head with a loud crack. Two goblins dropped from the broken ceiling — small, green, and fast. A third stood in the doorway, already pulling another arrow from its bag. The ruins were supposed to be empty. The map said so. But goblins cannot read maps. They don't care what humans write on paper. They only care that you walked into their home. Now you have three seconds to decide: fight, run, or try to talk.",
+    "vocab": [
+      ["arrow", "Pfeil"],
+      ["crack", "Knall, Riss"],
+      ["goblins", "Kobolde, kleine grüne Monster"],
+      ["ruins", "Ruinen"],
+      ["doorway", "Türöffnung"],
+      ["map", "Karte, Landkarte"]
+    ],
+    "questions": [
+      "How many goblins attacked?",
+      "Why was the map wrong?",
+      "What three choices do you have?"
+    ]
+  },
+  {
+    "id": "ring_fallen_knight",
+    "title": "The Ring of the Fallen Knight",
+    "type": "Item",
+    "world": "dungeon",
+    "cr": 1,
+    "xp": 100,
+    "text": "You found the ring on a skeleton's finger. The skeleton was wearing armour that was once beautiful. Now rust covers everything except the ring. It is silver, with a blue stone that still shines. When you put it on, you feel stronger. Braver. You hear a voice in your head: 'I am Sir Aldric. I died here forty years ago. My quest was never finished. Will you finish it for me?' The ring cannot come off now. Sir Aldric is very polite about it, but he is also very clear: you will complete his quest, or you will join him in death. Most people throw the ring away when they hear this. But you cannot throw away something that will not leave your finger.",
+    "vocab": [
+      ["armour", "Rüstung"],
+      ["rust", "Rost"],
+      ["silver", "Silber"],
+      ["quest", "Auftrag, Mission"],
+      ["polite", "höflich"],
+      ["complete", "vollenden, abschliessen"]
+    ],
+    "questions": [
+      "Where did you find the ring?",
+      "What happened to Sir Aldric?",
+      "Why can't you take the ring off?"
+    ]
+  },
+  {
+    "id": "contract_wolf",
+    "title": "Contract: Theron's Wolf",
+    "type": "Quest Document",
+    "world": "greece",
+    "cr": 1,
+    "xp": 100,
+    "text": "BOUNTY — 500 DRACHMAE. A wolf has been killing sheep near the village of Theron. This is no ordinary wolf. Hunters say it is bigger than a horse. Its fur is black as midnight. Its eyes glow red in the darkness. Three hunters have tried to kill it. None came back. The village elder believes the wolf is cursed — perhaps a man transformed by the gods as punishment. Kill the beast and bring its head to the elder. Warning: The wolf has been seen near the old temple of Artemis. The goddess protects all wild animals. If you make her angry, not even the walls of Athens will keep you safe.",
+    "vocab": [
+      ["bounty", "Kopfgeld"],
+      ["drachmae", "Drachmen (griechische Münzen)"],
+      ["glow", "glühen, leuchten"],
+      ["cursed", "verflucht"],
+      ["elder", "Dorfältester"],
+      ["beast", "Bestie, wildes Tier"]
+    ],
+    "questions": [
+      "How much money is offered for the wolf?",
+      "What do people think the wolf really is?",
+      "Why is the temple of Artemis dangerous?"
+    ]
+  },
+  {
+    "id": "drowned_temple",
+    "title": "The Drowned Temple",
+    "type": "Dungeon Log",
+    "world": "dungeon",
+    "cr": 2,
+    "xp": 180,
+    "text": "Day 3 in the temple. The water rises every night and goes down every morning. We found air pockets in the ceiling where we can breathe and sleep. The carvings on the walls tell the story of a sea god who was forgotten. His priests drowned themselves when the last believer died. Now their ghosts swim through these halls, still doing rituals that nobody watches. They ignore us mostly. But yesterday, Mira said she heard singing under the water. Beautiful singing. She wanted to dive down and find it. We had to tie her to a pillar. The singing hasn't stopped. I'm starting to understand the words.",
+    "vocab": [
+      ["rises", "steigt"],
+      ["air pockets", "Luftblasen, Lufttaschen"],
+      ["carvings", "Schnitzereien, Gravuren"],
+      ["priests", "Priester"],
+      ["drowned", "ertrunken"],
+      ["ghosts", "Geister"],
+      ["rituals", "Rituale, Zeremonien"],
+      ["pillar", "Säule"]
+    ],
+    "questions": [
+      "What happens to the water every day?",
+      "Why did the priests drown themselves?",
+      "Why did they have to tie Mira to a pillar?"
+    ]
+  },
+  {
+    "id": "mad_wizard_note",
+    "title": "Note from the Mad Wizard",
+    "type": "Found Document",
+    "world": "dungeon",
+    "cr": 2,
+    "xp": 220,
+    "text": "Day 47 — The experiment continues. I have successfully merged the soul of a cat with the body of an owl. The result screams constantly. I consider this progress. Day 52 — The screaming has stopped. The cat-owl watches me now. It knows things it should not know. When I sleep, I dream of mice dying in moonlight. Day 61 — I understand now. I was wrong. The owl did not receive the cat's soul. The cat received mine. I am the experiment. I have always been the experiment. I am writing this with paws that used to be hands. The thing wearing my body is reading over my shoulder. It is smiling. Day 62 — mrrrowww the wizard is fine the wizard is happy you should visit the wizard bring mice",
+    "vocab": [
+      ["experiment", "Experiment"],
+      ["merged", "verschmolzen, vereint"],
+      ["soul", "Seele"],
+      ["screams", "schreit"],
+      ["constantly", "ständig, dauernd"],
+      ["moonlight", "Mondlicht"],
+      ["wizard", "Zauberer"]
+    ],
+    "questions": [
+      "What two animals did the wizard try to combine?",
+      "What did the wizard realize on Day 61?",
+      "Who is writing on Day 62?"
+    ]
+  },
+  {
+    "id": "rust_monster",
+    "title": "The Thing That Ate My Sword",
+    "type": "Bestiary",
+    "world": "dungeon",
+    "cr": 2,
+    "xp": 200,
+    "text": "It looked almost cute at first. Like a big insect with feathery feelers and a long tail. It didn't attack us. It just walked toward Marcus, making happy clicking sounds. Then it touched his shield. The metal crumbled like old bread. The creature ate the rust that fell to the ground, making satisfied noises. Marcus drew his sword. The creature's feelers twitched with excitement. The sword dissolved where its feelers touched. We ran. I still have my leather armour. Marcus has his underclothes and his dignity. Actually, he lost the dignity too when he screamed. We don't talk about that. Lesson learned: Rust Monsters don't want to kill you. They just want to eat everything you own.",
+    "vocab": [
+      ["insect", "Insekt"],
+      ["feelers", "Fühler"],
+      ["shield", "Schild"],
+      ["metal", "Metall"],
+      ["crumbled", "zerbröckelte"],
+      ["dissolved", "löste sich auf"],
+      ["twitched", "zuckte"]
+    ],
+    "questions": [
+      "What happened to Marcus's shield?",
+      "How does the Rust Monster eat metal?",
+      "What lesson did they learn?"
+    ]
+  },
+  {
+    "id": "oracle_delphi",
+    "title": "The Oracle of Delphi",
+    "type": "Encounter",
+    "world": "greece",
+    "cr": 2,
+    "xp": 190,
+    "text": "The temple smelled of smoke and something else — something old. The Pythia sat on a three-legged stool above a crack in the earth. Strange fumes rose from below. Her eyes were completely white. 'You seek the Wolf of Sparta,' she said. Her voice was not her own. It was deeper, older, coming from somewhere far away. 'He hides where the lion's shadow falls at noon. But beware — the one you hunt also hunts you. Blood calls to blood. The eagle and the wolf share the same father.' She screamed suddenly, a terrible sound, and collapsed. The priests rushed to help her. When she woke, she remembered nothing. But you remember every word.",
+    "vocab": [
+      ["oracle", "Orakel"],
+      ["Pythia", "Pythia (Priesterin in Delphi)"],
+      ["stool", "Hocker"],
+      ["fumes", "Dämpfe"],
+      ["shadow", "Schatten"],
+      ["beware", "sei vorsichtig, hüte dich"],
+      ["collapsed", "brach zusammen"]
+    ],
+    "questions": [
+      "Where does the Pythia sit?",
+      "What warning does the Oracle give about the enemy?",
+      "Why doesn't the Pythia remember what she said?"
+    ]
+  },
+  {
+    "id": "margrath",
+    "title": "Margrath, the Hollow King",
+    "type": "Boss Encounter",
+    "world": "dungeon",
+    "cr": 3,
+    "xp": 280,
+    "text": "The throne room doors opened by themselves. On the ancient throne sat what was left of King Margrath the Fourth. His crown still sat on his skull. His royal robes hung on bones that had forgotten flesh three hundred years ago. But his eyes — two points of cold blue fire — those remembered everything. 'Another adventurer,' his voice echoed from nowhere and everywhere. 'They always come for the crown. They never leave with it.' The skeletal king stood. He was tall in life. In death, he was taller. His sword scraped against the stone floor as he descended the steps — a blade so old that rust had become part of its edge, yet sharp enough to cut through shadows. 'I have killed nine hundred and seventy-three heroes in this room,' Margrath said. 'You will be nine hundred and seventy-four. Unless...' He paused. 'Unless you can answer my riddle. I do so enjoy riddles.'",
+    "vocab": [
+      ["throne", "Thron"],
+      ["ancient", "uralt"],
+      ["crown", "Krone"],
+      ["skull", "Schädel"],
+      ["robes", "Gewänder"],
+      ["flesh", "Fleisch"],
+      ["echoed", "hallte wider"],
+      ["descended", "stieg herab"],
+      ["riddle", "Rätsel"]
+    ],
+    "questions": [
+      "How long has Margrath been dead?",
+      "How many heroes has he killed?",
+      "What chance does he give you?"
+    ]
+  },
+  {
+    "id": "beholder",
+    "title": "The Eye Tyrant",
+    "type": "Boss Encounter",
+    "world": "dungeon",
+    "cr": 3,
+    "xp": 320,
+    "text": "It was floating in the centre of the room, a nightmare that had become real. A ball of ugly skin, about one metre wide, with one very big eye in the middle. Around it, ten smaller eyes moved on stalks, each looking in a different direction. Each eye held a different death. 'You are either very brave or very stupid,' it said. Its voice was polite, almost friendly. 'I am Xanathar. Well, I call myself Xanathar. The first one died hundreds of years ago. But names have power, and his had enough power to keep me alive through seven killers, three groups of adventurers, and one very patient knight who never gave up.' Two of its eye stalks turned to look at you. 'I wonder which death you will get. The beam that makes you disappear is quick. The beam that turns you to stone lets me add you to my collection. So many choices, so many choices.'",
+    "vocab": [
+      ["floating", "schwebend"],
+      ["nightmare", "Albtraum"],
+      ["ugly", "hässlich"],
+      ["stalks", "Stiele, Stängel"],
+      ["beam", "Strahl"],
+      ["disappear", "verschwinden"],
+      ["stone", "Stein (hier: zu Stein werden)"],
+      ["collection", "Sammlung"]
+    ],
+    "questions": [
+      "What does Xanathar look like?",
+      "Why does the creature call itself Xanathar?",
+      "What can the different eyes do?"
+    ]
+  }
