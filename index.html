@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
     <title>📜 Codex of Shadows</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,6 +22,7 @@
             top: 0;
             z-index: 100;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
@@ -208,6 +208,7 @@
             color: #888;
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .card-meta span {
@@ -481,8 +482,8 @@
         <div class="header-top">
             <h1 class="title">📜 Codex of Shadows</h1>
             <div class="header-buttons">
-                <button class="icon-btn" id="wakeLockBtn" title="Keep Screen On">☀</button>
-                <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+                <button class="icon-btn" id="wakeLockBtn" title="Keep Screen On" aria-label="Keep Screen On">☀</button>
+                <button class="icon-btn" id="fullscreenBtn" title="Fullscreen" aria-label="Toggle Fullscreen">⛶</button>
             </div>
         </div>
 
@@ -507,7 +508,7 @@
             </div>
             <div class="zoom-control">
                 <span>Aa</span>
-                <input type="range" class="zoom-slider" id="zoomSlider" min="14" max="26" value="18">
+                <input type="range" class="zoom-slider" id="zoomSlider" min="14" max="26" value="18" aria-label="Text Size">
                 <span>Aa</span>
             </div>
         </div>
@@ -525,11 +526,15 @@
         </div>
     </div>
 
-    <button class="reset-btn" id="resetBtn">Reset Progress</button>
+    <button class="reset-btn" id="resetBtn" aria-label="Reset Progress">Reset Progress</button>
 
     <script>
+        // ╔════════════════════════════════════════════════════════════════╗
+        // ║  JSON SOURCE                                                  ║
+        // ╚════════════════════════════════════════════════════════════════╝
         const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/main/texts.json';
 
+        // ==================== CONFIG ====================
         const FIXED_LEVELS = [
             { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
             { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprentice" },
@@ -538,6 +543,9 @@
             { level: 5, xpRequired: 1200, unlockedCR: 3,    title: "Master" }
         ];
 
+        const MAX_LEVEL = FIXED_LEVELS[FIXED_LEVELS.length - 1].level;
+
+        // ==================== STATE ====================
         let TEXTS = [];
         let CR_LEVELS = [];
         let LEVELS = [];
@@ -547,21 +555,37 @@
         let activeWorldFilter = 'all';
         let activeCrFilter = 'all';
 
-        // ------------------ TTS ENGINE STUFF ------------------
-        let currentReadingId = null;
-        let currentSentenceIndex = 0;
-        let ttsInterval = null; // Anti-Pausierung für Mobile
+        // ==================== HELPERS ====================
+        function escapeAttr(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
 
+        function crDisplayName(cr) {
+            if (cr === 0.25) return '¼';
+            if (cr === 0.5) return '½';
+            return String(cr);
+        }
+
+        // ==================== STORAGE ====================
         function saveState() {
-            localStorage.setItem('codex_of_shadows_progress', JSON.stringify(gameState));
+            try {
+                localStorage.setItem('codex_of_shadows_progress', JSON.stringify(gameState));
+            } catch (e) {
+                console.warn('Could not save progress:', e);
+            }
         }
 
         function loadState() {
-            const saved = localStorage.getItem('codex_of_shadows_progress');
-            if (saved) {
-                try {
-                    gameState = JSON.parse(saved);
-                } catch (e) { console.error('Failed to load state:', e); }
+            try {
+                const saved = localStorage.getItem('codex_of_shadows_progress');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    gameState.xp = parsed.xp || 0;
+                    gameState.level = parsed.level || 1;
+                    gameState.completedTexts = Array.isArray(parsed.completedTexts) ? parsed.completedTexts : [];
+                }
+            } catch (e) {
+                console.error('Failed to load state:', e);
             }
         }
 
@@ -574,6 +598,7 @@
             }
         }
 
+        // ==================== DYNAMIC LEVEL GENERATION ====================
         function generateLevels() {
             CR_LEVELS = [...new Set(TEXTS.map(t => t.cr))].sort((a, b) => a - b);
             WORLDS = [...new Set(TEXTS.map(t => t.world))];
@@ -583,25 +608,27 @@
 
         function generateFilterButtons() {
             const worldContainer = document.getElementById('worldFilters');
-            if (!worldContainer) return;
             worldContainer.innerHTML = '<span class="filter-label">World:</span><button class="filter-btn active" data-world="all">All</button>';
+            
             WORLDS.forEach(world => {
                 const btn = document.createElement('button');
-                btn.className = `filter-btn world-${world}`;
+                btn.className = 'filter-btn world-' + world;
                 btn.dataset.world = world;
                 btn.textContent = world.charAt(0).toUpperCase() + world.slice(1);
                 worldContainer.appendChild(btn);
             });
+
             const crContainer = document.getElementById('crFilters');
-            if (!crContainer) return;
             crContainer.innerHTML = '<span class="filter-label">CR:</span><button class="filter-btn active" data-cr="all">All</button>';
+            
             CR_LEVELS.forEach(cr => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-btn';
-                btn.dataset.cr = cr;
-                btn.textContent = cr < 1 ? (cr === 0.25 ? '¼' : '½') : cr.toString();
+                btn.dataset.cr = String(cr);
+                btn.textContent = crDisplayName(cr);
                 crContainer.appendChild(btn);
             });
+
             attachFilterListeners();
         }
 
@@ -614,6 +641,7 @@
                     renderTexts();
                 });
             });
+
             document.querySelectorAll('#crFilters .filter-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('#crFilters .filter-btn').forEach(b => b.classList.remove('active'));
@@ -624,176 +652,462 @@
             });
         }
 
+        // ==================== LEVEL LOGIC ====================
         function getUnlockedCRs() {
             const unlocked = [];
             for (const level of LEVELS) {
-                if (gameState.level >= level.level) unlocked.push(level.unlockedCR);
+                if (gameState.level >= level.level) {
+                    unlocked.push(level.unlockedCR);
+                }
             }
             return unlocked;
         }
 
-        function isTextUnlocked(text) { return getUnlockedCRs().includes(text.cr); }
-        function isTextCompleted(text) { return gameState.completedTexts.includes(text.id); }
+        function isTextUnlocked(text) {
+            return getUnlockedCRs().includes(text.cr);
+        }
 
+        function isTextCompleted(text) {
+            return gameState.completedTexts.includes(text.id);
+        }
+
+        function isMaxLevel() {
+            return gameState.level >= MAX_LEVEL;
+        }
+
+        function getNextLevelXP() {
+            if (isMaxLevel()) return null;
+            const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+            return nextLevel ? nextLevel.xpRequired : null;
+        }
+
+        function getCurrentLevelXP() {
+            const currentLevel = LEVELS.find(l => l.level === gameState.level);
+            return currentLevel ? currentLevel.xpRequired : 0;
+        }
+
+        function checkLevelUp() {
+            for (let i = LEVELS.length - 1; i >= 0; i--) {
+                if (gameState.xp >= LEVELS[i].xpRequired && gameState.level < LEVELS[i].level) {
+                    gameState.level = LEVELS[i].level;
+                    saveState();
+                    showLevelUp(LEVELS[i]);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function showLevelUp(levelData) {
+            document.getElementById('newLevel').textContent = levelData.level;
+            document.getElementById('unlockText').textContent = 'CR ' + crDisplayName(levelData.unlockedCR) + ' texts unlocked!';
+            
+            const overlay = document.getElementById('levelUpOverlay');
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                updateUI();
+                renderTexts();
+            }, 2500);
+        }
+
+        // ==================== COMPLETE TEXT ====================
+        function completeText(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text || isTextCompleted(text)) return;
+
+            gameState.completedTexts.push(textId);
+            gameState.xp += text.xp;
+            saveState();
+            
+            if (!checkLevelUp()) {
+                updateUI();
+                renderTexts();
+            }
+        }
+
+        // ==================== UI ====================
         function updateUI() {
             const currentLevelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
             document.getElementById('currentLevel').textContent = gameState.level;
             document.getElementById('levelTitle').textContent = currentLevelData.title;
             document.getElementById('currentXP').textContent = gameState.xp;
-            const nextXP = LEVELS.find(l => l.level === gameState.level + 1)?.xpRequired || LEVELS[LEVELS.length - 1].xpRequired;
-            const currentXP = LEVELS.find(l => l.level === gameState.level)?.xpRequired || 0;
-            document.getElementById('nextLevelXP').textContent = nextXP;
-            const progress = nextXP > currentXP ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 : 100;
-            document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
+            
+            if (isMaxLevel()) {
+                document.getElementById('nextLevelXP').textContent = 'MAX';
+                document.getElementById('xpBar').style.width = '100%';
+            } else {
+                const nextXP = getNextLevelXP();
+                const currentXP = getCurrentLevelXP();
+                document.getElementById('nextLevelXP').textContent = nextXP;
+                
+                const progress = nextXP > currentXP 
+                    ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 
+                    : 100;
+                document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
+            }
         }
 
         function renderTexts() {
             const container = document.getElementById('textContainer');
-            if (!container) return;
+            
             let filtered = TEXTS;
-            if (activeWorldFilter !== 'all') filtered = filtered.filter(t => t.world === activeWorldFilter);
-            if (activeCrFilter !== 'all') filtered = filtered.filter(t => t.cr === parseFloat(activeCrFilter));
+            
+            if (activeWorldFilter !== 'all') {
+                filtered = filtered.filter(t => t.world === activeWorldFilter);
+            }
+            
+            if (activeCrFilter !== 'all') {
+                filtered = filtered.filter(t => String(t.cr) === activeCrFilter);
+            }
+
             filtered.sort((a, b) => a.cr - b.cr);
+
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="loading">No texts match your filters.</div>';
                 return;
             }
+
             container.innerHTML = filtered.map(text => {
                 const unlocked = isTextUnlocked(text);
                 const completed = isTextCompleted(text);
-                const crDisplay = text.cr < 1 ? (text.cr === 0.25 ? '¼' : '½') : text.cr;
+                const crDisplay = crDisplayName(text.cr);
+                const safeId = escapeAttr(text.id);
+                const vocab = Array.isArray(text.vocab) ? text.vocab : [];
+                const questions = Array.isArray(text.questions) ? text.questions : [];
+                
                 return `
-                    <div class="text-card ${unlocked ? '' : 'locked'} ${completed ? 'completed' : ''}" data-id="${text.id}">
-                        <div class="card-header" onclick="${unlocked ? `toggleCard('${text.id}')` : ''}">
+                    <div class="text-card ${unlocked ? '' : 'locked'} ${completed ? 'completed' : ''}" data-id="${safeId}">
+                        <div class="card-header" onclick="${unlocked ? "toggleCard('" + safeId + "')" : ''}">
                             <div class="card-title-section">
-                                <div class="card-title">${text.title}</div>
+                                <div class="card-title">${text.title || 'Untitled'}</div>
                                 <div class="card-meta">
-                                    <span class="world-badge ${text.world}">${text.world}</span>
+                                    <span class="world-badge ${escapeAttr(text.world || '')}">${text.world || ''}</span>
                                     <span class="cr-badge">CR ${crDisplay}</span>
-                                    <span class="xp-badge">+${text.xp} XP</span>
+                                    <span class="xp-badge">+${text.xp || 0} XP</span>
+                                    <span>${text.type || ''}</span>
                                 </div>
                             </div>
-                            <div class="card-status">${!unlocked ? '🔒' : (completed ? '✅' : '📖')}</div>
+                            <div class="card-status">
+                                ${!unlocked ? '<span class="lock-icon">🔒</span>' : (completed ? '✅' : '📖')}
+                            </div>
                         </div>
                         ${unlocked ? `
-                            <div class="card-content" id="content-${text.id}">
-                                <div class="reading-text" id="text-${text.id}">${renderTextWithSentences(text.text, text.id)}</div>
-                                <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Read Aloud</button>
+                            <div class="card-content" id="content-${safeId}">
+                                <div class="reading-text" id="text-${safeId}">${text.text || ''}</div>
+                                
+                                ${vocab.length > 0 ? `
+                                <div class="vocab-section">
+                                    <div class="section-title">📚 New Words</div>
+                                    <div class="vocab-list">
+                                        ${vocab.map(v => `
+                                            <div class="vocab-item">
+                                                <span class="vocab-word">${Array.isArray(v) && v[0] ? v[0] : ''}</span>
+                                                <span class="vocab-meaning">— ${Array.isArray(v) && v[1] ? v[1] : ''}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>` : ''}
+                                
+                                ${questions.length > 0 ? `
+                                <div class="questions-section">
+                                    <div class="section-title">❓ Questions</div>
+                                    <ul class="questions-list">
+                                        ${questions.map(q => `<li>${q}</li>`).join('')}
+                                    </ul>
+                                </div>` : ''}
+                                
+                                <button class="read-aloud-btn" id="read-btn-${safeId}" onclick="toggleReadAloud('${safeId}')">
+                                    <span class="read-icon">🔊</span> Read Aloud
+                                </button>
                                 <div class="speed-control">
-                                    <span>🐢</span><input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8"><span>🐇</span>
+                                    <span>🐢</span>
+                                    <input type="range" class="speed-slider" id="speed-${safeId}" min="0.5" max="1.2" step="0.1" value="0.8" aria-label="Reading Speed">
+                                    <span>🐇</span>
+                                    <span id="speed-display-${safeId}">0.8x</span>
                                 </div>
-                                <button class="complete-btn" onclick="completeText('${text.id}')" ${completed ? 'disabled' : ''}>${completed ? '✅ Completed' : '✓ Mark as Read'}</button>
-                            </div>` : ''}
-                    </div>`;
+                                
+                                <button class="complete-btn" 
+                                        onclick="completeText('${safeId}')"
+                                        ${completed ? 'disabled' : ''}>
+                                    ${completed ? '✅ Completed' : '✓ Mark as Read'}
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
             }).join('');
+
             applyZoom();
         }
 
-        function toggleCard(id) { document.getElementById(`content-${id}`)?.classList.toggle('open'); }
-        function applyZoom() {
-            const size = document.getElementById('zoomSlider')?.value || 18;
-            document.querySelectorAll('.reading-text').forEach(el => el.style.fontSize = size + 'px');
+        function toggleCard(id) {
+            const content = document.getElementById('content-' + id);
+            if (content) {
+                content.classList.toggle('open');
+            }
         }
 
+        function applyZoom() {
+            const size = document.getElementById('zoomSlider').value;
+            document.querySelectorAll('.reading-text').forEach(el => {
+                el.style.fontSize = size + 'px';
+            });
+        }
+
+        // ==================== LOAD TEXTS ====================
         async function loadTexts() {
             const container = document.getElementById('textContainer');
+            
             try {
                 const response = await fetch(TEXTS_JSON_URL);
-                TEXTS = await response.json();
-                generateLevels(); loadState(); updateUI(); renderTexts();
-            } catch (error) { container.innerHTML = `<div class="error">Loading failed.</div>`; }
+                if (!response.ok) throw new Error('HTTP ' + response.status + ': Failed to fetch texts');
+                
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('Invalid data format: expected an array');
+                
+                TEXTS = data;
+                generateLevels();
+                loadState();
+                updateUI();
+                renderTexts();
+            } catch (error) {
+                console.error('Error loading texts:', error);
+                container.innerHTML = '<div class="error">Failed to load texts.<br><small>' + error.message + '</small></div>';
+            }
         }
 
-        function renderTextWithSentences(text, textId) {
-            const sents = text.match(/[^.!?]+[.!?]+/g) || [text];
-            return sents.map((s, i) => `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`).join(' ');
+        // ==================== CONTROLS ====================
+        document.getElementById('zoomSlider').addEventListener('input', applyZoom);
+
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                (document.documentElement.requestFullscreen || 
+                 document.documentElement.webkitRequestFullscreen || 
+                 function(){}).call(document.documentElement);
+            } else {
+                (document.exitFullscreen || 
+                 document.webkitExitFullscreen || 
+                 function(){}).call(document);
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            document.getElementById('fullscreenBtn').classList.toggle('active', !!document.fullscreenElement);
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            document.getElementById('fullscreenBtn').classList.toggle('active', !!(document.fullscreenElement || document.webkitFullscreenElement));
+        });
+
+        let wakeLock = null;
+        const wakeLockBtn = document.getElementById('wakeLockBtn');
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLockBtn.classList.add('active');
+                    wakeLock.addEventListener('release', () => {
+                        wakeLockBtn.classList.remove('active');
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock error:', err);
+            }
         }
 
-        // ------------------ ROBUST TTS ENGINE ------------------
+        async function releaseWakeLock() {
+            if (wakeLock) {
+                await wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        wakeLockBtn.addEventListener('click', async () => {
+            if (wakeLock) {
+                await releaseWakeLock();
+            } else {
+                await requestWakeLock();
+            }
+        });
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && wakeLockBtn.classList.contains('active')) {
+                await requestWakeLock();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', resetProgress);
+
+        // ==================== TEXT-TO-SPEECH ====================
+        let currentReadingId = null;
+        let currentSentenceIndex = 0;
+
+        function splitTextIntoSentences(text) {
+            const result = text.match(/[^.!?]+[.!?]+/g);
+            return result || [text];
+        }
+
+        function prepareSentences(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text || !text.text) return;
+            
+            const container = document.getElementById('text-' + textId);
+            if (!container) return;
+            
+            const sents = splitTextIntoSentences(text.text);
+            container.innerHTML = sents.map((s, i) => 
+                '<span class="sentence" id="sent-' + textId + '-' + i + '">' + s.trim() + '</span>'
+            ).join(' ');
+        }
+
+        function restoreText(textId) {
+            if (!textId) return;
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text) return;
+            
+            const container = document.getElementById('text-' + textId);
+            if (container) {
+                container.innerHTML = text.text || '';
+            }
+        }
+
         function getEnglishVoice() {
             const voices = speechSynthesis.getVoices();
-            return voices.find(v => v.lang.startsWith('en-GB')) || voices.find(v => v.lang.startsWith('en')) || null;
+            
+            return voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('google')) ||
+                voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('google')) ||
+                voices.find(v => v.lang === 'en-GB') ||
+                voices.find(v => v.lang === 'en-US') ||
+                voices.find(v => v.lang.startsWith('en-')) ||
+                voices.find(v => v.lang.startsWith('en')) ||
+                null;
+        }
+
+        function clearHighlights(textId) {
+            const container = document.getElementById('text-' + textId);
+            if (container) {
+                container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+            }
+        }
+
+        function highlightSentence(textId, index) {
+            clearHighlights(textId);
+            const sent = document.getElementById('sent-' + textId + '-' + index);
+            if (sent) {
+                sent.classList.add('active');
+                sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         function speakSentence(textId, index) {
             const text = TEXTS.find(t => t.id === textId);
-            if (!text) return;
-            const sents = text.text.match(/[^.!?]+[.!?]+/g) || [text.text];
-            
+            if (!text || !text.text) return;
+
+            const sents = splitTextIntoSentences(text.text);
             if (index >= sents.length) {
-                stopTTS(textId);
+                const btn = document.getElementById('read-btn-' + textId);
+                if (btn) {
+                    btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                    btn.classList.remove('playing');
+                }
+                restoreText(textId);
+                currentReadingId = null;
                 return;
             }
 
+            const speedSlider = document.getElementById('speed-' + textId);
+            const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+
             const utterance = new SpeechSynthesisUtterance(sents[index].trim());
-            utterance.lang = 'en-US'; 
+            utterance.lang = 'en-GB';
+            
             const voice = getEnglishVoice();
-            if (voice) utterance.voice = voice;
+            if (voice) {
+                utterance.voice = voice;
+            }
             
-            utterance.rate = parseFloat(document.getElementById(`speed-${textId}`)?.value || 0.8);
-            
+            utterance.rate = speed;
+            utterance.pitch = 1;
+
             utterance.onstart = () => {
-                document.querySelectorAll(`#text-${textId} .sentence`).forEach(s => s.classList.remove('active'));
-                document.getElementById(`sent-${textId}-${index}`)?.classList.add('active');
+                highlightSentence(textId, index);
             };
 
             utterance.onend = () => {
-                if (currentReadingId === textId) {
-                    currentSentenceIndex = index + 1;
-                    speakSentence(textId, currentSentenceIndex);
-                }
+                currentSentenceIndex = index + 1;
+                speakSentence(textId, currentSentenceIndex);
             };
 
-            utterance.onerror = () => stopTTS(textId);
-
-            // Opera Fix: Interval um "Idle" zu verhindern
-            if (ttsInterval) clearInterval(ttsInterval);
-            ttsInterval = setInterval(() => {
-                if (speechSynthesis.speaking) speechSynthesis.resume();
-            }, 5000);
+            utterance.onerror = (e) => {
+                if (e.error === 'canceled') return;
+                restoreText(textId);
+                const btn = document.getElementById('read-btn-' + textId);
+                if (btn) {
+                    btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                    btn.classList.remove('playing');
+                }
+                currentReadingId = null;
+            };
 
             speechSynthesis.speak(utterance);
         }
 
-        function stopTTS(textId) {
-            speechSynthesis.cancel();
-            if (ttsInterval) clearInterval(ttsInterval);
-            const btn = document.getElementById(`read-btn-${textId}`);
-            if (btn) {
+        function toggleReadAloud(textId) {
+            const btn = document.getElementById('read-btn-' + textId);
+            if (!btn) return;
+            
+            // Stop current text
+            if (currentReadingId === textId && speechSynthesis.speaking) {
+                speechSynthesis.cancel();
                 btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
                 btn.classList.remove('playing');
+                restoreText(textId);
+                currentReadingId = null;
+                return;
             }
-            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
-            currentReadingId = null;
+            
+            // Stop other text if playing
+            if (currentReadingId && speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                const oldBtn = document.getElementById('read-btn-' + currentReadingId);
+                if (oldBtn) {
+                    oldBtn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                    oldBtn.classList.remove('playing');
+                }
+                restoreText(currentReadingId);
+            }
+            
+            // Start reading
+            currentReadingId = textId;
+            currentSentenceIndex = 0;
+            prepareSentences(textId);
+            btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
+            btn.classList.add('playing');
+            speakSentence(textId, 0);
         }
 
-        function toggleReadAloud(textId) {
-            // Opera "Wake up"
-            if (speechSynthesis.paused) speechSynthesis.resume();
-
-            if (currentReadingId === textId) {
-                stopTTS(textId);
-            } else {
-                if (currentReadingId) stopTTS(currentReadingId);
-                currentReadingId = textId;
-                currentSentenceIndex = 0;
-                const btn = document.getElementById(`read-btn-${textId}`);
-                btn.innerHTML = '⏹ Stop';
-                btn.classList.add('playing');
-                speakSentence(textId, 0);
+        // Speed slider event listeners (delegated)
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('speed-slider')) {
+                const textId = e.target.id.replace('speed-', '');
+                const display = document.getElementById('speed-display-' + textId);
+                if (display) {
+                    display.textContent = e.target.value + 'x';
+                }
             }
+        });
+
+        // Voices laden
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = () => {
+                getEnglishVoice();
+            };
         }
 
-        window.onload = () => {
-            loadTexts();
-            document.getElementById('zoomSlider')?.addEventListener('input', applyZoom);
-            document.getElementById('resetBtn')?.addEventListener('click', resetProgress);
-            // Stimmen im Hintergrund laden
-            speechSynthesis.getVoices();
-            if (speechSynthesis.onvoiceschanged !== undefined) {
-                speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-            }
-        };
+        // ==================== INIT ====================
+        loadTexts();
     </script>
 </body>
 </html>
