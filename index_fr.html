@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📜 Codex des Ombres</title>
     <style>
-        /* Das CSS bleibt unverändert, da es nur das Design betrifft */
+        /* Das CSS bleibt grösstenteils unverändert */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #e8e8e8; padding-bottom: 80px; }
         .header { background: rgba(0,0,0,0.4); padding: 15px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -51,6 +51,41 @@
         .card-content { display: none; padding: 0 15px 15px; border-top: 1px solid rgba(255,255,255,0.1); }
         .card-content.open { display: block; }
         .reading-text { line-height: 1.8; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; }
+        
+        /* --- NEU: Stile für die Übersetzung --- */
+        .translation-text {
+            display: none; /* Standardmässig ausgeblendet */
+            line-height: 1.7;
+            margin: 10px 0 15px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            border-left: 3px solid #4682b4; /* Blaue Farbe zur Unterscheidung */
+            font-size: 0.95em;
+            color: #ccc;
+        }
+        .translation-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 15px;
+            background: rgba(70, 130, 180, 0.2);
+            border: 1px solid rgba(70, 130, 180, 0.4);
+            border-radius: 8px;
+            color: #87ceeb;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .translation-btn:hover {
+            background: rgba(70, 130, 180, 0.4);
+        }
+        .translation-btn.active {
+            background: rgba(70, 130, 180, 0.5);
+            color: #fff;
+        }
+        /* --- Ende der neuen Stile --- */
+
         .vocab-section, .questions-section { margin-top: 15px; }
         .section-title { font-size: 0.85em; color: #ffd700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
         .vocab-list { display: grid; gap: 6px; }
@@ -134,12 +169,11 @@
     </div>
 
     <button class="reset-btn" id="resetBtn">Réinitialiser</button>
-
     <script>
         // ╔════════════════════════════════════════════════════════════════╗
         // ║  SOURCE JSON (FRANÇAIS)                                         ║
         // ╚════════════════════════════════════════════════════════════════╝
-        const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/main/texts_fr.json'; // <-- URL ANPASSEN!
+        const TEXTS_JSON_URL = 'URL_ZU_DEINER_FINALEN_TEXTS_FR.JSON'; // <-- URL ANPASSEN!
 
         // ==================== CONFIG ====================
         const FIXED_LEVELS = [
@@ -320,6 +354,12 @@
                 const unlocked = isTextUnlocked(text);
                 const completed = isTextCompleted(text);
                 const crDisplay = text.cr < 1 ? (text.cr === 0.25 ? '¼' : '½') : text.cr;
+                const vocabList = text.vocab && text.vocab.length > 0 ? `
+                    <div class="vocab-section">
+                        <div class="section-title">📚 Nouveaux Mots</div>
+                        <div class="vocab-list">${text.vocab.map(v => `<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div>
+                    </div>` : '';
+
                 return `
                     <div class="text-card ${unlocked ? '' : 'locked'} ${completed ? 'completed' : ''}" data-id="${text.id}">
                         <div class="card-header" onclick="${unlocked ? `toggleCard('${text.id}')` : ''}">
@@ -337,14 +377,20 @@
                         ${unlocked ? `
                             <div class="card-content" id="content-${text.id}">
                                 <div class="reading-text" id="text-${text.id}">${text.text}</div>
-                                <div class="vocab-section">
-                                    <div class="section-title">📚 Nouveaux Mots</div>
-                                    <div class="vocab-list">${text.vocab.map(v => `<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div>
-                                </div>
+                                
+                                <!-- NEU: Platzhalter für die Übersetzung -->
+                                <div class="translation-text" id="translation-${text.id}"></div>
+                                
+                                <!-- NEU: Button zum Umschalten der Übersetzung -->
+                                <button class="translation-btn" id="trans-btn-${text.id}" onclick="toggleTranslation('${text.id}')">🔎 Afficher la traduction</button>
+
+                                ${vocabList}
+                                
                                 <div class="questions-section">
                                     <div class="section-title">❓ Questions</div>
                                     <ul class="questions-list">${text.questions.map(q => `<li>${q}</li>`).join('')}</ul>
                                 </div>
+                                
                                 <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Lire à voix haute</button>
                                 <div class="speed-control">
                                     <span>🐢</span>
@@ -363,6 +409,29 @@
 
         function toggleCard(id) { const content = document.getElementById(`content-${id}`); if (content) { content.classList.toggle('open'); } }
         function applyZoom() { const size = document.getElementById('zoomSlider').value; document.querySelectorAll('.reading-text').forEach(el => { el.style.fontSize = size + 'px'; }); }
+
+        // --- NEU: Funktion zum Anzeigen/Verbergen der Übersetzung ---
+        function toggleTranslation(textId) {
+            const transContainer = document.getElementById(`translation-${textId}`);
+            const transBtn = document.getElementById(`trans-btn-${textId}`);
+            if (!transContainer || !transBtn) return;
+
+            const textData = TEXTS.find(t => t.id === textId);
+            if (!textData) return;
+
+            // Wenn der Container leer ist, füllen und anzeigen
+            if (transContainer.innerHTML === '') {
+                transContainer.innerHTML = textData.text_de;
+                transContainer.style.display = 'block';
+                transBtn.textContent = '🙈 Cacher la traduction';
+                transBtn.classList.add('active');
+            } else { // Sonst nur die Sichtbarkeit umschalten
+                const isVisible = transContainer.style.display === 'block';
+                transContainer.style.display = isVisible ? 'none' : 'block';
+                transBtn.textContent = isVisible ? '🔎 Afficher la traduction' : '🙈 Cacher la traduction';
+                transBtn.classList.toggle('active');
+            }
+        }
 
         // ==================== LOAD TEXTS ====================
         async function loadTexts() {
@@ -424,7 +493,6 @@
         function speakSentence(textId, index) {
             if (currentReadingId !== textId) { restoreText(textId); return; }
             const text = TEXTS.find(t => t.id === textId); if (!text) return;
-            const sents = split
             const sents = splitTextIntoSentences(text.text);
             if (index >= sents.length) {
                 const btn = document.getElementById(`read-btn-${textId}`);
@@ -439,46 +507,23 @@
 
             const speedSlider = document.getElementById(`speed-${textId}`);
             const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-
             const utterance = new SpeechSynthesisUtterance(sents[index].trim());
-            
-            // Sprache explizit auf Französisch setzen
             const langCode = 'fr-FR';
             utterance.lang = langCode;
-            
             const voice = getVoiceForLanguage(langCode);
-            if (voice) {
-                utterance.voice = voice;
-            } else {
-                console.warn(`Aucune voix française (${langCode}) trouvée. Utilisation de la voix par défaut.`);
-            }
-            
+            if (voice) { utterance.voice = voice; } 
+            else { console.warn(`Aucune voix française (${langCode}) trouvée. Utilisation de la voix par défaut.`); }
             utterance.rate = speed;
             utterance.pitch = 1;
-
-            utterance.onstart = () => {
-                highlightSentence(textId, index);
-            };
-
-            const continueReading = () => {
-                if (currentReadingId === textId) {
-                    currentSentenceIndex = index + 1;
-                    speakSentence(textId, currentSentenceIndex);
-                }
-            };
-
+            utterance.onstart = () => { highlightSentence(textId, index); };
+            const continueReading = () => { if (currentReadingId === textId) { currentSentenceIndex = index + 1; speakSentence(textId, currentSentenceIndex); } };
             utterance.onend = continueReading;
-            utterance.onerror = (event) => {
-                console.error('Erreur SpeechSynthesis:', event.error);
-                continueReading();
-            };
-
+            utterance.onerror = (event) => { console.error('Erreur SpeechSynthesis:', event.error); continueReading(); };
             speechSynthesis.speak(utterance);
         }
 
         function toggleReadAloud(textId) {
             const btn = document.getElementById(`read-btn-${textId}`);
-            
             if (currentReadingId === textId && speechSynthesis.speaking) {
                 speechSynthesis.cancel();
                 btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute';
@@ -487,7 +532,6 @@
                 currentReadingId = null;
                 return;
             }
-            
             if (speechSynthesis.speaking) {
                 speechSynthesis.cancel();
                 const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
@@ -497,7 +541,6 @@
                 }
                 restoreText(currentReadingId);
             }
-            
             currentReadingId = textId;
             currentSentenceIndex = 0;
             prepareSentences(textId);
@@ -506,22 +549,15 @@
             speakSentence(textId, 0);
         }
 
-        // Speed slider event listeners
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('speed-slider')) {
                 const textId = e.target.id.replace('speed-', '');
                 const display = document.getElementById(`speed-display-${textId}`);
-                if (display) {
-                    display.textContent = e.target.value + 'x';
-                }
+                if (display) { display.textContent = e.target.value + 'x'; }
             }
         });
 
-        // Voices laden
-        speechSynthesis.onvoiceschanged = () => {
-            // Ruft die Funktion einmal auf, um sicherzustellen, dass die Stimmenliste bei Bedarf verfügbar ist.
-            getVoiceForLanguage('fr-FR');
-        };
+        speechSynthesis.onvoiceschanged = () => { getVoiceForLanguage('fr-FR'); };
 
         // ==================== INIT ====================
         loadTexts();
