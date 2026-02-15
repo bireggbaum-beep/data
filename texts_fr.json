@@ -10,11 +10,7 @@
     "world": "real",
     "type": "Journal",
     "vocab": [],
-    "questions": [
-      "Qu'est-ce que tu fais le mercredi ?",
-      "Tu aimes lire ?",
-      "Quel est ton hobby ?"
-    ]
+    "questions": [ "Qu'est-ce que tu fais le mercredi?", "Tu aimes lire?", "Quel est ton hobby?" ]
   },
   {
     "id": "fr_famille_musique_01_revised",
@@ -27,11 +23,33 @@
     "world": "real",
     "type": "Description",
     "vocab": [],
-    "questions": [
-      "Qui joue du piano dans la famille ?",
-      "Est-ce que ta sœur joue de la guitare ?",
-      "Quelle est ta passion ?"
-    ]
+    "questions": [ "Qui joue du piano dans la famille?", "Est-ce que ta sœur joue de la guitare?", "Quelle est ta passion?" ]
+  },
+  {
+    "id": "fr_ecole_01",
+    "title": "À l'école",
+    "title_de": "In der Schule",
+    "text": "Le lundi, j'ai les maths et l'allemand. J'aime calculer. Le mardi, j'ai le français. Je parle français. Je dessine une table et une chaise. J'adore l'école. Zut, la gomme!",
+    "text_de": "Am Montag habe ich Mathe und Deutsch. Ich mag es zu rechnen. Am Dienstag habe ich Französisch. Ich spreche Französisch. Ich zeichne einen Tisch und einen Stuhl. Ich liebe die Schule. Oje, der Radiergummi!",
+    "cr": 0.25,
+    "xp": 15,
+    "world": "real",
+    "type": "École",
+    "vocab": [],
+    "questions": [ "Quelles matières as-tu le lundi?", "Est-ce que tu aimes dessiner?", "Parles-tu français?" ]
+  },
+  {
+    "id": "fr_cuisine_01",
+    "title": "La cuisine avec maman",
+    "title_de": "Kochen mit Mama",
+    "text": "J'adore faire la cuisine. Ma mère et moi, nous sommes dans la cuisine. Je regarde le livre de cuisine. C'est un grand livre. La cuisine, c'est mon hobby. C'est chouette.",
+    "text_de": "Ich liebe es zu kochen. Meine Mutter und ich, wir sind in der Küche. Ich schaue das Kochbuch an. Es ist ein grosses Buch. Kochen ist mein Hobby. Das ist toll.",
+    "cr": 0.25,
+    "xp": 15,
+    "world": "real",
+    "type": "Activité",
+    "vocab": [],
+    "questions": [ "Tu aimes faire la cuisine?", "Avec qui es-tu dans la cuisine?", "Le livre est grand ou petit?" ]
   },
   {
     "id": "fr_sport_01_revised_v2",
@@ -43,16 +61,8 @@
     "xp": 20,
     "world": "real",
     "type": "Hobby",
-    "vocab": [
-      ["mon sport favori", "mein Lieblingssport (Vocabulaire plus)"],
-      ["avec", "mit"],
-      ["super", "super"]
-    ],
-    "questions": [
-      "Quelle est ta passion ?",
-      "Qu'est-ce que tu fais le dimanche ?",
-      "Tu aimes le foot ?"
-    ]
+    "vocab": [ ["mon sport favori", "mein Lieblingssport (Vocabulaire plus)"], ["avec", "mit"], ["super", "super"] ],
+    "questions": [ "Quelle est ta passion?", "Qu'est-ce que tu fais le dimanche?", "Tu aimes le foot?" ]
   },
   {
     "id": "fr_animaux_01_revised_v2",
@@ -64,16 +74,34 @@
     "xp": 25,
     "world": "real",
     "type": "Description",
-    "vocab": [
-      ["le chien", "der Hund (Vocabulaire plus)"],
-      ["le chat", "die Katze (Vocabulaire plus)"],
-      ["aussi", "auch"]
-    ],
-    "questions": [
-      "Tu as des animaux ?",
-      "Comment s'appelle le chien ?",
-      "Où est le chat ?"
-    ]
+    "vocab": [ ["le chien", "der Hund (Vocabulaire plus)"], ["le chat", "die Katze (Vocabulaire plus)"], ["aussi", "auch"] ],
+    "questions": [ "Tu as des animaux?", "Comment s'appelle le chien?", "Où est le chat?" ]
+  },
+  {
+    "id": "fr_console_01",
+    "title": "La console de jeux",
+    "title_de": "Die Spielkonsole",
+    "text": "Mon frère a une nouvelle console. Il adore jouer. Parfois, je joue avec lui. Le jeu est une aventure. Nous jouons dans sa chambre. C'est un bon jeu, mais c'est difficile.",
+    "text_de": "Mein Bruder hat eine neue Konsole. Er liebt es zu spielen. Manchmal spiele ich mit ihm. Das Spiel ist ein Abenteuer. Wir spielen in seinem Zimmer. Es ist ein gutes Spiel, aber es ist schwierig.",
+    "cr": 0.5,
+    "xp": 30,
+    "world": "dungeon",
+    "type": "Médias",
+    "vocab": [ ["parfois", "manchmal"], ["le jeu", "das Spiel"], ["difficile", "schwierig"] ],
+    "questions": [ "Qui a une nouvelle console?", "Est-ce que le jeu est facile?", "Où est-ce que vous jouez?" ]
+  },
+  {
+    "id": "fr_shopping_01",
+    "title": "Faire du shopping",
+    "title_de": "Shoppen gehen",
+    "text": "Le samedi, je fais du shopping avec ma cousine. J'aime regarder les magasins. Je cherche un nouveau stylo et un cahier pour l'école. Ma cousine cherche une BD. C'est un loisir super.",
+    "text_de": "Am Samstag gehe ich mit meiner Cousine shoppen. Ich mag es, die Läden anzuschauen. Ich suche einen neuen Kuli und ein Heft für die Schule. Meine Cousine sucht ein Comic. Das ist ein super Hobby.",
+    "cr": 0.5,
+    "xp": 25,
+    "world": "real",
+    "type": "Activité",
+    "vocab": [ ["les magasins", "die Läden"], ["pour", "für"], ["super", "super"] ],
+    "questions": [ "Avec qui fais-tu du shopping?", "Qu'est-ce que tu cherches?", "Qu'est-ce que ta cousine cherche?" ]
   },
   {
     "id": "fr_cirque_01",
@@ -85,18 +113,8 @@
     "xp": 35,
     "world": "dungeon",
     "type": "Aventure",
-    "vocab": [
-      ["le cirque", "der Zirkus (Vocabulaire plus)"],
-      ["les acrobaties (f, pl.)", "die Akrobatik (Vocabulaire plus)"],
-      ["grimper", "klettern (Vocabulaire plus)"],
-      ["le jonglage", "das Jonglieren (Vocabulaire plus)"],
-      ["je vais", "ich gehe"]
-    ],
-    "questions": [
-      "Où vas-tu le samedi ?",
-      "Qu'est-ce que les acrobates font ?",
-      "Est-ce que tu aimes le cirque ?"
-    ]
+    "vocab": [ ["le cirque", "der Zirkus (Vocabulaire plus)"], ["les acrobaties (f, pl.)", "die Akrobatik (Vocabulaire plus)"], ["grimper", "klettern (Vocabulaire plus)"], ["le jonglage", "das Jonglieren (Vocabulaire plus)"], ["je vais", "ich gehe"] ],
+    "questions": [ "Où vas-tu le samedi?", "Qu'est-ce que les acrobates font?", "Est-ce que tu aimes le cirque?" ]
   },
   {
     "id": "fr_equitation_01",
@@ -108,17 +126,7 @@
     "xp": 40,
     "world": "real",
     "type": "Portrait",
-    "vocab": [
-      ["l'équitation (f)", "das Reiten (Vocabulaire plus)"],
-      ["le cheval / les chevaux", "das Pferd / die Pferde"],
-      ["détester", "hassen (Vocabulaire plus)"],
-      ["le manège", "die Reitbahn / Reitschule"],
-      ["très douée", "sehr begabt"]
-    ],
-    "questions": [
-      "Quelle est la passion de Nathalie ?",
-      "Qu'est-ce qu'elle fait le vendredi ?",
-      "Est-ce que tu aimes l'équitation ?"
-    ]
+    "vocab": [ ["l'équitation (f)", "das Reiten (Vocabulaire plus)"], ["le cheval / les chevaux", "das Pferd / die Pferde"], ["détester", "hassen (Vocabulaire plus)"], ["le manège", "die Reitbahn / Reitschule"], ["très douée", "sehr begabt"] ],
+    "questions": [ "Quelle est la passion de Nathalie?", "Qu'est-ce qu'elle fait le vendredi?", "Est-ce que tu aimes l'équitation?" ]
   }
 ]
