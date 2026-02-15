@@ -967,12 +967,18 @@
         }
 
         function speakSentence(textId, index) {
+            // Abbruchbedingung: Wenn der aktuelle Vorlese-Job nicht mehr dieser Text ist, stoppen.
+            if (currentReadingId !== textId) {
+                restoreText(textId);
+                return;
+            }
+
             const text = TEXTS.find(t => t.id === textId);
             if (!text) return;
 
             const sents = splitTextIntoSentences(text.text);
             if (index >= sents.length) {
-                // Fertig
+                // Ende der Wiedergabe erreicht
                 const btn = document.getElementById(`read-btn-${textId}`);
                 if (btn) {
                     btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
@@ -987,15 +993,13 @@
             const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
 
             const utterance = new SpeechSynthesisUtterance(sents[index].trim());
-            
-            // Sprache explizit auf Englisch setzen
-            utterance.lang = 'en-GB';
-            
+            utterance.lang = 'en-GB'; // Sprache explizit setzen
+
             const voice = getEnglishVoice();
             if (voice) {
                 utterance.voice = voice;
             }
-            
+
             utterance.rate = speed;
             utterance.pitch = 1;
 
@@ -1003,23 +1007,26 @@
                 highlightSentence(textId, index);
             };
 
-            utterance.onend = () => {
-                currentSentenceIndex = index + 1;
-                speakSentence(textId, currentSentenceIndex);
+            // WICHTIG: Diese Funktion wird aufgerufen, wenn der Satz fertig ist ODER ein Fehler auftrat.
+            // Dies stellt sicher, dass die Wiedergabe zum nächsten Satz übergeht.
+            const continueReading = () => {
+                // Nur fortfahren, wenn der Vorlese-Job noch aktiv ist
+                if (currentReadingId === textId) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
             };
 
-            utterance.onerror = () => {
-                restoreText(textId);
-                const btn = document.getElementById(`read-btn-${textId}`);
-                if (btn) {
-                    btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-                    btn.classList.remove('playing');
-                }
-                currentReadingId = null;
+            utterance.onend = continueReading;
+            utterance.onerror = (event) => {
+                console.error('SpeechSynthesis Error:', event.error);
+                // Trotz Fehler versuchen, mit dem nächsten Satz fortzufahren
+                continueReading();
             };
 
             speechSynthesis.speak(utterance);
         }
+
 
         function toggleReadAloud(textId) {
             const btn = document.getElementById(`read-btn-${textId}`);
