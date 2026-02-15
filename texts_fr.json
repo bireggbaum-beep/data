@@ -1,0 +1,124 @@
+[
+  {
+    "id": "fr_loisir_01_revised",
+    "title": "Mes loisirs",
+    "title_de": "Meine Hobbys",
+    "text": "J'aime mes loisirs. Le mercredi, je joue dehors. J'adore faire du vélo. Le vendredi, j'écoute de la musique. Je lis aussi une BD. J'aime la lecture. C'est chouette.",
+    "text_de": "Ich mag meine Hobbys. Am Mittwoch spiele ich draussen. Ich liebe es, Velo zu fahren. Am Freitag höre ich Musik. Ich lese auch ein Comic. Ich mag das Lesen. Das ist toll.",
+    "cr": 0.25,
+    "xp": 10,
+    "world": "real",
+    "type": "Journal",
+    "vocab": [],
+    "questions": [
+      "Qu'est-ce que tu fais le mercredi ?",
+      "Tu aimes lire ?",
+      "Quel est ton hobby ?"
+    ]
+  },
+  {
+    "id": "fr_famille_musique_01_revised",
+    "title": "La famille et la musique",
+    "title_de": "Die Familie und die Musik",
+    "text": "Voici ma famille. Mon père joue du piano. Ma mère chante. Ma sœur, elle, joue de la guitare. Mon frère fait du foot. Moi, j'adore la musique et le foot. C'est ma passion.",
+    "text_de": "Hier ist meine Familie. Mein Vater spielt Klavier. Meine Mutter singt. Meine Schwester, sie, spielt Gitarre. Mein Bruder spielt Fussball. Ich, ich liebe Musik und Fussball. Das ist meine Leidenschaft.",
+    "cr": 0.25,
+    "xp": 15,
+    "world": "real",
+    "type": "Description",
+    "vocab": [],
+    "questions": [
+      "Qui joue du piano dans la famille ?",
+      "Est-ce que ta sœur joue de la guitare ?",
+      "Quelle est ta passion ?"
+    ]
+  },
+  {
+    "id": "fr_sport_01_revised_v2",
+    "title": "Le foot, ma passion",
+    "title_de": "Fussball, meine Leidenschaft",
+    "text": "Mon hobby, c'est le foot. Le mardi, je rencontre mes amis. J'adore faire du foot. C'est mon sport favori. Le dimanche, je fais du vélo avec mon père. C'est super!",
+    "text_de": "Mein Hobby ist Fussball. Am Dienstag treffe ich meine Freunde. Ich liebe es, Fussball zu spielen. Das ist mein Lieblingssport. Am Sonntag fahre ich Velo mit meinem Vater. Das ist super!",
+    "cr": 0.5,
+    "xp": 20,
+    "world": "real",
+    "type": "Hobby",
+    "vocab": [
+      ["mon sport favori", "mein Lieblingssport (Vocabulaire plus)"],
+      ["avec", "mit"],
+      ["super", "super"]
+    ],
+    "questions": [
+      "Quelle est ta passion ?",
+      "Qu'est-ce que tu fais le dimanche ?",
+      "Tu aimes le foot ?"
+    ]
+  },
+  {
+    "id": "fr_animaux_01_revised_v2",
+    "title": "Mes animaux",
+    "title_de": "Meine Tiere",
+    "text": "J'adore les animaux. Voici mon chien. Il s'appelle Zizou. Il aime jouer dehors. J'ai aussi un chat. Le chat est sur la table. Je suis fan de mes animaux.",
+    "text_de": "Ich liebe Tiere. Hier ist mein Hund. Er heisst Zizou. Er spielt gerne draussen. Ich habe auch eine Katze. Die Katze ist auf dem Tisch. Ich bin ein Fan von meinen Tieren.",
+    "cr": 0.5,
+    "xp": 25,
+    "world": "real",
+    "type": "Description",
+    "vocab": [
+      ["le chien", "der Hund (Vocabulaire plus)"],
+      ["le chat", "die Katze (Vocabulaire plus)"],
+      ["aussi", "auch"]
+    ],
+    "questions": [
+      "Tu as des animaux ?",
+      "Comment s'appelle le chien ?",
+      "Où est le chat ?"
+    ]
+  },
+  {
+    "id": "fr_cirque_01",
+    "title": "Au cirque avec papa",
+    "title_de": "Im Zirkus mit Papa",
+    "text": "Le samedi, je vais au cirque avec mon père. J'adore le cirque! Je regarde les acrobates. Ils grimpent et ils sautent. Un garçon fait du jonglage. C'est ma passion, le cirque!",
+    "text_de": "Am Samstag gehe ich mit meinem Vater in den Zirkus. Ich liebe den Zirkus! Ich schaue den Akrobaten zu. Sie klettern und sie springen. Ein Junge jongliert. Der Zirkus ist meine Leidenschaft!",
+    "cr": 1,
+    "xp": 35,
+    "world": "dungeon",
+    "type": "Aventure",
+    "vocab": [
+      ["le cirque", "der Zirkus (Vocabulaire plus)"],
+      ["les acrobaties (f, pl.)", "die Akrobatik (Vocabulaire plus)"],
+      ["grimper", "klettern (Vocabulaire plus)"],
+      ["le jonglage", "das Jonglieren (Vocabulaire plus)"],
+      ["je vais", "ich gehe"]
+    ],
+    "questions": [
+      "Où vas-tu le samedi ?",
+      "Qu'est-ce que les acrobates font ?",
+      "Est-ce que tu aimes le cirque ?"
+    ]
+  },
+  {
+    "id": "fr_equitation_01",
+    "title": "Mon amie et l'équitation",
+    "title_de": "Meine Freundin und das Reiten",
+    "text": "Mon amie s'appelle Nathalie. Sa passion, c'est l'équitation. Le vendredi, elle va au manège. Elle adore les chevaux. Moi, je déteste l'équitation, mais j'aime bien regarder Nathalie. Elle est très douée.",
+    "text_de": "Meine Freundin heisst Nathalie. Ihre Leidenschaft ist das Reiten. Am Freitag geht sie in die Reitschule. Sie liebt Pferde. Ich, ich hasse Reiten, aber ich schaue Nathalie gerne zu. Sie ist sehr begabt.",
+    "cr": 1,
+    "xp": 40,
+    "world": "real",
+    "type": "Portrait",
+    "vocab": [
+      ["l'équitation (f)", "das Reiten (Vocabulaire plus)"],
+      ["le cheval / les chevaux", "das Pferd / die Pferde"],
+      ["détester", "hassen (Vocabulaire plus)"],
+      ["le manège", "die Reitbahn / Reitschule"],
+      ["très douée", "sehr begabt"]
+    ],
+    "questions": [
+      "Quelle est la passion de Nathalie ?",
+      "Qu'est-ce qu'elle fait le vendredi ?",
+      "Est-ce que tu aimes l'équitation ?"
+    ]
+  }
+]
