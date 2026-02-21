@@ -49,7 +49,7 @@
         .card-status { font-size: 1.2em; margin-left: 10px; }
         .card-content { display: none; padding: 0 15px 15px; border-top: 1px solid rgba(255,255,255,0.1); }
         .card-content.open { display: block; }
-        .reading-text { line-height: 1.8; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; }
+        .reading-text { line-height: 1.8; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; transition: font-size 0.2s; }
         .translation-text { display: none; line-height: 1.7; margin: 10px 0 15px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 3px solid #4682b4; font-size: 0.95em; color: #ccc; }
         .translation-btn { width: 100%; padding: 8px; margin-top: 15px; background: rgba(70,130,180,0.2); border: 1px solid rgba(70,130,180,0.4); border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s; }
         .translation-btn:hover { background: rgba(70,130,180,0.4); }
@@ -71,8 +71,6 @@
         .read-aloud-btn.playing { background: rgba(255,100,100,0.3); border-color: #ff6b6b; color: #ff6b6b; }
         .speed-control { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.8em; color: #888; }
         .speed-slider { width: 100px; accent-color: #6495ed; }
-        .sentence { transition: background 0.2s, color 0.2s; border-radius: 3px; padding: 0 2px; }
-        .sentence.active { background: rgba(255,215,0,0.3); color: #fff; }
         .lock-icon { font-size: 1.5em; }
         .level-up-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         .level-up-overlay.show { display: flex; }
@@ -85,24 +83,6 @@
         .reset-btn:hover { background: rgba(255,50,50,0.3); }
         .loading { text-align: center; padding: 50px; color: #888; }
         .error { text-align: center; padding: 50px; color: #ff6b6b; }
-
-        /* Debug-Log */
-        #ttsLog {
-            position: fixed; bottom: 50px; left: 5px; right: 5px;
-            max-height: 150px; overflow-y: auto;
-            background: rgba(0,0,0,0.92); color: #0f0;
-            font-family: monospace; font-size: 10px;
-            padding: 8px; border-radius: 8px;
-            z-index: 999; display: none;
-            border: 1px solid #0f0;
-        }
-        #ttsLog.visible { display: block; }
-        .debug-toggle {
-            position: fixed; bottom: 20px; left: 20px;
-            background: rgba(0,100,0,0.3); border: 1px solid #0a0;
-            color: #0f0; padding: 4px 10px; border-radius: 12px;
-            cursor: pointer; font-size: 0.7em; z-index: 1000;
-        }
     </style>
 </head>
 <body>
@@ -152,13 +132,11 @@
         </div>
     </div>
 
-    <div id="ttsLog"></div>
-    <button class="debug-toggle" id="debugToggle">🐛 Log</button>
     <button class="reset-btn" id="resetBtn">Réinitialiser</button>
 
     <script>
         // ══════════════════════════════════════════
-        //  APP LOGIC (unchanged)
+        //  APP LOGIC
         // ══════════════════════════════════════════
         const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/refs/heads/main/texts_fr.json';
         const FIXED_LEVELS = [
@@ -248,90 +226,15 @@
         document.addEventListener('input',(e)=>{if(e.target.classList.contains('speed-slider')){const id=e.target.id.replace('speed-','');const d=document.getElementById(`speed-display-${id}`);if(d)d.textContent=e.target.value+'x';}});
         loadTexts();
 
+
         // ══════════════════════════════════════════════════════════════
-        //  TTS v4 — BULLET-PROOF FÜR CHROME MOBILE
-        //
-        //  Strategie: Einen einzelnen Utterance nach dem anderen.
-        //  Zwischen Chunks: cancel() + 250ms Pause + neuer speak().
-        //  Chrome Mobile braucht cancel() vor jedem neuen speak(),
-        //  sonst bleibt die Queue hängen.
-        //  Dazu: Aggressiver Timer-Fallback falls onend nicht feuert.
+        //  Einfaches TTS ohne Chunks, mit Keep-Alive für Chrome Android
         // ══════════════════════════════════════════════════════════════
-
-        let ttsReadingId = null;    // welcher Text gerade gelesen wird
-        let ttsChunkIdx = 0;        // aktueller Chunk-Index
-        let ttsChunks = [];         // Array der Chunks
-        let ttsAborted = false;     // wurde Stopp angefordert?
-        let ttsFallbackTimer = null;
-        let ttsKeepAlive = null;
-
-        // --- Debug Log ---
-        const logEl = document.getElementById('ttsLog');
-        document.getElementById('debugToggle').addEventListener('click', () => {
-            logEl.classList.toggle('visible');
-        });
-        function log(msg) {
-            const ts = new Date().toLocaleTimeString('de', {hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:1});
-            const line = `[${ts}] ${msg}`;
-            console.log('[TTS]', msg);
-            logEl.innerHTML += line + '<br>';
-            logEl.scrollTop = logEl.scrollHeight;
-        }
-
-        // --- Chunk-Splitting: Sätze, dann bei Komma, max ~60 chars ---
-        function makeChunks(fullText) {
-            const out = [];
-            const sents = fullText.match(/[^.!?]+[.!?]*/g) || [fullText];
-            for (const s of sents) {
-                const trimmed = s.trim();
-                if (!trimmed) continue;
-                if (trimmed.length <= 60) { out.push(trimmed); continue; }
-                // Bei Komma/Semikolon splitten
-                const parts = trimmed.split(/(?<=[,;:])\s*/);
-                let buf = '';
-                for (const p of parts) {
-                    if (buf.length + p.length > 60 && buf) {
-                        out.push(buf.trim());
-                        buf = p;
-                    } else {
-                        buf += (buf ? ' ' : '') + p;
-                    }
-                }
-                if (buf.trim()) out.push(buf.trim());
-            }
-            return out.filter(c => c.length > 0);
-        }
-
-        // --- Sentence spans für Highlighting ---
-        function buildSpans(textId) {
-            const textObj = TEXTS.find(t => t.id === textId); if (!textObj) return;
-            const el = document.getElementById(`text-${textId}`); if (!el) return;
-            ttsChunks = makeChunks(textObj.text);
-            el.innerHTML = ttsChunks.map((c, i) =>
-                `<span class="sentence" id="s-${textId}-${i}">${c}</span>`
-            ).join(' ');
-            log(`${ttsChunks.length} chunks prepared`);
-        }
-
-        function restoreOriginal(textId) {
-            if (!textId) return;
-            const t = TEXTS.find(x => x.id === textId); if (!t) return;
-            const el = document.getElementById(`text-${textId}`); if (el) el.innerHTML = t.text;
-        }
-
-        // --- Highlight ---
-        function hlClear(textId) {
-            const el = document.getElementById(`text-${textId}`);
-            if (el) el.querySelectorAll('.sentence.active').forEach(s => s.classList.remove('active'));
-        }
-        function hlSet(textId, idx) {
-            hlClear(textId);
-            const s = document.getElementById(`s-${textId}-${idx}`);
-            if (s) { s.classList.add('active'); s.scrollIntoView({behavior:'smooth',block:'center'}); }
-        }
-
-        // --- Voice finden ---
+        let currentUtterance = null;
+        let ttsReadingId = null;
+        let keepAliveTimer = null;
         let cachedVoice = null;
+
         function findVoice() {
             if (cachedVoice) return cachedVoice;
             try {
@@ -340,222 +243,79 @@
                     || v.find(x => x.lang === 'fr-FR')
                     || v.find(x => x.lang.startsWith('fr'))
                     || null;
-                if (cachedVoice) log(`voice: ${cachedVoice.name}`);
             } catch(e) {}
             return cachedVoice;
         }
         try { speechSynthesis.onvoiceschanged = findVoice; } catch(e) {}
 
-        // --- KeepAlive: pause/resume alle 4s ---
-        function startKeepAlive() {
-            stopKeepAlive();
-            ttsKeepAlive = setInterval(() => {
-                try {
-                    if (speechSynthesis.speaking && !speechSynthesis.paused) {
-                        speechSynthesis.pause();
-                        speechSynthesis.resume();
-                    }
-                } catch(e) {}
-            }, 4000);
-        }
-        function stopKeepAlive() {
-            if (ttsKeepAlive) { clearInterval(ttsKeepAlive); ttsKeepAlive = null; }
-        }
-
-        // --- Fallback-Timer: wenn onend nicht feuert ---
-        function startFallback(chunkText, speed) {
-            clearFallback();
-            // Geschätzte Sprechdauer: ~80ms pro Zeichen bei rate=1.0, plus Puffer
-            const estimatedMs = (chunkText.length * 80 / Math.max(speed, 0.5)) + 3000;
-            log(`fallback timer: ${Math.round(estimatedMs)}ms`);
-            ttsFallbackTimer = setTimeout(() => {
-                log(`⚠ FALLBACK fired (chunk ${ttsChunkIdx}), speaking=${speechSynthesis.speaking}`);
-                // Force weiter
-                advanceToNext();
-            }, estimatedMs);
-        }
-        function clearFallback() {
-            if (ttsFallbackTimer) { clearTimeout(ttsFallbackTimer); ttsFallbackTimer = null; }
-        }
-
-        // --- Zum nächsten Chunk ---
-        function advanceToNext() {
-            clearFallback();
-            if (ttsAborted || !ttsReadingId) return;
-            ttsChunkIdx++;
-            doSpeak();
-        }
-
-        // --- Kern: Einen Chunk sprechen ---
-        function doSpeak() {
-            if (ttsAborted || !ttsReadingId) return;
-            const textId = ttsReadingId;
-
-            if (ttsChunkIdx >= ttsChunks.length) {
-                log('✓ Alle Chunks fertig');
-                fullStop();
-                return;
-            }
-
-            const chunk = ttsChunks[ttsChunkIdx];
-            log(`► chunk ${ttsChunkIdx}: "${chunk.substring(0,40)}${chunk.length>40?'…':''}" (${chunk.length}ch)`);
-
-            // WICHTIG: cancel() VOR jedem neuen speak() — Chrome Mobile braucht das
-            try { speechSynthesis.cancel(); } catch(e) {}
-
-            // WICHTIG: 250ms warten nach cancel() — Chrome Mobile braucht die Pause
-            setTimeout(() => {
-                if (ttsAborted || ttsReadingId !== textId) return;
-
-                try {
-                    const speedSlider = document.getElementById(`speed-${textId}`);
-                    const rate = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-
-                    const utt = new SpeechSynthesisUtterance(chunk);
-                    utt.lang = 'fr-FR';
-                    utt.rate = rate;
-                    utt.pitch = 1;
-                    const voice = findVoice();
-                    if (voice) utt.voice = voice;
-
-                    let resolved = false;
-                    const resolve = (reason) => {
-                        if (resolved) return;
-                        resolved = true;
-                        log(`  → ${reason} (chunk ${ttsChunkIdx})`);
-                        advanceToNext();
-                    };
-
-                    utt.onstart = () => {
-                        log(`  onstart (chunk ${ttsChunkIdx})`);
-                        hlSet(textId, ttsChunkIdx);
-                    };
-
-                    utt.onend = () => resolve('onend');
-
-                    utt.onerror = (ev) => {
-                        if (ev.error === 'canceled') {
-                            log(`  onerror:canceled (ignored)`);
-                            return;
-                        }
-                        resolve('onerror:' + ev.error);
-                    };
-
-                    speechSynthesis.speak(utt);
-                    log(`  speak() called, speaking=${speechSynthesis.speaking}`);
-
-                    // Fallback-Timer starten
-                    startFallback(chunk, rate);
-
-                    // Extra-Check: Wenn nach 1s immer noch nicht speaking, nochmal versuchen
-                    setTimeout(() => {
-                        if (!resolved && !ttsAborted && ttsReadingId === textId) {
-                            if (!speechSynthesis.speaking) {
-                                log(`  ⚠ not speaking after 1s, retrying...`);
-                                // Nochmal probieren
-                                try { speechSynthesis.cancel(); } catch(e) {}
-                                setTimeout(() => {
-                                    if (resolved || ttsAborted) return;
-                                    const utt2 = new SpeechSynthesisUtterance(chunk);
-                                    utt2.lang = 'fr-FR'; utt2.rate = rate; utt2.pitch = 1;
-                                    const v2 = findVoice(); if (v2) utt2.voice = v2;
-                                    utt2.onstart = () => hlSet(textId, ttsChunkIdx);
-                                    utt2.onend = () => resolve('retry-onend');
-                                    utt2.onerror = (ev) => { if (ev.error !== 'canceled') resolve('retry-onerror'); };
-                                    speechSynthesis.speak(utt2);
-                                    log(`  retry speak() called`);
-                                }, 200);
-                            }
-                        }
-                    }, 1000);
-
-                } catch(e) {
-                    log(`  ✗ ERROR: ${e.message}`);
-                    fullStop();
-                }
-            }, 250); // <-- 250ms Pause nach cancel()
-        }
-
-        // --- Komplett stoppen ---
-        function fullStop() {
-            log('STOP');
-            ttsAborted = true;
-            clearFallback();
-            stopKeepAlive();
-            try { speechSynthesis.cancel(); } catch(e) {}
+        function stopTTS() {
+            clearInterval(keepAliveTimer);
+            try { window.speechSynthesis.cancel(); } catch(e) {}
             if (ttsReadingId) {
                 const btn = document.getElementById(`read-btn-${ttsReadingId}`);
-                if (btn) { btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute'; btn.classList.remove('playing'); }
-                restoreOriginal(ttsReadingId);
+                if (btn) {
+                    btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute';
+                    btn.classList.remove('playing');
+                }
             }
             ttsReadingId = null;
-            ttsChunks = [];
-            ttsChunkIdx = 0;
+            currentUtterance = null;
         }
 
-        // --- Toggle-Button ---
         function toggleReadAloud(textId) {
             if (!window.speechSynthesis) {
                 alert('Sprachausgabe nicht verfügbar in diesem Browser.');
                 return;
             }
 
-            // Stopp wenn was läuft
-            const wasPlaying = ttsReadingId;
-            if (wasPlaying) {
-                fullStop();
-                if (wasPlaying === textId) return; // gleicher Text → nur stoppen
-                // anderer Text → weiter unten starten
+            // Stoppen, falls bereits etwas läuft
+            if (ttsReadingId === textId) {
+                stopTTS();
+                return;
             }
+            stopTTS();
 
-            const btn = document.getElementById(`read-btn-${textId}`);
-            if (!btn) return;
+            const textObj = TEXTS.find(t => t.id === textId);
+            if (!textObj) return;
 
-            log(`=== START: ${textId} ===`);
-            log(`UA: ${navigator.userAgent.substring(0, 80)}`);
-            log(`voices: ${speechSynthesis.getVoices().length}`);
-
-            // Sauberer Reset
-            ttsAborted = false;
             ttsReadingId = textId;
-            ttsChunkIdx = 0;
-
-            // cancel() + warten, dann starten
-            try { speechSynthesis.cancel(); } catch(e) {}
-
-            btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
-            btn.classList.add('playing');
-
-            // Voices sicherstellen (Chrome lädt sie async)
-            const voices = speechSynthesis.getVoices();
-            if (!voices.length) {
-                log('Waiting for voices...');
-                speechSynthesis.onvoiceschanged = () => {
-                    findVoice();
-                    startAfterDelay(textId);
-                };
-                // Fallback falls event nie feuert
-                setTimeout(() => startAfterDelay(textId), 500);
-            } else {
-                findVoice();
-                startAfterDelay(textId);
+            const btn = document.getElementById(`read-btn-${textId}`);
+            if (btn) {
+                btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
+                btn.classList.add('playing');
             }
+
+            const speedSlider = document.getElementById(`speed-${textId}`);
+            const rate = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+
+            currentUtterance = new SpeechSynthesisUtterance(textObj.text);
+            currentUtterance.lang = 'fr-FR';
+            currentUtterance.rate = rate;
+            
+            const voice = findVoice();
+            if (voice) currentUtterance.voice = voice;
+
+            currentUtterance.onend = stopTTS;
+            currentUtterance.onerror = (e) => {
+                if (e.error !== 'canceled') stopTTS();
+            };
+
+            // Workaround für den Android 15-Sekunden Bug: Alle 10s kurz pausieren und fortsetzen
+            keepAliveTimer = setInterval(() => {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.pause();
+                    window.speechSynthesis.resume();
+                } else {
+                    clearInterval(keepAliveTimer);
+                }
+            }, 10000);
+
+            window.speechSynthesis.speak(currentUtterance);
         }
 
-        function startAfterDelay(textId) {
-            if (ttsAborted || ttsReadingId !== textId) return;
-            // 300ms nach letztem cancel() warten
-            setTimeout(() => {
-                if (ttsAborted || ttsReadingId !== textId) return;
-                buildSpans(textId);
-                startKeepAlive();
-                doSpeak();
-            }, 300);
-        }
-
-        // Aufräumen bei Tab-Wechsel/Verlassen
+        // Stoppen beim Verlassen des Tabs
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && ttsReadingId) fullStop();
+            if (document.visibilityState === 'hidden') stopTTS();
         });
     </script>
 </body>
