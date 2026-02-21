@@ -51,9 +51,9 @@
         .card-content.open { display: block; }
         .reading-text { line-height: 1.8; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; }
         .translation-text { display: none; line-height: 1.7; margin: 10px 0 15px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 3px solid #4682b4; font-size: 0.95em; color: #ccc; }
-        .translation-btn { width: 100%; padding: 8px; margin-top: 15px; background: rgba(70, 130, 180, 0.2); border: 1px solid rgba(70, 130, 180, 0.4); border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s; }
-        .translation-btn:hover { background: rgba(70, 130, 180, 0.4); }
-        .translation-btn.active { background: rgba(70, 130, 180, 0.5); color: #fff; }
+        .translation-btn { width: 100%; padding: 8px; margin-top: 15px; background: rgba(70,130,180,0.2); border: 1px solid rgba(70,130,180,0.4); border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s; }
+        .translation-btn:hover { background: rgba(70,130,180,0.4); }
+        .translation-btn.active { background: rgba(70,130,180,0.5); color: #fff; }
         .vocab-section, .questions-section { margin-top: 15px; }
         .section-title { font-size: 0.85em; color: #ffd700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
         .vocab-list { display: grid; gap: 6px; }
@@ -66,13 +66,13 @@
         .complete-btn { width: 100%; padding: 12px; margin-top: 15px; background: linear-gradient(135deg, #ffd700, #ff8c00); border: none; border-radius: 8px; color: #1a1a2e; font-weight: 600; font-size: 1em; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .complete-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
         .complete-btn:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; }
-        .read-aloud-btn { width: 100%; padding: 10px; margin-top: 10px; background: rgba(100, 149, 237, 0.3); border: 1px solid #6495ed; border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.95em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .read-aloud-btn:hover { background: rgba(100, 149, 237, 0.5); }
-        .read-aloud-btn.playing { background: rgba(255, 100, 100, 0.3); border-color: #ff6b6b; color: #ff6b6b; }
+        .read-aloud-btn { width: 100%; padding: 10px; margin-top: 10px; background: rgba(100,149,237,0.3); border: 1px solid #6495ed; border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.95em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .read-aloud-btn:hover { background: rgba(100,149,237,0.5); }
+        .read-aloud-btn.playing { background: rgba(255,100,100,0.3); border-color: #ff6b6b; color: #ff6b6b; }
         .speed-control { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.8em; color: #888; }
         .speed-slider { width: 100px; accent-color: #6495ed; }
         .sentence { transition: background 0.2s, color 0.2s; border-radius: 3px; padding: 0 2px; }
-        .sentence.active { background: rgba(255, 215, 0, 0.3); color: #fff; }
+        .sentence.active { background: rgba(255,215,0,0.3); color: #fff; }
         .lock-icon { font-size: 1.5em; }
         .level-up-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         .level-up-overlay.show { display: flex; }
@@ -81,11 +81,28 @@
         .level-up-text { font-size: 3em; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.5); margin-bottom: 10px; }
         .level-up-subtitle { font-size: 1.5em; color: #fff; margin-bottom: 20px; }
         .level-up-unlock { font-size: 1.1em; color: #90ee90; }
-        .reset-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(255,50,50,0.2); border: 1px solid rgba(255,50,50,0.3); color: #ff6b6b; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; }
+        .reset-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(255,50,50,0.2); border: 1px solid rgba(255,50,50,0.3); color: #ff6b6b; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; z-index: 50; }
         .reset-btn:hover { background: rgba(255,50,50,0.3); }
         .loading { text-align: center; padding: 50px; color: #888; }
         .error { text-align: center; padding: 50px; color: #ff6b6b; }
-        .tts-debug { position: fixed; bottom: 50px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; font-family: monospace; font-size: 11px; padding: 6px 10px; border-radius: 6px; z-index: 999; display: none; }
+
+        /* Debug-Log */
+        #ttsLog {
+            position: fixed; bottom: 50px; left: 5px; right: 5px;
+            max-height: 150px; overflow-y: auto;
+            background: rgba(0,0,0,0.92); color: #0f0;
+            font-family: monospace; font-size: 10px;
+            padding: 8px; border-radius: 8px;
+            z-index: 999; display: none;
+            border: 1px solid #0f0;
+        }
+        #ttsLog.visible { display: block; }
+        .debug-toggle {
+            position: fixed; bottom: 20px; left: 20px;
+            background: rgba(0,100,0,0.3); border: 1px solid #0a0;
+            color: #0f0; padding: 4px 10px; border-radius: 12px;
+            cursor: pointer; font-size: 0.7em; z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -135,10 +152,14 @@
         </div>
     </div>
 
-    <div class="tts-debug" id="ttsDebug"></div>
+    <div id="ttsLog"></div>
+    <button class="debug-toggle" id="debugToggle">🐛 Log</button>
     <button class="reset-btn" id="resetBtn">Réinitialiser</button>
 
     <script>
+        // ══════════════════════════════════════════
+        //  APP LOGIC (unchanged)
+        // ══════════════════════════════════════════
         const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/refs/heads/main/texts_fr.json';
         const FIXED_LEVELS = [
             { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
@@ -147,48 +168,46 @@
             { level: 4, xpRequired: 550,  unlockedCR: 2,    title: "Vétéran" },
             { level: 5, xpRequired: 1200, unlockedCR: 3,    title: "Maître" }
         ];
+        let TEXTS=[], CR_LEVELS=[], LEVELS=[], WORLDS=[];
+        let gameState={xp:0,level:1,completedTexts:[]};
+        let activeWorldFilter='all', activeCrFilter='all';
 
-        let TEXTS = [], CR_LEVELS = [], LEVELS = [], WORLDS = [];
-        let gameState = { xp: 0, level: 1, completedTexts: [] };
-        let activeWorldFilter = 'all', activeCrFilter = 'all';
-
-        function saveState() { localStorage.setItem('codex_des_ombres_progress', JSON.stringify(gameState)); }
-        function loadState() { const s = localStorage.getItem('codex_des_ombres_progress'); if (s) { try { gameState = JSON.parse(s); } catch(e){} } }
-        function resetProgress() { if (confirm('Réinitialiser toute la progression ?')) { gameState = { xp: 0, level: 1, completedTexts: [] }; saveState(); updateUI(); renderTexts(); } }
-
-        function generateLevels() { CR_LEVELS = [...new Set(TEXTS.map(t=>t.cr))].sort((a,b)=>a-b); WORLDS = [...new Set(TEXTS.map(t=>t.world))]; LEVELS = FIXED_LEVELS; generateFilterButtons(); }
-        function generateFilterButtons() {
-            const wc = document.getElementById('worldFilters'); wc.innerHTML = '<span class="filter-label">Monde:</span><button class="filter-btn active" data-world="all">Tous</button>';
-            WORLDS.forEach(w => { const b = document.createElement('button'); b.className = `filter-btn world-${w}`; b.dataset.world = w; b.textContent = w.charAt(0).toUpperCase()+w.slice(1); wc.appendChild(b); });
-            const cc = document.getElementById('crFilters'); cc.innerHTML = '<span class="filter-label">FP:</span><button class="filter-btn active" data-cr="all">Tous</button>';
-            CR_LEVELS.forEach(cr => { const b = document.createElement('button'); b.className='filter-btn'; b.dataset.cr=cr; b.textContent = cr<1?(cr===0.25?'¼':'½'):cr.toString(); cc.appendChild(b); });
+        function saveState(){localStorage.setItem('codex_des_ombres_progress',JSON.stringify(gameState));}
+        function loadState(){const s=localStorage.getItem('codex_des_ombres_progress');if(s)try{gameState=JSON.parse(s);}catch(e){}}
+        function resetProgress(){if(confirm('Réinitialiser toute la progression ?')){gameState={xp:0,level:1,completedTexts:[]};saveState();updateUI();renderTexts();}}
+        function generateLevels(){CR_LEVELS=[...new Set(TEXTS.map(t=>t.cr))].sort((a,b)=>a-b);WORLDS=[...new Set(TEXTS.map(t=>t.world))];LEVELS=FIXED_LEVELS;generateFilterButtons();}
+        function generateFilterButtons(){
+            const wc=document.getElementById('worldFilters');wc.innerHTML='<span class="filter-label">Monde:</span><button class="filter-btn active" data-world="all">Tous</button>';
+            WORLDS.forEach(w=>{const b=document.createElement('button');b.className=`filter-btn world-${w}`;b.dataset.world=w;b.textContent=w.charAt(0).toUpperCase()+w.slice(1);wc.appendChild(b);});
+            const cc=document.getElementById('crFilters');cc.innerHTML='<span class="filter-label">FP:</span><button class="filter-btn active" data-cr="all">Tous</button>';
+            CR_LEVELS.forEach(cr=>{const b=document.createElement('button');b.className='filter-btn';b.dataset.cr=cr;b.textContent=cr<1?(cr===0.25?'¼':'½'):cr.toString();cc.appendChild(b);});
             attachFilterListeners();
         }
-        function attachFilterListeners() {
-            document.querySelectorAll('#worldFilters .filter-btn').forEach(b => { b.addEventListener('click', () => { document.querySelectorAll('#worldFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); activeWorldFilter=b.dataset.world; renderTexts(); }); });
-            document.querySelectorAll('#crFilters .filter-btn').forEach(b => { b.addEventListener('click', () => { document.querySelectorAll('#crFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); activeCrFilter=b.dataset.cr; renderTexts(); }); });
+        function attachFilterListeners(){
+            document.querySelectorAll('#worldFilters .filter-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#worldFilters .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeWorldFilter=b.dataset.world;renderTexts();});});
+            document.querySelectorAll('#crFilters .filter-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#crFilters .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeCrFilter=b.dataset.cr;renderTexts();});});
         }
-        function getUnlockedCRs() { const u=[]; for(const l of LEVELS) if(gameState.level>=l.level) u.push(l.unlockedCR); return u; }
-        function isTextUnlocked(t) { return getUnlockedCRs().includes(t.cr); }
-        function isTextCompleted(t) { return gameState.completedTexts.includes(t.id); }
-        function getNextLevelXP() { const n=LEVELS.find(l=>l.level===gameState.level+1); return n?n.xpRequired:LEVELS[LEVELS.length-1].xpRequired; }
-        function getCurrentLevelXP() { const c=LEVELS.find(l=>l.level===gameState.level); return c?c.xpRequired:0; }
-        function checkLevelUp() { for(let i=LEVELS.length-1;i>=0;i--) { if(gameState.xp>=LEVELS[i].xpRequired&&gameState.level<LEVELS[i].level) { gameState.level=LEVELS[i].level; saveState(); showLevelUp(LEVELS[i]); return true; } } return false; }
-        function showLevelUp(ld) { document.getElementById('newLevel').textContent=ld.level; const d=ld.unlockedCR<1?(ld.unlockedCR===0.25?'¼':'½'):ld.unlockedCR; document.getElementById('unlockText').textContent=`Textes de FP ${d} débloqués !`; const o=document.getElementById('levelUpOverlay'); o.classList.add('show'); setTimeout(()=>{o.classList.remove('show');updateUI();renderTexts();},2500); }
-        function completeText(id) { const t=TEXTS.find(x=>x.id===id); if(!t||isTextCompleted(t))return; gameState.completedTexts.push(id); gameState.xp+=t.xp; saveState(); if(!checkLevelUp()){updateUI();renderTexts();} }
-        function updateUI() {
+        function getUnlockedCRs(){const u=[];for(const l of LEVELS)if(gameState.level>=l.level)u.push(l.unlockedCR);return u;}
+        function isTextUnlocked(t){return getUnlockedCRs().includes(t.cr);}
+        function isTextCompleted(t){return gameState.completedTexts.includes(t.id);}
+        function getNextLevelXP(){const n=LEVELS.find(l=>l.level===gameState.level+1);return n?n.xpRequired:LEVELS[LEVELS.length-1].xpRequired;}
+        function getCurrentLevelXP(){const c=LEVELS.find(l=>l.level===gameState.level);return c?c.xpRequired:0;}
+        function checkLevelUp(){for(let i=LEVELS.length-1;i>=0;i--)if(gameState.xp>=LEVELS[i].xpRequired&&gameState.level<LEVELS[i].level){gameState.level=LEVELS[i].level;saveState();showLevelUp(LEVELS[i]);return true;}return false;}
+        function showLevelUp(ld){document.getElementById('newLevel').textContent=ld.level;const d=ld.unlockedCR<1?(ld.unlockedCR===0.25?'¼':'½'):ld.unlockedCR;document.getElementById('unlockText').textContent=`Textes de FP ${d} débloqués !`;const o=document.getElementById('levelUpOverlay');o.classList.add('show');setTimeout(()=>{o.classList.remove('show');updateUI();renderTexts();},2500);}
+        function completeText(id){const t=TEXTS.find(x=>x.id===id);if(!t||isTextCompleted(t))return;gameState.completedTexts.push(id);gameState.xp+=t.xp;saveState();if(!checkLevelUp()){updateUI();renderTexts();}}
+        function updateUI(){
             const cl=LEVELS.find(l=>l.level===gameState.level)||LEVELS[0];
-            document.getElementById('currentLevel').textContent=gameState.level; document.getElementById('levelTitle').textContent=cl.title;
+            document.getElementById('currentLevel').textContent=gameState.level;document.getElementById('levelTitle').textContent=cl.title;
             document.getElementById('currentXP').textContent=gameState.xp;
-            const nx=getNextLevelXP(),cx=getCurrentLevelXP(); document.getElementById('nextLevelXP').textContent=nx;
-            const p=nx>cx?((gameState.xp-cx)/(nx-cx))*100:100; document.getElementById('xpBar').style.width=Math.min(100,Math.max(0,p))+'%';
+            const nx=getNextLevelXP(),cx=getCurrentLevelXP();document.getElementById('nextLevelXP').textContent=nx;
+            const p=nx>cx?((gameState.xp-cx)/(nx-cx))*100:100;document.getElementById('xpBar').style.width=Math.min(100,Math.max(0,p))+'%';
         }
-        function renderTexts() {
-            const c=document.getElementById('textContainer'); let f=TEXTS;
-            if(activeWorldFilter!=='all') f=f.filter(t=>t.world===activeWorldFilter);
-            if(activeCrFilter!=='all') f=f.filter(t=>t.cr===parseFloat(activeCrFilter));
+        function renderTexts(){
+            const c=document.getElementById('textContainer');let f=TEXTS;
+            if(activeWorldFilter!=='all')f=f.filter(t=>t.world===activeWorldFilter);
+            if(activeCrFilter!=='all')f=f.filter(t=>t.cr===parseFloat(activeCrFilter));
             f.sort((a,b)=>a.cr-b.cr);
-            if(!f.length){c.innerHTML='<div class="loading">Aucun texte ne correspond à vos filtres.</div>';return;}
+            if(!f.length){c.innerHTML='<div class="loading">Aucun texte.</div>';return;}
             c.innerHTML=f.map(text=>{
                 const ul=isTextUnlocked(text),co=isTextCompleted(text);
                 const crd=text.cr<1?(text.cr===0.25?'¼':'½'):text.cr;
@@ -216,9 +235,7 @@
         function toggleCard(id){const c=document.getElementById(`content-${id}`);if(c)c.classList.toggle('open');}
         function applyZoom(){const s=document.getElementById('zoomSlider').value;document.querySelectorAll('.reading-text').forEach(e=>{e.style.fontSize=s+'px';});}
         function toggleTranslation(id){const tc=document.getElementById(`translation-${id}`),tb=document.getElementById(`trans-btn-${id}`);if(!tc||!tb)return;const td=TEXTS.find(t=>t.id===id);if(!td)return;if(tc.innerHTML===''){tc.innerHTML=td.text_de;tc.style.display='block';tb.textContent='🙈 Cacher la traduction';tb.classList.add('active');}else{const v=tc.style.display==='block';tc.style.display=v?'none':'block';tb.textContent=v?'🔎 Afficher la traduction':'🙈 Cacher la traduction';tb.classList.toggle('active');}}
-
-        async function loadTexts(){const c=document.getElementById('textContainer');try{const r=await fetch(TEXTS_JSON_URL);if(!r.ok)throw new Error('Fetch failed');TEXTS=await r.json();generateLevels();loadState();updateUI();renderTexts();}catch(e){c.innerHTML=`<div class="error">Échec du chargement.<br><small>${e.message}</small></div>`;}}
-
+        async function loadTexts(){const c=document.getElementById('textContainer');try{const r=await fetch(TEXTS_JSON_URL);if(!r.ok)throw new Error('Fetch failed');TEXTS=await r.json();generateLevels();loadState();updateUI();renderTexts();}catch(e){c.innerHTML=`<div class="error">Fehler: ${e.message}</div>`;}}
         document.getElementById('zoomSlider').addEventListener('input',applyZoom);
         document.getElementById('fullscreenBtn').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();});
         document.addEventListener('fullscreenchange',()=>{document.getElementById('fullscreenBtn').classList.toggle('active',!!document.fullscreenElement);});
@@ -228,271 +245,318 @@
         wakeLockBtn.addEventListener('click',async()=>{if(wakeLock)await releaseWakeLock();else await requestWakeLock();});
         document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&wakeLockBtn.classList.contains('active'))await requestWakeLock();});
         document.getElementById('resetBtn').addEventListener('click',resetProgress);
+        document.addEventListener('input',(e)=>{if(e.target.classList.contains('speed-slider')){const id=e.target.id.replace('speed-','');const d=document.getElementById(`speed-display-${id}`);if(d)d.textContent=e.target.value+'x';}});
         loadTexts();
 
-        // ══════════════════════════════════════════════════════════
-        //  TTS v3 — KOMPLETT NEU: Kein cancel() zwischen Chunks,
-        //  aggressiver Keepalive, Polling-basierter Watchdog
-        // ══════════════════════════════════════════════════════════
-        let currentReadingId = null;
-        let currentChunkIndex = 0;
-        let ttsChunks = [];          // vorberechnete Chunks für aktuellen Text
-        let ttsInitialized = false;
-        let keepaliveTimer = null;
-        let pollingTimer = null;     // pollt ob speaking gestoppt hat
-        const DEBUG_TTS = false;     // auf true setzen zum Debuggen
+        // ══════════════════════════════════════════════════════════════
+        //  TTS v4 — BULLET-PROOF FÜR CHROME MOBILE
+        //
+        //  Strategie: Einen einzelnen Utterance nach dem anderen.
+        //  Zwischen Chunks: cancel() + 250ms Pause + neuer speak().
+        //  Chrome Mobile braucht cancel() vor jedem neuen speak(),
+        //  sonst bleibt die Queue hängen.
+        //  Dazu: Aggressiver Timer-Fallback falls onend nicht feuert.
+        // ══════════════════════════════════════════════════════════════
 
-        function dbg(msg) {
-            if (!DEBUG_TTS) return;
-            const el = document.getElementById('ttsDebug');
-            if (el) { el.style.display = 'block'; el.textContent = msg; }
+        let ttsReadingId = null;    // welcher Text gerade gelesen wird
+        let ttsChunkIdx = 0;        // aktueller Chunk-Index
+        let ttsChunks = [];         // Array der Chunks
+        let ttsAborted = false;     // wurde Stopp angefordert?
+        let ttsFallbackTimer = null;
+        let ttsKeepAlive = null;
+
+        // --- Debug Log ---
+        const logEl = document.getElementById('ttsLog');
+        document.getElementById('debugToggle').addEventListener('click', () => {
+            logEl.classList.toggle('visible');
+        });
+        function log(msg) {
+            const ts = new Date().toLocaleTimeString('de', {hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:1});
+            const line = `[${ts}] ${msg}`;
             console.log('[TTS]', msg);
+            logEl.innerHTML += line + '<br>';
+            logEl.scrollTop = logEl.scrollHeight;
         }
 
-        // --- Texte in kurze Chunks splitten (max ~60 Zeichen) ---
-        // Kürzere Chunks = Chrome hat keine Chance den 15s-Bug zu triggern
-        function splitIntoChunks(text) {
-            const chunks = [];
-            // Erst bei Satzzeichen splitten
-            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-            for (const sent of sentences) {
-                if (sent.trim().length <= 60) {
-                    chunks.push(sent.trim());
-                    continue;
-                }
-                // Lange Sätze bei Komma, Semikolon, Doppelpunkt splitten
-                const parts = sent.split(/(?<=[,;:])\s*/);
+        // --- Chunk-Splitting: Sätze, dann bei Komma, max ~60 chars ---
+        function makeChunks(fullText) {
+            const out = [];
+            const sents = fullText.match(/[^.!?]+[.!?]*/g) || [fullText];
+            for (const s of sents) {
+                const trimmed = s.trim();
+                if (!trimmed) continue;
+                if (trimmed.length <= 60) { out.push(trimmed); continue; }
+                // Bei Komma/Semikolon splitten
+                const parts = trimmed.split(/(?<=[,;:])\s*/);
                 let buf = '';
-                for (const part of parts) {
-                    if (buf.length + part.length > 60 && buf.length > 0) {
-                        chunks.push(buf.trim());
-                        buf = part;
+                for (const p of parts) {
+                    if (buf.length + p.length > 60 && buf) {
+                        out.push(buf.trim());
+                        buf = p;
                     } else {
-                        buf += (buf ? ' ' : '') + part;
+                        buf += (buf ? ' ' : '') + p;
                     }
                 }
-                if (buf.trim()) chunks.push(buf.trim());
+                if (buf.trim()) out.push(buf.trim());
             }
-            return chunks.filter(c => c.length > 0);
+            return out.filter(c => c.length > 0);
         }
 
-        function prepareSentenceSpans(textId) {
-            const text = TEXTS.find(t => t.id === textId); if (!text) return;
-            const container = document.getElementById(`text-${textId}`); if (!container) return;
-            ttsChunks = splitIntoChunks(text.text);
-            container.innerHTML = ttsChunks.map((s, i) =>
-                `<span class="sentence" id="sent-${textId}-${i}">${s}</span>`
+        // --- Sentence spans für Highlighting ---
+        function buildSpans(textId) {
+            const textObj = TEXTS.find(t => t.id === textId); if (!textObj) return;
+            const el = document.getElementById(`text-${textId}`); if (!el) return;
+            ttsChunks = makeChunks(textObj.text);
+            el.innerHTML = ttsChunks.map((c, i) =>
+                `<span class="sentence" id="s-${textId}-${i}">${c}</span>`
             ).join(' ');
+            log(`${ttsChunks.length} chunks prepared`);
         }
 
-        function restoreText(textId) {
+        function restoreOriginal(textId) {
             if (!textId) return;
             const t = TEXTS.find(x => x.id === textId); if (!t) return;
-            const c = document.getElementById(`text-${textId}`); if (c) c.innerHTML = t.text;
+            const el = document.getElementById(`text-${textId}`); if (el) el.innerHTML = t.text;
         }
 
-        function getVoice() {
+        // --- Highlight ---
+        function hlClear(textId) {
+            const el = document.getElementById(`text-${textId}`);
+            if (el) el.querySelectorAll('.sentence.active').forEach(s => s.classList.remove('active'));
+        }
+        function hlSet(textId, idx) {
+            hlClear(textId);
+            const s = document.getElementById(`s-${textId}-${idx}`);
+            if (s) { s.classList.add('active'); s.scrollIntoView({behavior:'smooth',block:'center'}); }
+        }
+
+        // --- Voice finden ---
+        let cachedVoice = null;
+        function findVoice() {
+            if (cachedVoice) return cachedVoice;
             try {
-                const voices = speechSynthesis.getVoices();
-                return voices.find(v => v.lang === 'fr-FR' && v.name.toLowerCase().includes('google'))
-                    || voices.find(v => v.lang === 'fr-FR')
-                    || voices.find(v => v.lang.startsWith('fr'))
+                const v = speechSynthesis.getVoices();
+                cachedVoice = v.find(x => x.lang === 'fr-FR' && x.name.toLowerCase().includes('google'))
+                    || v.find(x => x.lang === 'fr-FR')
+                    || v.find(x => x.lang.startsWith('fr'))
                     || null;
-            } catch (e) { return null; }
+                if (cachedVoice) log(`voice: ${cachedVoice.name}`);
+            } catch(e) {}
+            return cachedVoice;
         }
+        try { speechSynthesis.onvoiceschanged = findVoice; } catch(e) {}
 
-        // --- Keepalive: pause/resume alle 3s gegen Chrome 15s-Bug ---
-        // Nur aktiv wenn tatsächlich gesprochen wird
-        function startKeepalive() {
-            stopKeepalive();
-            keepaliveTimer = setInterval(() => {
+        // --- KeepAlive: pause/resume alle 4s ---
+        function startKeepAlive() {
+            stopKeepAlive();
+            ttsKeepAlive = setInterval(() => {
                 try {
                     if (speechSynthesis.speaking && !speechSynthesis.paused) {
                         speechSynthesis.pause();
                         speechSynthesis.resume();
-                        dbg(`keepalive tick (chunk ${currentChunkIndex})`);
                     }
-                } catch (e) {}
-            }, 3000);
+                } catch(e) {}
+            }, 4000);
         }
-        function stopKeepalive() { if (keepaliveTimer) { clearInterval(keepaliveTimer); keepaliveTimer = null; } }
-
-        // --- Polling-Watchdog: prüft alle 500ms ob Chrome still aufgehört hat ---
-        // Das ist der entscheidende Fix: onend feuert in Chrome manchmal einfach nicht.
-        // Statt eines einmaligen Timeouts pollt dieser Timer permanent.
-        let lastSpeakingCheck = 0;
-        let silentSince = 0;
-
-        function startPolling() {
-            stopPolling();
-            lastSpeakingCheck = Date.now();
-            silentSince = 0;
-            pollingTimer = setInterval(() => {
-                if (!currentReadingId) { stopPolling(); return; }
-                const now = Date.now();
-                const speaking = speechSynthesis.speaking;
-
-                if (speaking) {
-                    silentSince = 0; // Reset
-                } else {
-                    if (silentSince === 0) {
-                        silentSince = now; // Beginn der Stille merken
-                    } else if (now - silentSince > 800) {
-                        // 800ms still = Chrome hat aufgehört ohne onend
-                        dbg(`polling: silent for ${now - silentSince}ms, forcing next chunk`);
-                        silentSince = 0;
-                        currentChunkIndex++;
-                        speakNextChunk();
-                    }
-                }
-            }, 400);
-        }
-        function stopPolling() { if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; } silentSince = 0; }
-
-        // --- Highlight ---
-        function clearHL(textId) { const c = document.getElementById(`text-${textId}`); if (c) c.querySelectorAll('.sentence').forEach(s => s.classList.remove('active')); }
-        function highlight(textId, idx) {
-            clearHL(textId);
-            const s = document.getElementById(`sent-${textId}-${idx}`);
-            if (s) { s.classList.add('active'); s.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        function stopKeepAlive() {
+            if (ttsKeepAlive) { clearInterval(ttsKeepAlive); ttsKeepAlive = null; }
         }
 
-        // --- Kern: Nächsten Chunk sprechen (OHNE cancel!) ---
-        function speakNextChunk() {
-            if (!currentReadingId) return;
-            const textId = currentReadingId;
+        // --- Fallback-Timer: wenn onend nicht feuert ---
+        function startFallback(chunkText, speed) {
+            clearFallback();
+            // Geschätzte Sprechdauer: ~80ms pro Zeichen bei rate=1.0, plus Puffer
+            const estimatedMs = (chunkText.length * 80 / Math.max(speed, 0.5)) + 3000;
+            log(`fallback timer: ${Math.round(estimatedMs)}ms`);
+            ttsFallbackTimer = setTimeout(() => {
+                log(`⚠ FALLBACK fired (chunk ${ttsChunkIdx}), speaking=${speechSynthesis.speaking}`);
+                // Force weiter
+                advanceToNext();
+            }, estimatedMs);
+        }
+        function clearFallback() {
+            if (ttsFallbackTimer) { clearTimeout(ttsFallbackTimer); ttsFallbackTimer = null; }
+        }
 
-            if (currentChunkIndex >= ttsChunks.length) {
-                dbg('done — all chunks spoken');
-                fullStop(true);
+        // --- Zum nächsten Chunk ---
+        function advanceToNext() {
+            clearFallback();
+            if (ttsAborted || !ttsReadingId) return;
+            ttsChunkIdx++;
+            doSpeak();
+        }
+
+        // --- Kern: Einen Chunk sprechen ---
+        function doSpeak() {
+            if (ttsAborted || !ttsReadingId) return;
+            const textId = ttsReadingId;
+
+            if (ttsChunkIdx >= ttsChunks.length) {
+                log('✓ Alle Chunks fertig');
+                fullStop();
                 return;
             }
 
-            const chunkText = ttsChunks[currentChunkIndex];
-            dbg(`speak chunk ${currentChunkIndex}/${ttsChunks.length}: "${chunkText.substring(0,30)}..."`);
+            const chunk = ttsChunks[ttsChunkIdx];
+            log(`► chunk ${ttsChunkIdx}: "${chunk.substring(0,40)}${chunk.length>40?'…':''}" (${chunk.length}ch)`);
 
-            try {
-                const speedSlider = document.getElementById(`speed-${textId}`);
-                const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-                const utt = new SpeechSynthesisUtterance(chunkText);
-                utt.lang = 'fr-FR';
-                const voice = getVoice();
-                if (voice) utt.voice = voice;
-                utt.rate = speed;
-                utt.pitch = 1;
+            // WICHTIG: cancel() VOR jedem neuen speak() — Chrome Mobile braucht das
+            try { speechSynthesis.cancel(); } catch(e) {}
 
-                let endFired = false;
+            // WICHTIG: 250ms warten nach cancel() — Chrome Mobile braucht die Pause
+            setTimeout(() => {
+                if (ttsAborted || ttsReadingId !== textId) return;
 
-                utt.onstart = () => {
-                    silentSince = 0; // Polling-Reset
-                    highlight(textId, currentChunkIndex);
-                };
+                try {
+                    const speedSlider = document.getElementById(`speed-${textId}`);
+                    const rate = speedSlider ? parseFloat(speedSlider.value) : 0.8;
 
-                utt.onend = () => {
-                    if (endFired) return;
-                    endFired = true;
-                    dbg(`onend fired for chunk ${currentChunkIndex}`);
-                    if (currentReadingId === textId) {
-                        currentChunkIndex++;
-                        // Kleiner Delay damit Chrome sich beruhigt
-                        setTimeout(() => speakNextChunk(), 50);
-                    }
-                };
+                    const utt = new SpeechSynthesisUtterance(chunk);
+                    utt.lang = 'fr-FR';
+                    utt.rate = rate;
+                    utt.pitch = 1;
+                    const voice = findVoice();
+                    if (voice) utt.voice = voice;
 
-                utt.onerror = (ev) => {
-                    if (endFired) return;
-                    if (ev.error === 'canceled') return;
-                    endFired = true;
-                    dbg(`onerror: ${ev.error}, chunk ${currentChunkIndex}`);
-                    if (currentReadingId === textId) {
-                        currentChunkIndex++;
-                        setTimeout(() => speakNextChunk(), 100);
-                    }
-                };
+                    let resolved = false;
+                    const resolve = (reason) => {
+                        if (resolved) return;
+                        resolved = true;
+                        log(`  → ${reason} (chunk ${ttsChunkIdx})`);
+                        advanceToNext();
+                    };
 
-                // KEIN cancel() hier! Einfach speak() aufrufen.
-                speechSynthesis.speak(utt);
+                    utt.onstart = () => {
+                        log(`  onstart (chunk ${ttsChunkIdx})`);
+                        hlSet(textId, ttsChunkIdx);
+                    };
 
-            } catch (e) {
-                console.warn('TTS speak error:', e);
-                fullStop(true);
-            }
+                    utt.onend = () => resolve('onend');
+
+                    utt.onerror = (ev) => {
+                        if (ev.error === 'canceled') {
+                            log(`  onerror:canceled (ignored)`);
+                            return;
+                        }
+                        resolve('onerror:' + ev.error);
+                    };
+
+                    speechSynthesis.speak(utt);
+                    log(`  speak() called, speaking=${speechSynthesis.speaking}`);
+
+                    // Fallback-Timer starten
+                    startFallback(chunk, rate);
+
+                    // Extra-Check: Wenn nach 1s immer noch nicht speaking, nochmal versuchen
+                    setTimeout(() => {
+                        if (!resolved && !ttsAborted && ttsReadingId === textId) {
+                            if (!speechSynthesis.speaking) {
+                                log(`  ⚠ not speaking after 1s, retrying...`);
+                                // Nochmal probieren
+                                try { speechSynthesis.cancel(); } catch(e) {}
+                                setTimeout(() => {
+                                    if (resolved || ttsAborted) return;
+                                    const utt2 = new SpeechSynthesisUtterance(chunk);
+                                    utt2.lang = 'fr-FR'; utt2.rate = rate; utt2.pitch = 1;
+                                    const v2 = findVoice(); if (v2) utt2.voice = v2;
+                                    utt2.onstart = () => hlSet(textId, ttsChunkIdx);
+                                    utt2.onend = () => resolve('retry-onend');
+                                    utt2.onerror = (ev) => { if (ev.error !== 'canceled') resolve('retry-onerror'); };
+                                    speechSynthesis.speak(utt2);
+                                    log(`  retry speak() called`);
+                                }, 200);
+                            }
+                        }
+                    }, 1000);
+
+                } catch(e) {
+                    log(`  ✗ ERROR: ${e.message}`);
+                    fullStop();
+                }
+            }, 250); // <-- 250ms Pause nach cancel()
         }
 
-        // --- Alles stoppen ---
-        function fullStop(cleanup) {
-            stopKeepalive();
-            stopPolling();
-            try { speechSynthesis.cancel(); } catch (e) {}
-            if (cleanup && currentReadingId) {
-                const btn = document.getElementById(`read-btn-${currentReadingId}`);
+        // --- Komplett stoppen ---
+        function fullStop() {
+            log('STOP');
+            ttsAborted = true;
+            clearFallback();
+            stopKeepAlive();
+            try { speechSynthesis.cancel(); } catch(e) {}
+            if (ttsReadingId) {
+                const btn = document.getElementById(`read-btn-${ttsReadingId}`);
                 if (btn) { btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute'; btn.classList.remove('playing'); }
-                restoreText(currentReadingId);
-                currentReadingId = null;
-                ttsChunks = [];
+                restoreOriginal(ttsReadingId);
             }
+            ttsReadingId = null;
+            ttsChunks = [];
+            ttsChunkIdx = 0;
         }
 
-        // --- Dummy-Utterance zum Aufwecken der Engine ---
-        function initTTS(cb) {
-            if (ttsInitialized) { cb(); return; }
-            try {
-                const d = new SpeechSynthesisUtterance('');
-                d.volume = 0;
-                d.onend = () => { ttsInitialized = true; cb(); };
-                d.onerror = () => { ttsInitialized = true; cb(); };
-                speechSynthesis.speak(d);
-                setTimeout(() => { if (!ttsInitialized) { ttsInitialized = true; cb(); } }, 500);
-            } catch (e) { ttsInitialized = true; cb(); }
-        }
-
-        // --- Toggle Button ---
+        // --- Toggle-Button ---
         function toggleReadAloud(textId) {
             if (!window.speechSynthesis) {
-                alert('Sprachausgabe nicht verfügbar.');
+                alert('Sprachausgabe nicht verfügbar in diesem Browser.');
                 return;
             }
+
+            // Stopp wenn was läuft
+            const wasPlaying = ttsReadingId;
+            if (wasPlaying) {
+                fullStop();
+                if (wasPlaying === textId) return; // gleicher Text → nur stoppen
+                // anderer Text → weiter unten starten
+            }
+
             const btn = document.getElementById(`read-btn-${textId}`);
             if (!btn) return;
 
-            // Stopp wenn gleicher Text läuft
-            if (currentReadingId === textId) { fullStop(true); return; }
-            // Stopp wenn anderer Text läuft
-            if (currentReadingId) fullStop(true);
+            log(`=== START: ${textId} ===`);
+            log(`UA: ${navigator.userAgent.substring(0, 80)}`);
+            log(`voices: ${speechSynthesis.getVoices().length}`);
 
-            initTTS(() => {
-                // cancel() einmal sauber, dann warten
-                try { speechSynthesis.cancel(); } catch(e) {}
+            // Sauberer Reset
+            ttsAborted = false;
+            ttsReadingId = textId;
+            ttsChunkIdx = 0;
 
-                setTimeout(() => {
-                    currentReadingId = textId;
-                    currentChunkIndex = 0;
-                    prepareSentenceSpans(textId);
-                    btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
-                    btn.classList.add('playing');
-                    startKeepalive();
-                    startPolling();
-                    speakNextChunk();
-                }, 150); // 150ms Pause nach cancel — Chrome braucht das
-            });
+            // cancel() + warten, dann starten
+            try { speechSynthesis.cancel(); } catch(e) {}
+
+            btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
+            btn.classList.add('playing');
+
+            // Voices sicherstellen (Chrome lädt sie async)
+            const voices = speechSynthesis.getVoices();
+            if (!voices.length) {
+                log('Waiting for voices...');
+                speechSynthesis.onvoiceschanged = () => {
+                    findVoice();
+                    startAfterDelay(textId);
+                };
+                // Fallback falls event nie feuert
+                setTimeout(() => startAfterDelay(textId), 500);
+            } else {
+                findVoice();
+                startAfterDelay(textId);
+            }
         }
 
-        // Speed-Slider Label
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('speed-slider')) {
-                const id = e.target.id.replace('speed-', '');
-                const d = document.getElementById(`speed-display-${id}`);
-                if (d) d.textContent = e.target.value + 'x';
-            }
-        });
+        function startAfterDelay(textId) {
+            if (ttsAborted || ttsReadingId !== textId) return;
+            // 300ms nach letztem cancel() warten
+            setTimeout(() => {
+                if (ttsAborted || ttsReadingId !== textId) return;
+                buildSpans(textId);
+                startKeepAlive();
+                doSpeak();
+            }, 300);
+        }
 
-        // Cleanup bei Tab-Wechsel
+        // Aufräumen bei Tab-Wechsel/Verlassen
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && currentReadingId) fullStop(true);
+            if (document.visibilityState === 'hidden' && ttsReadingId) fullStop();
         });
-
-        // Voices laden
-        try { if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => getVoice(); } catch(e) {}
     </script>
 </body>
 </html>
