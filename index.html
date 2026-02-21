@@ -6,316 +6,178 @@
     <title>📜 Codex des Ombres</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #e8e8e8; padding-bottom: 80px; }
-        .header { background: rgba(0,0,0,0.4); padding: 15px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .title { font-size: 1.4em; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
-        .header-buttons { display: flex; gap: 8px; }
-        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e8e8e8; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 1.1em; transition: all 0.2s; }
-        .icon-btn:hover, .icon-btn.active { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; }
-        .xp-section { margin-bottom: 12px; }
-        .xp-header { display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px; }
-        .level-display { color: #ffd700; font-weight: 600; }
-        .xp-display { color: #aaa; }
-        .xp-bar-container { background: rgba(0,0,0,0.4); border-radius: 10px; height: 8px; overflow: hidden; }
-        .xp-bar { background: linear-gradient(90deg, #ffd700, #ff8c00); height: 100%; border-radius: 10px; transition: width 0.5s ease; }
-        .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .filter-label { font-size: 0.8em; color: #888; margin-right: 4px; }
-        .filter-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #aaa; padding: 5px 10px; border-radius: 15px; cursor: pointer; font-size: 0.8em; transition: all 0.2s; }
-        .filter-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
-        .filter-btn.active { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; }
-        .world-dungeon.active { background: rgba(139,69,19,0.3); border-color: #8b4513; color: #daa520; }
-        .world-greece.active { background: rgba(70,130,180,0.3); border-color: #4682b4; color: #87ceeb; }
-        .world-real.active { background: rgba(60,179,113,0.3); border-color: #3cb371; color: #90ee90; }
-        .zoom-control { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 0.85em; color: #888; }
-        .zoom-slider { width: 80px; accent-color: #ffd700; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .text-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 15px; overflow: hidden; transition: all 0.3s; }
-        .text-card.locked { opacity: 0.5; filter: grayscale(0.5); }
-        .text-card.completed { border-color: rgba(255,215,0,0.3); }
-        .card-header { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
-        .card-header:hover { background: rgba(255,255,255,0.05); }
-        .card-title-section { flex: 1; }
-        .card-title { font-size: 1.1em; color: #fff; margin-bottom: 4px; }
-        .card-meta { font-size: 0.8em; color: #888; display: flex; gap: 12px; }
-        .card-meta span { display: flex; align-items: center; gap: 4px; }
-        .cr-badge { background: rgba(255,100,100,0.2); color: #ff6b6b; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-        .xp-badge { color: #ffd700; }
-        .world-badge { padding: 2px 8px; border-radius: 10px; font-size: 0.75em; }
-        .world-badge.dungeon { background: rgba(139,69,19,0.3); color: #daa520; }
-        .world-badge.greece { background: rgba(70,130,180,0.3); color: #87ceeb; }
-        .world-badge.real { background: rgba(60,179,113,0.3); color: #90ee90; }
-        .card-status { font-size: 1.2em; margin-left: 10px; }
-        .card-content { display: none; padding: 0 15px 15px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .card-content.open { display: block; }
-        .reading-text { line-height: 1.8; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; transition: font-size 0.2s; }
-        .translation-text { display: none; line-height: 1.7; margin: 10px 0 15px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 3px solid #4682b4; font-size: 0.95em; color: #ccc; }
-        .translation-btn { width: 100%; padding: 8px; margin-top: 15px; background: rgba(70,130,180,0.2); border: 1px solid rgba(70,130,180,0.4); border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s; }
-        .translation-btn:hover { background: rgba(70,130,180,0.4); }
-        .translation-btn.active { background: rgba(70,130,180,0.5); color: #fff; }
-        .vocab-section, .questions-section { margin-top: 15px; }
-        .section-title { font-size: 0.85em; color: #ffd700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .vocab-list { display: grid; gap: 6px; }
-        .vocab-item { display: flex; gap: 8px; font-size: 0.9em; padding: 6px 10px; background: rgba(255,215,0,0.1); border-radius: 6px; }
-        .vocab-word { color: #ffd700; font-weight: 600; min-width: 120px; }
-        .vocab-meaning { color: #ccc; }
-        .questions-list { list-style: none; }
-        .questions-list li { padding: 8px 0; padding-left: 20px; position: relative; font-size: 0.9em; }
-        .questions-list li::before { content: "?"; position: absolute; left: 0; color: #ffd700; font-weight: bold; }
-        .complete-btn { width: 100%; padding: 12px; margin-top: 15px; background: linear-gradient(135deg, #ffd700, #ff8c00); border: none; border-radius: 8px; color: #1a1a2e; font-weight: 600; font-size: 1em; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .complete-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
-        .complete-btn:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; }
-        .read-aloud-btn { width: 100%; padding: 10px; margin-top: 10px; background: rgba(100,149,237,0.3); border: 1px solid #6495ed; border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.95em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .read-aloud-btn:hover { background: rgba(100,149,237,0.5); }
-        .read-aloud-btn.playing { background: rgba(255,100,100,0.3); border-color: #ff6b6b; color: #ff6b6b; }
-        .speed-control { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.8em; color: #888; }
-        .speed-slider { width: 100px; accent-color: #6495ed; }
-        .lock-icon { font-size: 1.5em; }
-        .level-up-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .level-up-overlay.show { display: flex; }
-        .level-up-content { text-align: center; animation: levelUpPulse 0.5s ease-out; }
-        @keyframes levelUpPulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        .level-up-text { font-size: 3em; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.5); margin-bottom: 10px; }
-        .level-up-subtitle { font-size: 1.5em; color: #fff; margin-bottom: 20px; }
-        .level-up-unlock { font-size: 1.1em; color: #90ee90; }
-        .reset-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(255,50,50,0.2); border: 1px solid rgba(255,50,50,0.3); color: #ff6b6b; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; z-index: 50; }
-        .reset-btn:hover { background: rgba(255,50,50,0.3); }
-        .loading { text-align: center; padding: 50px; color: #888; }
-        .error { text-align: center; padding: 50px; color: #ff6b6b; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e8e8e8; padding: 20px; line-height: 1.6; }
+        .header { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .title { color: #ffd700; margin-bottom: 10px; }
+        .text-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s; }
+        .read-btn { background: #ffd700; color: #1a1a2e; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
+        .read-btn.playing { background: #ff4b2b; color: white; }
+        .loading { text-align: center; padding: 40px; color: #ffd700; font-style: italic; }
+        .highlight { color: #ffd700; background: rgba(255, 215, 0, 0.1); padding: 2px 4px; border-radius: 4px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #444; display: inline-block; margin-right: 5px; }
+        .status-active { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-top">
-            <h1 class="title">📜 Codex des Ombres</h1>
-            <div class="header-buttons">
-                <button class="icon-btn" id="wakeLockBtn" title="Garder l'écran allumé">☀</button>
-                <button class="icon-btn" id="fullscreenBtn" title="Plein écran">⛶</button>
-            </div>
-        </div>
-        <div class="xp-section">
-            <div class="xp-header">
-                <span class="level-display">Niveau <span id="currentLevel">1</span> — <span id="levelTitle">Novice</span></span>
-                <span class="xp-display"><span id="currentXP">0</span> / <span id="nextLevelXP">50</span> XP</span>
-            </div>
-            <div class="xp-bar-container">
-                <div class="xp-bar" id="xpBar" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="filters">
-            <div class="filter-group" id="worldFilters">
-                <span class="filter-label">Monde:</span>
-                <button class="filter-btn active" data-world="all">Tous</button>
-            </div>
-            <div class="filter-group" id="crFilters">
-                <span class="filter-label">FP:</span>
-                <button class="filter-btn active" data-cr="all">Tous</button>
-            </div>
-            <div class="zoom-control">
-                <span>Aa</span>
-                <input type="range" class="zoom-slider" id="zoomSlider" min="14" max="26" value="18">
-                <span>Aa</span>
-            </div>
-        </div>
-    </header>
 
-    <main class="container" id="textContainer">
-        <div class="loading">Chargement des textes...</div>
-    </main>
-
-    <div class="level-up-overlay" id="levelUpOverlay">
-        <div class="level-up-content">
-            <div class="level-up-text">⚔ NIVEAU SUPÉRIEUR ! ⚔</div>
-            <div class="level-up-subtitle">Vous avez atteint le niveau <span id="newLevel">2</span> !</div>
-            <div class="level-up-unlock" id="unlockText">Nouveaux textes débloqués !</div>
-        </div>
+    <div class="header">
+        <h1 class="title">📜 Codex des Ombres</h1>
+        <p><span id="statusIndicator" class="status-dot"></span> <span id="statusText">Initialisation...</span></p>
     </div>
 
-    <button class="reset-btn" id="resetBtn">Réinitialiser</button>
+    <main id="textContainer">
+        <div class="loading">Chargement des données GitHub...</div>
+    </main>
 
     <script>
-        // ══════════════════════════════════════════
-        //  APP LOGIC
-        // ══════════════════════════════════════════
-        const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/refs/heads/main/texts_fr.json';
-        const FIXED_LEVELS = [
-            { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
-            { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprenti" },
-            { level: 3, xpRequired: 200,  unlockedCR: 1,    title: "Aventurier" },
-            { level: 4, xpRequired: 550,  unlockedCR: 2,    title: "Vétéran" },
-            { level: 5, xpRequired: 1200, unlockedCR: 3,    title: "Maître" }
-        ];
-        let TEXTS=[], CR_LEVELS=[], LEVELS=[], WORLDS=[];
-        let gameState={xp:0,level:1,completedTexts:[]};
-        let activeWorldFilter='all', activeCrFilter='all';
+        // Nutze deine echte RAW-URL hier!
+        const GITHUB_JSON_URL = "https://raw.githubusercontent.com/DEIN_USER/DEIN_REPO/main/data.json";
+        
+        let synth = window.speechSynthesis;
+        let ttsData = {
+            chunks: [],
+            currentIdx: 0,
+            isPlaying: false,
+            btnRef: null,
+            watchdog: null
+        };
 
-        function saveState(){localStorage.setItem('codex_des_ombres_progress',JSON.stringify(gameState));}
-        function loadState(){const s=localStorage.getItem('codex_des_ombres_progress');if(s)try{gameState=JSON.parse(s);}catch(e){}}
-        function resetProgress(){if(confirm('Réinitialiser toute la progression ?')){gameState={xp:0,level:1,completedTexts:[]};saveState();updateUI();renderTexts();}}
-        function generateLevels(){CR_LEVELS=[...new Set(TEXTS.map(t=>t.cr))].sort((a,b)=>a-b);WORLDS=[...new Set(TEXTS.map(t=>t.world))];LEVELS=FIXED_LEVELS;generateFilterButtons();}
-        function generateFilterButtons(){
-            const wc=document.getElementById('worldFilters');wc.innerHTML='<span class="filter-label">Monde:</span><button class="filter-btn active" data-world="all">Tous</button>';
-            WORLDS.forEach(w=>{const b=document.createElement('button');b.className=`filter-btn world-${w}`;b.dataset.world=w;b.textContent=w.charAt(0).toUpperCase()+w.slice(1);wc.appendChild(b);});
-            const cc=document.getElementById('crFilters');cc.innerHTML='<span class="filter-label">FP:</span><button class="filter-btn active" data-cr="all">Tous</button>';
-            CR_LEVELS.forEach(cr=>{const b=document.createElement('button');b.className='filter-btn';b.dataset.cr=cr;b.textContent=cr<1?(cr===0.25?'¼':'½'):cr.toString();cc.appendChild(b);});
-            attachFilterListeners();
-        }
-        function attachFilterListeners(){
-            document.querySelectorAll('#worldFilters .filter-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#worldFilters .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeWorldFilter=b.dataset.world;renderTexts();});});
-            document.querySelectorAll('#crFilters .filter-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#crFilters .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeCrFilter=b.dataset.cr;renderTexts();});});
-        }
-        function getUnlockedCRs(){const u=[];for(const l of LEVELS)if(gameState.level>=l.level)u.push(l.unlockedCR);return u;}
-        function isTextUnlocked(t){return getUnlockedCRs().includes(t.cr);}
-        function isTextCompleted(t){return gameState.completedTexts.includes(t.id);}
-        function getNextLevelXP(){const n=LEVELS.find(l=>l.level===gameState.level+1);return n?n.xpRequired:LEVELS[LEVELS.length-1].xpRequired;}
-        function getCurrentLevelXP(){const c=LEVELS.find(l=>l.level===gameState.level);return c?c.xpRequired:0;}
-        function checkLevelUp(){for(let i=LEVELS.length-1;i>=0;i--)if(gameState.xp>=LEVELS[i].xpRequired&&gameState.level<LEVELS[i].level){gameState.level=LEVELS[i].level;saveState();showLevelUp(LEVELS[i]);return true;}return false;}
-        function showLevelUp(ld){document.getElementById('newLevel').textContent=ld.level;const d=ld.unlockedCR<1?(ld.unlockedCR===0.25?'¼':'½'):ld.unlockedCR;document.getElementById('unlockText').textContent=`Textes de FP ${d} débloqués !`;const o=document.getElementById('levelUpOverlay');o.classList.add('show');setTimeout(()=>{o.classList.remove('show');updateUI();renderTexts();},2500);}
-        function completeText(id){const t=TEXTS.find(x=>x.id===id);if(!t||isTextCompleted(t))return;gameState.completedTexts.push(id);gameState.xp+=t.xp;saveState();if(!checkLevelUp()){updateUI();renderTexts();}}
-        function updateUI(){
-            const cl=LEVELS.find(l=>l.level===gameState.level)||LEVELS[0];
-            document.getElementById('currentLevel').textContent=gameState.level;document.getElementById('levelTitle').textContent=cl.title;
-            document.getElementById('currentXP').textContent=gameState.xp;
-            const nx=getNextLevelXP(),cx=getCurrentLevelXP();document.getElementById('nextLevelXP').textContent=nx;
-            const p=nx>cx?((gameState.xp-cx)/(nx-cx))*100:100;document.getElementById('xpBar').style.width=Math.min(100,Math.max(0,p))+'%';
-        }
-        function renderTexts(){
-            const c=document.getElementById('textContainer');let f=TEXTS;
-            if(activeWorldFilter!=='all')f=f.filter(t=>t.world===activeWorldFilter);
-            if(activeCrFilter!=='all')f=f.filter(t=>t.cr===parseFloat(activeCrFilter));
-            f.sort((a,b)=>a.cr-b.cr);
-            if(!f.length){c.innerHTML='<div class="loading">Aucun texte.</div>';return;}
-            c.innerHTML=f.map(text=>{
-                const ul=isTextUnlocked(text),co=isTextCompleted(text);
-                const crd=text.cr<1?(text.cr===0.25?'¼':'½'):text.cr;
-                const vl=text.vocab&&text.vocab.length?`<div class="vocab-section"><div class="section-title">📚 Nouveaux Mots</div><div class="vocab-list">${text.vocab.map(v=>`<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div></div>`:'';
-                return `<div class="text-card ${ul?'':'locked'} ${co?'completed':''}" data-id="${text.id}">
-                    <div class="card-header" onclick="${ul?`toggleCard('${text.id}')`:''}">
-                        <div class="card-title-section"><div class="card-title">${text.title}</div>
-                        <div class="card-meta"><span class="world-badge ${text.world}">${text.world}</span><span class="cr-badge">FP ${crd}</span><span class="xp-badge">+${text.xp} XP</span><span>${text.type}</span></div></div>
-                        <div class="card-status">${!ul?'<span class="lock-icon">🔒</span>':(co?'✅':'📖')}</div>
-                    </div>
-                    ${ul?`<div class="card-content" id="content-${text.id}">
-                        <div class="reading-text" id="text-${text.id}">${text.text}</div>
-                        <div class="translation-text" id="translation-${text.id}"></div>
-                        <button class="translation-btn" id="trans-btn-${text.id}" onclick="toggleTranslation('${text.id}')">🔎 Afficher la traduction</button>
-                        ${vl}
-                        <div class="questions-section"><div class="section-title">❓ Questions</div><ul class="questions-list">${text.questions.map(q=>`<li>${q}</li>`).join('')}</ul></div>
-                        <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Lire à voix haute</button>
-                        <div class="speed-control"><span>🐢</span><input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8"><span>🐇</span><span id="speed-display-${text.id}">0.8x</span></div>
-                        <button class="complete-btn" onclick="completeText('${text.id}')" ${co?'disabled':''}>${co?'✅ Terminé':'✓ Marquer comme lu'}</button>
-                    </div>`:''}
-                </div>`;
-            }).join('');
-            applyZoom();
-        }
-        function toggleCard(id){const c=document.getElementById(`content-${id}`);if(c)c.classList.toggle('open');}
-        function applyZoom(){const s=document.getElementById('zoomSlider').value;document.querySelectorAll('.reading-text').forEach(e=>{e.style.fontSize=s+'px';});}
-        function toggleTranslation(id){const tc=document.getElementById(`translation-${id}`),tb=document.getElementById(`trans-btn-${id}`);if(!tc||!tb)return;const td=TEXTS.find(t=>t.id===id);if(!td)return;if(tc.innerHTML===''){tc.innerHTML=td.text_de;tc.style.display='block';tb.textContent='🙈 Cacher la traduction';tb.classList.add('active');}else{const v=tc.style.display==='block';tc.style.display=v?'none':'block';tb.textContent=v?'🔎 Afficher la traduction':'🙈 Cacher la traduction';tb.classList.toggle('active');}}
-        async function loadTexts(){const c=document.getElementById('textContainer');try{const r=await fetch(TEXTS_JSON_URL);if(!r.ok)throw new Error('Fetch failed');TEXTS=await r.json();generateLevels();loadState();updateUI();renderTexts();}catch(e){c.innerHTML=`<div class="error">Fehler: ${e.message}</div>`;}}
-        document.getElementById('zoomSlider').addEventListener('input',applyZoom);
-        document.getElementById('fullscreenBtn').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();});
-        document.addEventListener('fullscreenchange',()=>{document.getElementById('fullscreenBtn').classList.toggle('active',!!document.fullscreenElement);});
-        let wakeLock=null;const wakeLockBtn=document.getElementById('wakeLockBtn');
-        async function requestWakeLock(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');wakeLockBtn.classList.add('active');wakeLock.addEventListener('release',()=>{wakeLockBtn.classList.remove('active');});}}catch(e){}}
-        async function releaseWakeLock(){if(wakeLock){await wakeLock.release();wakeLock=null;}}
-        wakeLockBtn.addEventListener('click',async()=>{if(wakeLock)await releaseWakeLock();else await requestWakeLock();});
-        document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&wakeLockBtn.classList.contains('active'))await requestWakeLock();});
-        document.getElementById('resetBtn').addEventListener('click',resetProgress);
-        document.addEventListener('input',(e)=>{if(e.target.classList.contains('speed-slider')){const id=e.target.id.replace('speed-','');const d=document.getElementById(`speed-display-${id}`);if(d)d.textContent=e.target.value+'x';}});
-        loadTexts();
-
-
-        // ══════════════════════════════════════════════════════════════
-        //  Einfaches TTS ohne Chunks, mit Keep-Alive für Chrome Android
-        // ══════════════════════════════════════════════════════════════
-        let currentUtterance = null;
-        let ttsReadingId = null;
-        let keepAliveTimer = null;
-        let cachedVoice = null;
-
-        function findVoice() {
-            if (cachedVoice) return cachedVoice;
+        async function loadData() {
             try {
-                const v = speechSynthesis.getVoices();
-                cachedVoice = v.find(x => x.lang === 'fr-FR' && x.name.toLowerCase().includes('google'))
-                    || v.find(x => x.lang === 'fr-FR')
-                    || v.find(x => x.lang.startsWith('fr'))
-                    || null;
-            } catch(e) {}
-            return cachedVoice;
-        }
-        try { speechSynthesis.onvoiceschanged = findVoice; } catch(e) {}
-
-        function stopTTS() {
-            clearInterval(keepAliveTimer);
-            try { window.speechSynthesis.cancel(); } catch(e) {}
-            if (ttsReadingId) {
-                const btn = document.getElementById(`read-btn-${ttsReadingId}`);
-                if (btn) {
-                    btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute';
-                    btn.classList.remove('playing');
-                }
+                const response = await fetch(`${GITHUB_JSON_URL}?t=${Date.now()}`);
+                const data = await response.json();
+                renderTexts(data);
+                updateStatus("Prêt", false);
+            } catch (err) {
+                document.getElementById('textContainer').innerHTML = `<p style="color:#ff6b6b">Erreur de chargement: ${err.message}</p>`;
             }
-            ttsReadingId = null;
-            currentUtterance = null;
         }
 
-        function toggleReadAloud(textId) {
-            if (!window.speechSynthesis) {
-                alert('Sprachausgabe nicht verfügbar in diesem Browser.');
+        function updateStatus(msg, active) {
+            document.getElementById('statusText').innerText = msg;
+            document.getElementById('statusIndicator').className = 'status-dot' + (active ? ' status-active' : '');
+        }
+
+        function renderTexts(texts) {
+            const container = document.getElementById('textContainer');
+            container.innerHTML = "";
+            texts.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'text-card';
+                card.innerHTML = `
+                    <h3 style="color:#ffd700">${item.title}</h3>
+                    <p id="txt-${index}" style="margin:10px 0">${item.text}</p>
+                    <button id="btn-${index}" class="read-btn" onclick="handleTTS(${index})">
+                        <span>▶</span> Lire ce chapitre
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function handleTTS(id) {
+            if (ttsData.isPlaying && ttsData.btnRef === document.getElementById(`btn-${id}`)) {
+                stopEverything();
                 return;
             }
 
-            // Stoppen, falls bereits etwas läuft
-            if (ttsReadingId === textId) {
-                stopTTS();
-                return;
-            }
-            stopTTS();
-
-            const textObj = TEXTS.find(t => t.id === textId);
-            if (!textObj) return;
-
-            ttsReadingId = textId;
-            const btn = document.getElementById(`read-btn-${textId}`);
-            if (btn) {
-                btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
-                btn.classList.add('playing');
-            }
-
-            const speedSlider = document.getElementById(`speed-${textId}`);
-            const rate = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-
-            currentUtterance = new SpeechSynthesisUtterance(textObj.text);
-            currentUtterance.lang = 'fr-FR';
-            currentUtterance.rate = rate;
+            stopEverything();
             
-            const voice = findVoice();
-            if (voice) currentUtterance.voice = voice;
+            const rawText = document.getElementById(`txt-${id}`).innerText;
+            // Extrem robustes Splitting: Bei Punkt, Komma, Semikolon oder Doppelpunkt
+            ttsData.chunks = rawText.match(/[^.!?,:;]+[.!?,:;]*/g) || [rawText];
+            ttsData.currentIdx = 0;
+            ttsData.isPlaying = true;
+            ttsData.btnRef = document.getElementById(`btn-${id}`);
+            
+            ttsData.btnRef.classList.add('playing');
+            ttsData.btnRef.innerHTML = '<span>⏹</span> Arrêter';
+            
+            updateStatus("Lecture en cours...", true);
+            playNextChunk();
+        }
 
-            currentUtterance.onend = stopTTS;
-            currentUtterance.onerror = (e) => {
-                if (e.error !== 'canceled') stopTTS();
+        function playNextChunk() {
+            if (!ttsData.isPlaying || ttsData.currentIdx >= ttsData.chunks.length) {
+                stopEverything();
+                return;
+            }
+
+            // Cleanup vor neuem Chunk (wichtig für Android!)
+            synth.cancel();
+
+            const textToSpeak = ttsData.chunks[ttsData.currentIdx].trim();
+            if (textToSpeak.length < 1) {
+                ttsData.currentIdx++;
+                playNextChunk();
+                return;
+            }
+
+            const utter = new SpeechSynthesisUtterance(textToSpeak);
+            utter.lang = 'fr-FR';
+            utter.rate = 0.95; // Etwas langsamer ist stabiler
+
+            utter.onstart = () => {
+                resetWatchdog();
             };
 
-            // Workaround für den Android 15-Sekunden Bug: Alle 10s kurz pausieren und fortsetzen
-            keepAliveTimer = setInterval(() => {
-                if (window.speechSynthesis.speaking) {
-                    window.speechSynthesis.pause();
-                    window.speechSynthesis.resume();
-                } else {
-                    clearInterval(keepAliveTimer);
-                }
-            }, 10000);
+            utter.onend = () => {
+                clearTimeout(ttsData.watchdog);
+                ttsData.currentIdx++;
+                // Kurze Pause zwischen Chunks hilft dem Browser sich zu fangen
+                setTimeout(playNextChunk, 100); 
+            };
 
-            window.speechSynthesis.speak(currentUtterance);
+            utter.onerror = (e) => {
+                console.error("TTS Error:", e);
+                // Bei Fehler: Kurz warten und diesen Chunk nochmal probieren
+                setTimeout(playNextChunk, 500);
+            };
+
+            // Der entscheidende Trick: speechSynthesis.speak() erst nach einem winzigen Timeout
+            setTimeout(() => {
+                synth.speak(utter);
+                // Extra Android "Push"
+                if (synth.paused) synth.resume();
+            }, 50);
         }
 
-        // Stoppen beim Verlassen des Tabs
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') stopTTS();
+        function resetWatchdog() {
+            clearTimeout(ttsData.watchdog);
+            // Wenn ein Satz länger als 15 Sek braucht, stimmt was nicht -> Restart Chunk
+            ttsData.watchdog = setTimeout(() => {
+                if (ttsData.isPlaying) {
+                    console.log("Watchdog triggered: Restarting Chunk");
+                    synth.cancel();
+                    playNextChunk();
+                }
+            }, 15000);
+        }
+
+        function stopEverything() {
+            ttsData.isPlaying = false;
+            synth.cancel();
+            clearTimeout(ttsData.watchdog);
+            updateStatus("Prêt", false);
+            
+            document.querySelectorAll('.read-btn').forEach(b => {
+                b.classList.remove('playing');
+                b.innerHTML = '<span>▶</span> Lire ce chapitre';
+            });
+        }
+
+        // Fix für Android Chrome: Stimmen müssen initialisiert sein
+        window.onload = () => {
+            loadData();
+            // Android braucht oft einen User-Gesture um die Voices zu laden
+            synth.getVoices();
+        };
+
+        // Verhindert Abbruch bei Standby/Tab-Wechsel (versucht es zumindest)
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible' && ttsData.isPlaying) {
+                synth.resume();
+            }
         });
     </script>
 </body>
