@@ -85,6 +85,7 @@
         .reset-btn:hover { background: rgba(255,50,50,0.3); }
         .loading { text-align: center; padding: 50px; color: #888; }
         .error { text-align: center; padding: 50px; color: #ff6b6b; }
+        .tts-debug { position: fixed; bottom: 50px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; font-family: monospace; font-size: 11px; padding: 6px 10px; border-radius: 6px; z-index: 999; display: none; }
     </style>
 </head>
 <body>
@@ -134,10 +135,11 @@
         </div>
     </div>
 
+    <div class="tts-debug" id="ttsDebug"></div>
     <button class="reset-btn" id="resetBtn">Réinitialiser</button>
+
     <script>
         const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/refs/heads/main/texts_fr.json';
-
         const FIXED_LEVELS = [
             { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
             { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprenti" },
@@ -146,316 +148,351 @@
             { level: 5, xpRequired: 1200, unlockedCR: 3,    title: "Maître" }
         ];
 
-        let TEXTS = [];
-        let CR_LEVELS = [];
-        let LEVELS = [];
-        let WORLDS = [];
+        let TEXTS = [], CR_LEVELS = [], LEVELS = [], WORLDS = [];
         let gameState = { xp: 0, level: 1, completedTexts: [] };
-        let activeWorldFilter = 'all';
-        let activeCrFilter = 'all';
+        let activeWorldFilter = 'all', activeCrFilter = 'all';
 
         function saveState() { localStorage.setItem('codex_des_ombres_progress', JSON.stringify(gameState)); }
-        function loadState() { const saved = localStorage.getItem('codex_des_ombres_progress'); if (saved) { try { gameState = JSON.parse(saved); } catch (e) { console.error('Échec du chargement:', e); } } }
+        function loadState() { const s = localStorage.getItem('codex_des_ombres_progress'); if (s) { try { gameState = JSON.parse(s); } catch(e){} } }
         function resetProgress() { if (confirm('Réinitialiser toute la progression ?')) { gameState = { xp: 0, level: 1, completedTexts: [] }; saveState(); updateUI(); renderTexts(); } }
 
-        function generateLevels() {
-            CR_LEVELS = [...new Set(TEXTS.map(t => t.cr))].sort((a, b) => a - b);
-            WORLDS = [...new Set(TEXTS.map(t => t.world))];
-            LEVELS = FIXED_LEVELS;
-            generateFilterButtons();
-        }
-
+        function generateLevels() { CR_LEVELS = [...new Set(TEXTS.map(t=>t.cr))].sort((a,b)=>a-b); WORLDS = [...new Set(TEXTS.map(t=>t.world))]; LEVELS = FIXED_LEVELS; generateFilterButtons(); }
         function generateFilterButtons() {
-            const worldContainer = document.getElementById('worldFilters');
-            worldContainer.innerHTML = '<span class="filter-label">Monde:</span><button class="filter-btn active" data-world="all">Tous</button>';
-            WORLDS.forEach(world => { const btn = document.createElement('button'); btn.className = `filter-btn world-${world}`; btn.dataset.world = world; btn.textContent = world.charAt(0).toUpperCase() + world.slice(1); worldContainer.appendChild(btn); });
-            const crContainer = document.getElementById('crFilters');
-            crContainer.innerHTML = '<span class="filter-label">FP:</span><button class="filter-btn active" data-cr="all">Tous</button>';
-            CR_LEVELS.forEach(cr => { const btn = document.createElement('button'); btn.className = 'filter-btn'; btn.dataset.cr = cr; btn.textContent = cr < 1 ? (cr === 0.25 ? '¼' : '½') : cr.toString(); crContainer.appendChild(btn); });
+            const wc = document.getElementById('worldFilters'); wc.innerHTML = '<span class="filter-label">Monde:</span><button class="filter-btn active" data-world="all">Tous</button>';
+            WORLDS.forEach(w => { const b = document.createElement('button'); b.className = `filter-btn world-${w}`; b.dataset.world = w; b.textContent = w.charAt(0).toUpperCase()+w.slice(1); wc.appendChild(b); });
+            const cc = document.getElementById('crFilters'); cc.innerHTML = '<span class="filter-label">FP:</span><button class="filter-btn active" data-cr="all">Tous</button>';
+            CR_LEVELS.forEach(cr => { const b = document.createElement('button'); b.className='filter-btn'; b.dataset.cr=cr; b.textContent = cr<1?(cr===0.25?'¼':'½'):cr.toString(); cc.appendChild(b); });
             attachFilterListeners();
         }
-
         function attachFilterListeners() {
-            document.querySelectorAll('#worldFilters .filter-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('#worldFilters .filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); activeWorldFilter = btn.dataset.world; renderTexts(); }); });
-            document.querySelectorAll('#crFilters .filter-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('#crFilters .filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); activeCrFilter = btn.dataset.cr; renderTexts(); }); });
+            document.querySelectorAll('#worldFilters .filter-btn').forEach(b => { b.addEventListener('click', () => { document.querySelectorAll('#worldFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); activeWorldFilter=b.dataset.world; renderTexts(); }); });
+            document.querySelectorAll('#crFilters .filter-btn').forEach(b => { b.addEventListener('click', () => { document.querySelectorAll('#crFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); activeCrFilter=b.dataset.cr; renderTexts(); }); });
         }
-
-        function getUnlockedCRs() { const u = []; for (const l of LEVELS) { if (gameState.level >= l.level) u.push(l.unlockedCR); } return u; }
-        function isTextUnlocked(text) { return getUnlockedCRs().includes(text.cr); }
-        function isTextCompleted(text) { return gameState.completedTexts.includes(text.id); }
-        function getNextLevelXP() { const n = LEVELS.find(l => l.level === gameState.level + 1); return n ? n.xpRequired : LEVELS[LEVELS.length - 1].xpRequired; }
-        function getCurrentLevelXP() { const c = LEVELS.find(l => l.level === gameState.level); return c ? c.xpRequired : 0; }
-
-        function checkLevelUp() { for (let i = LEVELS.length - 1; i >= 0; i--) { if (gameState.xp >= LEVELS[i].xpRequired && gameState.level < LEVELS[i].level) { gameState.level = LEVELS[i].level; saveState(); showLevelUp(LEVELS[i]); return true; } } return false; }
-        function showLevelUp(levelData) { document.getElementById('newLevel').textContent = levelData.level; const crDisplay = levelData.unlockedCR < 1 ? (levelData.unlockedCR === 0.25 ? '¼' : '½') : levelData.unlockedCR; document.getElementById('unlockText').textContent = `Textes de FP ${crDisplay} débloqués !`; const overlay = document.getElementById('levelUpOverlay'); overlay.classList.add('show'); setTimeout(() => { overlay.classList.remove('show'); updateUI(); renderTexts(); }, 2500); }
-        function completeText(textId) { const text = TEXTS.find(t => t.id === textId); if (!text || isTextCompleted(text)) return; gameState.completedTexts.push(textId); gameState.xp += text.xp; saveState(); if (!checkLevelUp()) { updateUI(); renderTexts(); } }
-
+        function getUnlockedCRs() { const u=[]; for(const l of LEVELS) if(gameState.level>=l.level) u.push(l.unlockedCR); return u; }
+        function isTextUnlocked(t) { return getUnlockedCRs().includes(t.cr); }
+        function isTextCompleted(t) { return gameState.completedTexts.includes(t.id); }
+        function getNextLevelXP() { const n=LEVELS.find(l=>l.level===gameState.level+1); return n?n.xpRequired:LEVELS[LEVELS.length-1].xpRequired; }
+        function getCurrentLevelXP() { const c=LEVELS.find(l=>l.level===gameState.level); return c?c.xpRequired:0; }
+        function checkLevelUp() { for(let i=LEVELS.length-1;i>=0;i--) { if(gameState.xp>=LEVELS[i].xpRequired&&gameState.level<LEVELS[i].level) { gameState.level=LEVELS[i].level; saveState(); showLevelUp(LEVELS[i]); return true; } } return false; }
+        function showLevelUp(ld) { document.getElementById('newLevel').textContent=ld.level; const d=ld.unlockedCR<1?(ld.unlockedCR===0.25?'¼':'½'):ld.unlockedCR; document.getElementById('unlockText').textContent=`Textes de FP ${d} débloqués !`; const o=document.getElementById('levelUpOverlay'); o.classList.add('show'); setTimeout(()=>{o.classList.remove('show');updateUI();renderTexts();},2500); }
+        function completeText(id) { const t=TEXTS.find(x=>x.id===id); if(!t||isTextCompleted(t))return; gameState.completedTexts.push(id); gameState.xp+=t.xp; saveState(); if(!checkLevelUp()){updateUI();renderTexts();} }
         function updateUI() {
-            const currentLevelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
-            document.getElementById('currentLevel').textContent = gameState.level;
-            document.getElementById('levelTitle').textContent = currentLevelData.title;
-            document.getElementById('currentXP').textContent = gameState.xp;
-            const nextXP = getNextLevelXP(); const currentXP = getCurrentLevelXP();
-            document.getElementById('nextLevelXP').textContent = nextXP;
-            const progress = nextXP > currentXP ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 : 100;
-            document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
+            const cl=LEVELS.find(l=>l.level===gameState.level)||LEVELS[0];
+            document.getElementById('currentLevel').textContent=gameState.level; document.getElementById('levelTitle').textContent=cl.title;
+            document.getElementById('currentXP').textContent=gameState.xp;
+            const nx=getNextLevelXP(),cx=getCurrentLevelXP(); document.getElementById('nextLevelXP').textContent=nx;
+            const p=nx>cx?((gameState.xp-cx)/(nx-cx))*100:100; document.getElementById('xpBar').style.width=Math.min(100,Math.max(0,p))+'%';
         }
-
         function renderTexts() {
-            const container = document.getElementById('textContainer');
-            let filtered = TEXTS;
-            if (activeWorldFilter !== 'all') filtered = filtered.filter(t => t.world === activeWorldFilter);
-            if (activeCrFilter !== 'all') filtered = filtered.filter(t => t.cr === parseFloat(activeCrFilter));
-            filtered.sort((a, b) => a.cr - b.cr);
-            if (filtered.length === 0) { container.innerHTML = '<div class="loading">Aucun texte ne correspond à vos filtres.</div>'; return; }
-            container.innerHTML = filtered.map(text => {
-                const unlocked = isTextUnlocked(text); const completed = isTextCompleted(text);
-                const crDisplay = text.cr < 1 ? (text.cr === 0.25 ? '¼' : '½') : text.cr;
-                const vocabList = text.vocab && text.vocab.length > 0 ? `<div class="vocab-section"><div class="section-title">📚 Nouveaux Mots</div><div class="vocab-list">${text.vocab.map(v => `<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div></div>` : '';
-                return `
-                    <div class="text-card ${unlocked ? '' : 'locked'} ${completed ? 'completed' : ''}" data-id="${text.id}">
-                        <div class="card-header" onclick="${unlocked ? `toggleCard('${text.id}')` : ''}">
-                            <div class="card-title-section">
-                                <div class="card-title">${text.title}</div>
-                                <div class="card-meta">
-                                    <span class="world-badge ${text.world}">${text.world}</span>
-                                    <span class="cr-badge">FP ${crDisplay}</span>
-                                    <span class="xp-badge">+${text.xp} XP</span>
-                                    <span>${text.type}</span>
-                                </div>
-                            </div>
-                            <div class="card-status">${!unlocked ? '<span class="lock-icon">🔒</span>' : (completed ? '✅' : '📖')}</div>
-                        </div>
-                        ${unlocked ? `
-                            <div class="card-content" id="content-${text.id}">
-                                <div class="reading-text" id="text-${text.id}">${text.text}</div>
-                                <div class="translation-text" id="translation-${text.id}"></div>
-                                <button class="translation-btn" id="trans-btn-${text.id}" onclick="toggleTranslation('${text.id}')">🔎 Afficher la traduction</button>
-                                ${vocabList}
-                                <div class="questions-section">
-                                    <div class="section-title">❓ Questions</div>
-                                    <ul class="questions-list">${text.questions.map(q => `<li>${q}</li>`).join('')}</ul>
-                                </div>
-                                <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Lire à voix haute</button>
-                                <div class="speed-control">
-                                    <span>🐢</span>
-                                    <input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8">
-                                    <span>🐇</span>
-                                    <span id="speed-display-${text.id}">0.8x</span>
-                                </div>
-                                <button class="complete-btn" onclick="completeText('${text.id}')" ${completed ? 'disabled' : ''}>${completed ? '✅ Terminé' : '✓ Marquer comme lu'}</button>
-                            </div>
-                        ` : ''}
-                    </div>`;
+            const c=document.getElementById('textContainer'); let f=TEXTS;
+            if(activeWorldFilter!=='all') f=f.filter(t=>t.world===activeWorldFilter);
+            if(activeCrFilter!=='all') f=f.filter(t=>t.cr===parseFloat(activeCrFilter));
+            f.sort((a,b)=>a.cr-b.cr);
+            if(!f.length){c.innerHTML='<div class="loading">Aucun texte ne correspond à vos filtres.</div>';return;}
+            c.innerHTML=f.map(text=>{
+                const ul=isTextUnlocked(text),co=isTextCompleted(text);
+                const crd=text.cr<1?(text.cr===0.25?'¼':'½'):text.cr;
+                const vl=text.vocab&&text.vocab.length?`<div class="vocab-section"><div class="section-title">📚 Nouveaux Mots</div><div class="vocab-list">${text.vocab.map(v=>`<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div></div>`:'';
+                return `<div class="text-card ${ul?'':'locked'} ${co?'completed':''}" data-id="${text.id}">
+                    <div class="card-header" onclick="${ul?`toggleCard('${text.id}')`:''}">
+                        <div class="card-title-section"><div class="card-title">${text.title}</div>
+                        <div class="card-meta"><span class="world-badge ${text.world}">${text.world}</span><span class="cr-badge">FP ${crd}</span><span class="xp-badge">+${text.xp} XP</span><span>${text.type}</span></div></div>
+                        <div class="card-status">${!ul?'<span class="lock-icon">🔒</span>':(co?'✅':'📖')}</div>
+                    </div>
+                    ${ul?`<div class="card-content" id="content-${text.id}">
+                        <div class="reading-text" id="text-${text.id}">${text.text}</div>
+                        <div class="translation-text" id="translation-${text.id}"></div>
+                        <button class="translation-btn" id="trans-btn-${text.id}" onclick="toggleTranslation('${text.id}')">🔎 Afficher la traduction</button>
+                        ${vl}
+                        <div class="questions-section"><div class="section-title">❓ Questions</div><ul class="questions-list">${text.questions.map(q=>`<li>${q}</li>`).join('')}</ul></div>
+                        <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Lire à voix haute</button>
+                        <div class="speed-control"><span>🐢</span><input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8"><span>🐇</span><span id="speed-display-${text.id}">0.8x</span></div>
+                        <button class="complete-btn" onclick="completeText('${text.id}')" ${co?'disabled':''}>${co?'✅ Terminé':'✓ Marquer comme lu'}</button>
+                    </div>`:''}
+                </div>`;
             }).join('');
             applyZoom();
         }
+        function toggleCard(id){const c=document.getElementById(`content-${id}`);if(c)c.classList.toggle('open');}
+        function applyZoom(){const s=document.getElementById('zoomSlider').value;document.querySelectorAll('.reading-text').forEach(e=>{e.style.fontSize=s+'px';});}
+        function toggleTranslation(id){const tc=document.getElementById(`translation-${id}`),tb=document.getElementById(`trans-btn-${id}`);if(!tc||!tb)return;const td=TEXTS.find(t=>t.id===id);if(!td)return;if(tc.innerHTML===''){tc.innerHTML=td.text_de;tc.style.display='block';tb.textContent='🙈 Cacher la traduction';tb.classList.add('active');}else{const v=tc.style.display==='block';tc.style.display=v?'none':'block';tb.textContent=v?'🔎 Afficher la traduction':'🙈 Cacher la traduction';tb.classList.toggle('active');}}
 
-        function toggleCard(id) { const c = document.getElementById(`content-${id}`); if (c) c.classList.toggle('open'); }
-        function applyZoom() { const s = document.getElementById('zoomSlider').value; document.querySelectorAll('.reading-text').forEach(el => { el.style.fontSize = s + 'px'; }); }
+        async function loadTexts(){const c=document.getElementById('textContainer');try{const r=await fetch(TEXTS_JSON_URL);if(!r.ok)throw new Error('Fetch failed');TEXTS=await r.json();generateLevels();loadState();updateUI();renderTexts();}catch(e){c.innerHTML=`<div class="error">Échec du chargement.<br><small>${e.message}</small></div>`;}}
 
-        function toggleTranslation(textId) {
-            const tc = document.getElementById(`translation-${textId}`);
-            const tb = document.getElementById(`trans-btn-${textId}`);
-            if (!tc || !tb) return;
-            const td = TEXTS.find(t => t.id === textId);
-            if (!td) return;
-            if (tc.innerHTML === '') { tc.innerHTML = td.text_de; tc.style.display = 'block'; tb.textContent = '🙈 Cacher la traduction'; tb.classList.add('active'); }
-            else { const v = tc.style.display === 'block'; tc.style.display = v ? 'none' : 'block'; tb.textContent = v ? '🔎 Afficher la traduction' : '🙈 Cacher la traduction'; tb.classList.toggle('active'); }
-        }
-
-        async function loadTexts() {
-            const container = document.getElementById('textContainer');
-            try {
-                const response = await fetch(TEXTS_JSON_URL);
-                if (!response.ok) throw new Error('Échec de la récupération des textes');
-                TEXTS = await response.json();
-                generateLevels(); loadState(); updateUI(); renderTexts();
-            } catch (error) {
-                console.error('Erreur:', error);
-                container.innerHTML = `<div class="error">Échec du chargement des textes.<br><small>${error.message}</small></div>`;
-            }
-        }
-
-        document.getElementById('zoomSlider').addEventListener('input', applyZoom);
-        document.getElementById('fullscreenBtn').addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
-        document.addEventListener('fullscreenchange', () => { document.getElementById('fullscreenBtn').classList.toggle('active', !!document.fullscreenElement); });
-        let wakeLock = null;
-        const wakeLockBtn = document.getElementById('wakeLockBtn');
-        async function requestWakeLock() { try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); wakeLockBtn.classList.add('active'); wakeLock.addEventListener('release', () => { wakeLockBtn.classList.remove('active'); }); } } catch (e) {} }
-        async function releaseWakeLock() { if (wakeLock) { await wakeLock.release(); wakeLock = null; } }
-        wakeLockBtn.addEventListener('click', async () => { if (wakeLock) await releaseWakeLock(); else await requestWakeLock(); });
-        document.addEventListener('visibilitychange', async () => { if (document.visibilityState === 'visible' && wakeLockBtn.classList.contains('active')) await requestWakeLock(); });
-        document.getElementById('resetBtn').addEventListener('click', resetProgress);
-
+        document.getElementById('zoomSlider').addEventListener('input',applyZoom);
+        document.getElementById('fullscreenBtn').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();});
+        document.addEventListener('fullscreenchange',()=>{document.getElementById('fullscreenBtn').classList.toggle('active',!!document.fullscreenElement);});
+        let wakeLock=null;const wakeLockBtn=document.getElementById('wakeLockBtn');
+        async function requestWakeLock(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');wakeLockBtn.classList.add('active');wakeLock.addEventListener('release',()=>{wakeLockBtn.classList.remove('active');});}}catch(e){}}
+        async function releaseWakeLock(){if(wakeLock){await wakeLock.release();wakeLock=null;}}
+        wakeLockBtn.addEventListener('click',async()=>{if(wakeLock)await releaseWakeLock();else await requestWakeLock();});
+        document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&wakeLockBtn.classList.contains('active'))await requestWakeLock();});
+        document.getElementById('resetBtn').addEventListener('click',resetProgress);
         loadTexts();
 
-        // ==================== TEXT-TO-SPEECH (FIXED CHROME BUG) ====================
+        // ══════════════════════════════════════════════════════════
+        //  TTS v3 — KOMPLETT NEU: Kein cancel() zwischen Chunks,
+        //  aggressiver Keepalive, Polling-basierter Watchdog
+        // ══════════════════════════════════════════════════════════
         let currentReadingId = null;
-        let currentSentenceIndex = 0;
+        let currentChunkIndex = 0;
+        let ttsChunks = [];          // vorberechnete Chunks für aktuellen Text
         let ttsInitialized = false;
-        let resumeTimer = null;
-        let watchdogTimer = null;
-        let ttsBusy = false; // FIX: Guard gegen Keepalive während cancel→speak
+        let keepaliveTimer = null;
+        let pollingTimer = null;     // pollt ob speaking gestoppt hat
+        const DEBUG_TTS = false;     // auf true setzen zum Debuggen
 
-        function splitTextIntoSentences(text) {
-            // FIX: Auch bei Komma nach >80 Zeichen splitten, damit Chunks kürzer bleiben
-            const result = [];
-            const rough = text.match(/[^.!?]+[.!?]+/g) || [text];
-            for (const s of rough) {
-                if (s.length > 80) {
-                    // Lange Sätze bei Komma/Semikolon splitten
-                    const parts = s.match(/[^,;]+[,;]?/g) || [s];
-                    let chunk = '';
-                    for (const p of parts) {
-                        if (chunk.length + p.length > 80 && chunk.length > 0) {
-                            result.push(chunk.trim());
-                            chunk = p;
-                        } else {
-                            chunk += p;
-                        }
-                    }
-                    if (chunk.trim()) result.push(chunk.trim());
-                } else {
-                    result.push(s.trim());
-                }
-            }
-            return result.filter(s => s.length > 0);
+        function dbg(msg) {
+            if (!DEBUG_TTS) return;
+            const el = document.getElementById('ttsDebug');
+            if (el) { el.style.display = 'block'; el.textContent = msg; }
+            console.log('[TTS]', msg);
         }
 
-        function prepareSentences(textId) {
+        // --- Texte in kurze Chunks splitten (max ~60 Zeichen) ---
+        // Kürzere Chunks = Chrome hat keine Chance den 15s-Bug zu triggern
+        function splitIntoChunks(text) {
+            const chunks = [];
+            // Erst bei Satzzeichen splitten
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            for (const sent of sentences) {
+                if (sent.trim().length <= 60) {
+                    chunks.push(sent.trim());
+                    continue;
+                }
+                // Lange Sätze bei Komma, Semikolon, Doppelpunkt splitten
+                const parts = sent.split(/(?<=[,;:])\s*/);
+                let buf = '';
+                for (const part of parts) {
+                    if (buf.length + part.length > 60 && buf.length > 0) {
+                        chunks.push(buf.trim());
+                        buf = part;
+                    } else {
+                        buf += (buf ? ' ' : '') + part;
+                    }
+                }
+                if (buf.trim()) chunks.push(buf.trim());
+            }
+            return chunks.filter(c => c.length > 0);
+        }
+
+        function prepareSentenceSpans(textId) {
             const text = TEXTS.find(t => t.id === textId); if (!text) return;
             const container = document.getElementById(`text-${textId}`); if (!container) return;
-            const sents = splitTextIntoSentences(text.text);
-            container.innerHTML = sents.map((s, i) => `<span class="sentence" id="sent-${textId}-${i}">${s}</span>`).join(' ');
+            ttsChunks = splitIntoChunks(text.text);
+            container.innerHTML = ttsChunks.map((s, i) =>
+                `<span class="sentence" id="sent-${textId}-${i}">${s}</span>`
+            ).join(' ');
         }
 
-        function restoreText(textId) { if (!textId) return; const t = TEXTS.find(t => t.id === textId); if (!t) return; const c = document.getElementById(`text-${textId}`); if (c) c.innerHTML = t.text; }
+        function restoreText(textId) {
+            if (!textId) return;
+            const t = TEXTS.find(x => x.id === textId); if (!t) return;
+            const c = document.getElementById(`text-${textId}`); if (c) c.innerHTML = t.text;
+        }
 
-        function getVoiceForLanguage(langCode) {
+        function getVoice() {
             try {
-                const voices = speechSynthesis.getVoices(); if (!voices.length) return null;
-                return voices.find(v => v.lang === langCode && v.name.toLowerCase().includes('google')) || voices.find(v => v.lang === langCode) || voices.find(v => v.lang.startsWith(langCode.split('-')[0] + '-')) || voices.find(v => v.lang === langCode.split('-')[0]) || null;
+                const voices = speechSynthesis.getVoices();
+                return voices.find(v => v.lang === 'fr-FR' && v.name.toLowerCase().includes('google'))
+                    || voices.find(v => v.lang === 'fr-FR')
+                    || voices.find(v => v.lang.startsWith('fr'))
+                    || null;
             } catch (e) { return null; }
         }
 
-        // FIX: Kürzeres Intervall (3s statt 5s) + ttsBusy-Guard
-        function startResumeTimer() {
-            stopResumeTimer();
-            resumeTimer = setInterval(() => {
+        // --- Keepalive: pause/resume alle 3s gegen Chrome 15s-Bug ---
+        // Nur aktiv wenn tatsächlich gesprochen wird
+        function startKeepalive() {
+            stopKeepalive();
+            keepaliveTimer = setInterval(() => {
                 try {
-                    if (!ttsBusy && speechSynthesis.speaking && !speechSynthesis.paused) {
+                    if (speechSynthesis.speaking && !speechSynthesis.paused) {
                         speechSynthesis.pause();
                         speechSynthesis.resume();
+                        dbg(`keepalive tick (chunk ${currentChunkIndex})`);
                     }
                 } catch (e) {}
             }, 3000);
         }
-        function stopResumeTimer() { if (resumeTimer) { clearInterval(resumeTimer); resumeTimer = null; } }
+        function stopKeepalive() { if (keepaliveTimer) { clearInterval(keepaliveTimer); keepaliveTimer = null; } }
 
-        function startWatchdog(textId, index, text) {
-            stopWatchdog();
-            const timeout = Math.max(text.length * 120 + 3000, 6000);
-            watchdogTimer = setTimeout(() => { if (currentReadingId === textId && !speechSynthesis.speaking) { currentSentenceIndex = index + 1; speakSentence(textId, currentSentenceIndex); } }, timeout);
+        // --- Polling-Watchdog: prüft alle 500ms ob Chrome still aufgehört hat ---
+        // Das ist der entscheidende Fix: onend feuert in Chrome manchmal einfach nicht.
+        // Statt eines einmaligen Timeouts pollt dieser Timer permanent.
+        let lastSpeakingCheck = 0;
+        let silentSince = 0;
+
+        function startPolling() {
+            stopPolling();
+            lastSpeakingCheck = Date.now();
+            silentSince = 0;
+            pollingTimer = setInterval(() => {
+                if (!currentReadingId) { stopPolling(); return; }
+                const now = Date.now();
+                const speaking = speechSynthesis.speaking;
+
+                if (speaking) {
+                    silentSince = 0; // Reset
+                } else {
+                    if (silentSince === 0) {
+                        silentSince = now; // Beginn der Stille merken
+                    } else if (now - silentSince > 800) {
+                        // 800ms still = Chrome hat aufgehört ohne onend
+                        dbg(`polling: silent for ${now - silentSince}ms, forcing next chunk`);
+                        silentSince = 0;
+                        currentChunkIndex++;
+                        speakNextChunk();
+                    }
+                }
+            }, 400);
         }
-        function stopWatchdog() { if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; } }
+        function stopPolling() { if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; } silentSince = 0; }
 
-        function stopReading(andCleanup) {
-            stopResumeTimer(); stopWatchdog(); ttsBusy = false;
-            try { speechSynthesis.cancel(); } catch (e) {}
-            if (andCleanup && currentReadingId) {
-                const btn = document.getElementById(`read-btn-${currentReadingId}`);
-                if (btn) { btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute'; btn.classList.remove('playing'); }
-                restoreText(currentReadingId); currentReadingId = null;
-            }
-        }
-
-        function clearHighlights(textId) { const c = document.getElementById(`text-${textId}`); if (c) c.querySelectorAll('.sentence').forEach(s => s.classList.remove('active')); }
-        function highlightSentence(textId, index) { clearHighlights(textId); const s = document.getElementById(`sent-${textId}-${index}`); if (s) { s.classList.add('active'); s.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
-
-        function speakSentence(textId, index) {
-            if (currentReadingId !== textId) { restoreText(textId); return; }
-            const text = TEXTS.find(t => t.id === textId); if (!text) return;
-            const sents = splitTextIntoSentences(text.text);
-            if (index >= sents.length) { stopReading(true); return; }
-
-            try {
-                ttsBusy = true; // FIX: Keepalive pausieren
-                speechSynthesis.cancel();
-                setTimeout(() => {
-                    if (currentReadingId !== textId) { ttsBusy = false; return; }
-                    const speedSlider = document.getElementById(`speed-${textId}`);
-                    const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-                    const sentText = sents[index].trim();
-                    const utterance = new SpeechSynthesisUtterance(sentText);
-                    utterance.lang = 'fr-FR';
-                    const voice = getVoiceForLanguage('fr-FR');
-                    if (voice) utterance.voice = voice;
-                    utterance.rate = speed;
-                    utterance.pitch = 1;
-
-                    let endFired = false;
-                    utterance.onstart = () => {
-                        ttsBusy = false; // FIX: Keepalive wieder erlauben sobald Sprache läuft
-                        highlightSentence(textId, index);
-                    };
-                    const continueReading = () => {
-                        if (endFired) return;
-                        endFired = true;
-                        stopWatchdog();
-                        if (currentReadingId === textId) { currentSentenceIndex = index + 1; speakSentence(textId, currentSentenceIndex); }
-                    };
-                    utterance.onend = continueReading;
-                    utterance.onerror = (event) => { if (event.error !== 'canceled') continueReading(); };
-
-                    speechSynthesis.speak(utterance);
-                    startWatchdog(textId, index, sentText);
-                }, 80); // FIX: 80ms statt 50ms — Chrome braucht etwas mehr Zeit nach cancel()
-            } catch (e) {
-                console.warn('TTS error:', e);
-                ttsBusy = false;
-                stopReading(true);
-            }
+        // --- Highlight ---
+        function clearHL(textId) { const c = document.getElementById(`text-${textId}`); if (c) c.querySelectorAll('.sentence').forEach(s => s.classList.remove('active')); }
+        function highlight(textId, idx) {
+            clearHL(textId);
+            const s = document.getElementById(`sent-${textId}-${idx}`);
+            if (s) { s.classList.add('active'); s.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         }
 
-        function initTTSEngine(callback) {
-            if (ttsInitialized) { callback(); return; }
-            try {
-                const dummy = new SpeechSynthesisUtterance('');
-                dummy.volume = 0;
-                dummy.onend = () => { ttsInitialized = true; callback(); };
-                dummy.onerror = () => { ttsInitialized = true; callback(); };
-                speechSynthesis.speak(dummy);
-                setTimeout(() => { if (!ttsInitialized) { ttsInitialized = true; callback(); } }, 300);
-            } catch (e) { ttsInitialized = true; callback(); }
-        }
+        // --- Kern: Nächsten Chunk sprechen (OHNE cancel!) ---
+        function speakNextChunk() {
+            if (!currentReadingId) return;
+            const textId = currentReadingId;
 
-        function toggleReadAloud(textId) {
-            if (!window.speechSynthesis) {
-                alert('Sprachausgabe nicht verfügbar. Bitte Chrome oder Firefox verwenden.');
+            if (currentChunkIndex >= ttsChunks.length) {
+                dbg('done — all chunks spoken');
+                fullStop(true);
                 return;
             }
-            const btn = document.getElementById(`read-btn-${textId}`); if (!btn) return;
+
+            const chunkText = ttsChunks[currentChunkIndex];
+            dbg(`speak chunk ${currentChunkIndex}/${ttsChunks.length}: "${chunkText.substring(0,30)}..."`);
+
             try {
-                if (currentReadingId === textId) { stopReading(true); return; }
-                if (currentReadingId) stopReading(true);
-                initTTSEngine(() => {
-                    currentReadingId = textId; currentSentenceIndex = 0;
-                    prepareSentences(textId);
-                    btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter'; btn.classList.add('playing');
-                    startResumeTimer();
-                    speakSentence(textId, 0);
-                });
+                const speedSlider = document.getElementById(`speed-${textId}`);
+                const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+                const utt = new SpeechSynthesisUtterance(chunkText);
+                utt.lang = 'fr-FR';
+                const voice = getVoice();
+                if (voice) utt.voice = voice;
+                utt.rate = speed;
+                utt.pitch = 1;
+
+                let endFired = false;
+
+                utt.onstart = () => {
+                    silentSince = 0; // Polling-Reset
+                    highlight(textId, currentChunkIndex);
+                };
+
+                utt.onend = () => {
+                    if (endFired) return;
+                    endFired = true;
+                    dbg(`onend fired for chunk ${currentChunkIndex}`);
+                    if (currentReadingId === textId) {
+                        currentChunkIndex++;
+                        // Kleiner Delay damit Chrome sich beruhigt
+                        setTimeout(() => speakNextChunk(), 50);
+                    }
+                };
+
+                utt.onerror = (ev) => {
+                    if (endFired) return;
+                    if (ev.error === 'canceled') return;
+                    endFired = true;
+                    dbg(`onerror: ${ev.error}, chunk ${currentChunkIndex}`);
+                    if (currentReadingId === textId) {
+                        currentChunkIndex++;
+                        setTimeout(() => speakNextChunk(), 100);
+                    }
+                };
+
+                // KEIN cancel() hier! Einfach speak() aufrufen.
+                speechSynthesis.speak(utt);
+
             } catch (e) {
-                console.warn('TTS error:', e);
-                btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute'; btn.classList.remove('playing');
-                restoreText(textId); currentReadingId = null;
+                console.warn('TTS speak error:', e);
+                fullStop(true);
             }
         }
 
-        document.addEventListener('input', (e) => { if (e.target.classList.contains('speed-slider')) { const id = e.target.id.replace('speed-', ''); const d = document.getElementById(`speed-display-${id}`); if (d) d.textContent = e.target.value + 'x'; } });
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && currentReadingId) stopReading(true); });
-        try { if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { getVoiceForLanguage('fr-FR'); }; } catch (e) {}
+        // --- Alles stoppen ---
+        function fullStop(cleanup) {
+            stopKeepalive();
+            stopPolling();
+            try { speechSynthesis.cancel(); } catch (e) {}
+            if (cleanup && currentReadingId) {
+                const btn = document.getElementById(`read-btn-${currentReadingId}`);
+                if (btn) { btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute'; btn.classList.remove('playing'); }
+                restoreText(currentReadingId);
+                currentReadingId = null;
+                ttsChunks = [];
+            }
+        }
+
+        // --- Dummy-Utterance zum Aufwecken der Engine ---
+        function initTTS(cb) {
+            if (ttsInitialized) { cb(); return; }
+            try {
+                const d = new SpeechSynthesisUtterance('');
+                d.volume = 0;
+                d.onend = () => { ttsInitialized = true; cb(); };
+                d.onerror = () => { ttsInitialized = true; cb(); };
+                speechSynthesis.speak(d);
+                setTimeout(() => { if (!ttsInitialized) { ttsInitialized = true; cb(); } }, 500);
+            } catch (e) { ttsInitialized = true; cb(); }
+        }
+
+        // --- Toggle Button ---
+        function toggleReadAloud(textId) {
+            if (!window.speechSynthesis) {
+                alert('Sprachausgabe nicht verfügbar.');
+                return;
+            }
+            const btn = document.getElementById(`read-btn-${textId}`);
+            if (!btn) return;
+
+            // Stopp wenn gleicher Text läuft
+            if (currentReadingId === textId) { fullStop(true); return; }
+            // Stopp wenn anderer Text läuft
+            if (currentReadingId) fullStop(true);
+
+            initTTS(() => {
+                // cancel() einmal sauber, dann warten
+                try { speechSynthesis.cancel(); } catch(e) {}
+
+                setTimeout(() => {
+                    currentReadingId = textId;
+                    currentChunkIndex = 0;
+                    prepareSentenceSpans(textId);
+                    btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
+                    btn.classList.add('playing');
+                    startKeepalive();
+                    startPolling();
+                    speakNextChunk();
+                }, 150); // 150ms Pause nach cancel — Chrome braucht das
+            });
+        }
+
+        // Speed-Slider Label
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('speed-slider')) {
+                const id = e.target.id.replace('speed-', '');
+                const d = document.getElementById(`speed-display-${id}`);
+                if (d) d.textContent = e.target.value + 'x';
+            }
+        });
+
+        // Cleanup bei Tab-Wechsel
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && currentReadingId) fullStop(true);
+        });
+
+        // Voices laden
+        try { if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => getVoice(); } catch(e) {}
     </script>
 </body>
 </html>
