@@ -5,180 +5,650 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📜 Codex des Ombres</title>
     <style>
+        /* Das CSS bleibt grösstenteils unverändert */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e8e8e8; padding: 20px; line-height: 1.6; }
-        .header { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .title { color: #ffd700; margin-bottom: 10px; }
-        .text-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s; }
-        .read-btn { background: #ffd700; color: #1a1a2e; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
-        .read-btn.playing { background: #ff4b2b; color: white; }
-        .loading { text-align: center; padding: 40px; color: #ffd700; font-style: italic; }
-        .highlight { color: #ffd700; background: rgba(255, 215, 0, 0.1); padding: 2px 4px; border-radius: 4px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #444; display: inline-block; margin-right: 5px; }
-        .status-active { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #e8e8e8; padding-bottom: 80px; }
+        .header { background: rgba(0,0,0,0.4); padding: 15px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .title { font-size: 1.4em; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        .header-buttons { display: flex; gap: 8px; }
+        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e8e8e8; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 1.1em; transition: all 0.2s; }
+        .icon-btn:hover, .icon-btn.active { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; }
+        .xp-section { margin-bottom: 12px; }
+        .xp-header { display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px; }
+        .level-display { color: #ffd700; font-weight: 600; }
+        .xp-display { color: #aaa; }
+        .xp-bar-container { background: rgba(0,0,0,0.4); border-radius: 10px; height: 8px; overflow: hidden; }
+        .xp-bar { background: linear-gradient(90deg, #ffd700, #ff8c00); height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+        .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .filter-label { font-size: 0.8em; color: #888; margin-right: 4px; }
+        .filter-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #aaa; padding: 5px 10px; border-radius: 15px; cursor: pointer; font-size: 0.8em; transition: all 0.2s; }
+        .filter-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .filter-btn.active { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; }
+        .world-dungeon.active { background: rgba(139,69,19,0.3); border-color: #8b4513; color: #daa520; }
+        .world-greece.active { background: rgba(70,130,180,0.3); border-color: #4682b4; color: #87ceeb; }
+        .world-real.active { background: rgba(60,179,113,0.3); border-color: #3cb371; color: #90ee90; }
+        .zoom-control { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 0.85em; color: #888; }
+        .zoom-slider { width: 80px; accent-color: #ffd700; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .text-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 15px; overflow: hidden; transition: all 0.3s; }
+        .text-card.locked { opacity: 0.5; filter: grayscale(0.5); }
+        .text-card.completed { border-color: rgba(255,215,0,0.3); }
+        .card-header { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .card-header:hover { background: rgba(255,255,255,0.05); }
+        .card-title-section { flex: 1; }
+        .card-title { font-size: 1.1em; color: #fff; margin-bottom: 4px; }
+        .card-meta { font-size: 0.8em; color: #888; display: flex; gap: 12px; }
+        .card-meta span { display: flex; align-items: center; gap: 4px; }
+        .cr-badge { background: rgba(255,100,100,0.2); color: #ff6b6b; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .xp-badge { color: #ffd700; }
+        .world-badge { padding: 2px 8px; border-radius: 10px; font-size: 0.75em; }
+        .world-badge.dungeon { background: rgba(139,69,19,0.3); color: #daa520; }
+        .world-badge.greece { background: rgba(70,130,180,0.3); color: #87ceeb; }
+        .world-badge.real { background: rgba(60,179,113,0.3); color: #90ee90; }
+        .card-status { font-size: 1.2em; margin-left: 10px; }
+        .card-content { display: none; padding: 0 15px 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .card-content.open { display: block; }
+        .reading-text { line-height: 1.8; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; }
+        
+        /* --- NEU: Stile für die Übersetzung --- */
+        .translation-text {
+            display: none; /* Standardmässig ausgeblendet */
+            line-height: 1.7;
+            margin: 10px 0 15px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            border-left: 3px solid #4682b4; /* Blaue Farbe zur Unterscheidung */
+            font-size: 0.95em;
+            color: #ccc;
+        }
+        .translation-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 15px;
+            background: rgba(70, 130, 180, 0.2);
+            border: 1px solid rgba(70, 130, 180, 0.4);
+            border-radius: 8px;
+            color: #87ceeb;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .translation-btn:hover {
+            background: rgba(70, 130, 180, 0.4);
+        }
+        .translation-btn.active {
+            background: rgba(70, 130, 180, 0.5);
+            color: #fff;
+        }
+        /* --- Ende der neuen Stile --- */
+
+        .vocab-section, .questions-section { margin-top: 15px; }
+        .section-title { font-size: 0.85em; color: #ffd700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .vocab-list { display: grid; gap: 6px; }
+        .vocab-item { display: flex; gap: 8px; font-size: 0.9em; padding: 6px 10px; background: rgba(255,215,0,0.1); border-radius: 6px; }
+        .vocab-word { color: #ffd700; font-weight: 600; min-width: 120px; }
+        .vocab-meaning { color: #ccc; }
+        .questions-list { list-style: none; }
+        .questions-list li { padding: 8px 0; padding-left: 20px; position: relative; font-size: 0.9em; }
+        .questions-list li::before { content: "?"; position: absolute; left: 0; color: #ffd700; font-weight: bold; }
+        .complete-btn { width: 100%; padding: 12px; margin-top: 15px; background: linear-gradient(135deg, #ffd700, #ff8c00); border: none; border-radius: 8px; color: #1a1a2e; font-weight: 600; font-size: 1em; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .complete-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
+        .complete-btn:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+        .read-aloud-btn { width: 100%; padding: 10px; margin-top: 10px; background: rgba(100, 149, 237, 0.3); border: 1px solid #6495ed; border-radius: 8px; color: #87ceeb; font-weight: 600; font-size: 0.95em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .read-aloud-btn:hover { background: rgba(100, 149, 237, 0.5); }
+        .read-aloud-btn.playing { background: rgba(255, 100, 100, 0.3); border-color: #ff6b6b; color: #ff6b6b; }
+        .speed-control { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.8em; color: #888; }
+        .speed-slider { width: 100px; accent-color: #6495ed; }
+        .sentence { transition: background 0.2s, color 0.2s; border-radius: 3px; padding: 0 2px; }
+        .sentence.active { background: rgba(255, 215, 0, 0.3); color: #fff; }
+        .lock-icon { font-size: 1.5em; }
+        .level-up-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .level-up-overlay.show { display: flex; }
+        .level-up-content { text-align: center; animation: levelUpPulse 0.5s ease-out; }
+        @keyframes levelUpPulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .level-up-text { font-size: 3em; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.5); margin-bottom: 10px; }
+        .level-up-subtitle { font-size: 1.5em; color: #fff; margin-bottom: 20px; }
+        .level-up-unlock { font-size: 1.1em; color: #90ee90; }
+        .reset-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(255,50,50,0.2); border: 1px solid rgba(255,50,50,0.3); color: #ff6b6b; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; }
+        .reset-btn:hover { background: rgba(255,50,50,0.3); }
+        .loading { text-align: center; padding: 50px; color: #888; }
+        .error { text-align: center; padding: 50px; color: #ff6b6b; }
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="header-top">
+            <h1 class="title">📜 Codex des Ombres</h1>
+            <div class="header-buttons">
+                <button class="icon-btn" id="wakeLockBtn" title="Garder l'écran allumé">☀</button>
+                <button class="icon-btn" id="fullscreenBtn" title="Plein écran">⛶</button>
+            </div>
+        </div>
 
-    <div class="header">
-        <h1 class="title">📜 Codex des Ombres</h1>
-        <p><span id="statusIndicator" class="status-dot"></span> <span id="statusText">Initialisation...</span></p>
-    </div>
+        <div class="xp-section">
+            <div class="xp-header">
+                <span class="level-display">Niveau <span id="currentLevel">1</span> — <span id="levelTitle">Novice</span></span>
+                <span class="xp-display"><span id="currentXP">0</span> / <span id="nextLevelXP">50</span> XP</span>
+            </div>
+            <div class="xp-bar-container">
+                <div class="xp-bar" id="xpBar" style="width: 0%"></div>
+            </div>
+        </div>
 
-    <main id="textContainer">
-        <div class="loading">Chargement des données GitHub...</div>
+        <div class="filters">
+            <div class="filter-group" id="worldFilters">
+                <span class="filter-label">Monde:</span>
+                <button class="filter-btn active" data-world="all">Tous</button>
+            </div>
+            <div class="filter-group" id="crFilters">
+                <span class="filter-label">FP:</span>
+                <button class="filter-btn active" data-cr="all">Tous</button>
+            </div>
+            <div class="zoom-control">
+                <span>Aa</span>
+                <input type="range" class="zoom-slider" id="zoomSlider" min="14" max="26" value="18">
+                <span>Aa</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" id="textContainer">
+        <div class="loading">Chargement des textes...</div>
     </main>
 
+    <div class="level-up-overlay" id="levelUpOverlay">
+        <div class="level-up-content">
+            <div class="level-up-text">⚔ NIVEAU SUPÉRIEUR ! ⚔</div>
+            <div class="level-up-subtitle">Vous avez atteint le niveau <span id="newLevel">2</span> !</div>
+            <div class="level-up-unlock" id="unlockText">Nouveaux textes débloqués !</div>
+        </div>
+    </div>
+
+    <button class="reset-btn" id="resetBtn">Réinitialiser</button>
     <script>
-        // Nutze deine echte RAW-URL hier!
-        const GITHUB_JSON_URL = "https://raw.githubusercontent.com/bireggbaum-beep/data/refs/heads/main/texts_fr.json";
-        
-        let synth = window.speechSynthesis;
-        let ttsData = {
-            chunks: [],
-            currentIdx: 0,
-            isPlaying: false,
-            btnRef: null,
-            watchdog: null
-        };
+        // ╔════════════════════════════════════════════════════════════════╗
+        // ║  SOURCE JSON (FRANÇAIS)                                         ║
+        // ╚════════════════════════════════════════════════════════════════╝
+        const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/refs/heads/main/texts_fr.json'; // <-- URL ANPASSEN!
 
-        async function loadData() {
-            try {
-                const response = await fetch(`${GITHUB_JSON_URL}?t=${Date.now()}`);
-                const data = await response.json();
-                renderTexts(data);
-                updateStatus("Prêt", false);
-            } catch (err) {
-                document.getElementById('textContainer').innerHTML = `<p style="color:#ff6b6b">Erreur de chargement: ${err.message}</p>`;
-            }
+        // ==================== CONFIG ====================
+        const FIXED_LEVELS = [
+            { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
+            { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprenti" },
+            { level: 3, xpRequired: 200,  unlockedCR: 1,    title: "Aventurier" },
+            { level: 4, xpRequired: 550,  unlockedCR: 2,    title: "Vétéran" },
+            { level: 5, xpRequired: 1200, unlockedCR: 3,    title: "Maître" }
+        ];
+
+        // ==================== STATE ====================
+        let TEXTS = [];
+        let CR_LEVELS = [];
+        let LEVELS = [];
+        let WORLDS = [];
+
+        let gameState = { xp: 0, level: 1, completedTexts: [] };
+        let activeWorldFilter = 'all';
+        let activeCrFilter = 'all';
+
+        // ==================== STORAGE ====================
+        function saveState() {
+            localStorage.setItem('codex_des_ombres_progress', JSON.stringify(gameState));
         }
 
-        function updateStatus(msg, active) {
-            document.getElementById('statusText').innerText = msg;
-            document.getElementById('statusIndicator').className = 'status-dot' + (active ? ' status-active' : '');
-        }
-
-        function renderTexts(texts) {
-            const container = document.getElementById('textContainer');
-            container.innerHTML = "";
-            texts.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'text-card';
-                card.innerHTML = `
-                    <h3 style="color:#ffd700">${item.title}</h3>
-                    <p id="txt-${index}" style="margin:10px 0">${item.text}</p>
-                    <button id="btn-${index}" class="read-btn" onclick="handleTTS(${index})">
-                        <span>▶</span> Lire ce chapitre
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function handleTTS(id) {
-            if (ttsData.isPlaying && ttsData.btnRef === document.getElementById(`btn-${id}`)) {
-                stopEverything();
-                return;
-            }
-
-            stopEverything();
-            
-            const rawText = document.getElementById(`txt-${id}`).innerText;
-            // Extrem robustes Splitting: Bei Punkt, Komma, Semikolon oder Doppelpunkt
-            ttsData.chunks = rawText.match(/[^.!?,:;]+[.!?,:;]*/g) || [rawText];
-            ttsData.currentIdx = 0;
-            ttsData.isPlaying = true;
-            ttsData.btnRef = document.getElementById(`btn-${id}`);
-            
-            ttsData.btnRef.classList.add('playing');
-            ttsData.btnRef.innerHTML = '<span>⏹</span> Arrêter';
-            
-            updateStatus("Lecture en cours...", true);
-            playNextChunk();
-        }
-
-        function playNextChunk() {
-            if (!ttsData.isPlaying || ttsData.currentIdx >= ttsData.chunks.length) {
-                stopEverything();
-                return;
-            }
-
-            // Cleanup vor neuem Chunk (wichtig für Android!)
-            synth.cancel();
-
-            const textToSpeak = ttsData.chunks[ttsData.currentIdx].trim();
-            if (textToSpeak.length < 1) {
-                ttsData.currentIdx++;
-                playNextChunk();
-                return;
-            }
-
-            const utter = new SpeechSynthesisUtterance(textToSpeak);
-            utter.lang = 'fr-FR';
-            utter.rate = 0.95; // Etwas langsamer ist stabiler
-
-            utter.onstart = () => {
-                resetWatchdog();
-            };
-
-            utter.onend = () => {
-                clearTimeout(ttsData.watchdog);
-                ttsData.currentIdx++;
-                // Kurze Pause zwischen Chunks hilft dem Browser sich zu fangen
-                setTimeout(playNextChunk, 100); 
-            };
-
-            utter.onerror = (e) => {
-                console.error("TTS Error:", e);
-                // Bei Fehler: Kurz warten und diesen Chunk nochmal probieren
-                setTimeout(playNextChunk, 500);
-            };
-
-            // Der entscheidende Trick: speechSynthesis.speak() erst nach einem winzigen Timeout
-            setTimeout(() => {
-                synth.speak(utter);
-                // Extra Android "Push"
-                if (synth.paused) synth.resume();
-            }, 50);
-        }
-
-        function resetWatchdog() {
-            clearTimeout(ttsData.watchdog);
-            // Wenn ein Satz länger als 15 Sek braucht, stimmt was nicht -> Restart Chunk
-            ttsData.watchdog = setTimeout(() => {
-                if (ttsData.isPlaying) {
-                    console.log("Watchdog triggered: Restarting Chunk");
-                    synth.cancel();
-                    playNextChunk();
+        function loadState() {
+            const saved = localStorage.getItem('codex_des_ombres_progress');
+            if (saved) {
+                try {
+                    gameState = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Échec du chargement de l\'état:', e);
                 }
-            }, 15000);
+            }
         }
 
-        function stopEverything() {
-            ttsData.isPlaying = false;
-            synth.cancel();
-            clearTimeout(ttsData.watchdog);
-            updateStatus("Prêt", false);
-            
-            document.querySelectorAll('.read-btn').forEach(b => {
-                b.classList.remove('playing');
-                b.innerHTML = '<span>▶</span> Lire ce chapitre';
+        function resetProgress() {
+            if (confirm('Réinitialiser toute la progression ? L\'XP et les textes terminés seront perdus !')) {
+                gameState = { xp: 0, level: 1, completedTexts: [] };
+                saveState();
+                updateUI();
+                renderTexts();
+            }
+        }
+
+        // ==================== DYNAMIC LEVEL GENERATION ====================
+        function generateLevels() {
+            CR_LEVELS = [...new Set(TEXTS.map(t => t.cr))].sort((a, b) => a - b);
+            WORLDS = [...new Set(TEXTS.map(t => t.world))];
+            LEVELS = FIXED_LEVELS;
+            generateFilterButtons();
+        }
+
+        function generateFilterButtons() {
+            const worldContainer = document.getElementById('worldFilters');
+            worldContainer.innerHTML = '<span class="filter-label">Monde:</span><button class="filter-btn active" data-world="all">Tous</button>';
+            WORLDS.forEach(world => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn world-${world}`;
+                btn.dataset.world = world;
+                btn.textContent = world.charAt(0).toUpperCase() + world.slice(1);
+                worldContainer.appendChild(btn);
+            });
+
+            const crContainer = document.getElementById('crFilters');
+            crContainer.innerHTML = '<span class="filter-label">FP:</span><button class="filter-btn active" data-cr="all">Tous</button>';
+            CR_LEVELS.forEach(cr => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.dataset.cr = cr;
+                btn.textContent = cr < 1 ? (cr === 0.25 ? '¼' : '½') : cr.toString();
+                crContainer.appendChild(btn);
+            });
+
+            attachFilterListeners();
+        }
+
+        function attachFilterListeners() {
+            document.querySelectorAll('#worldFilters .filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#worldFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeWorldFilter = btn.dataset.world;
+                    renderTexts();
+                });
+            });
+
+            document.querySelectorAll('#crFilters .filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#crFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeCrFilter = btn.dataset.cr;
+                    renderTexts();
+                });
             });
         }
 
-        // Fix für Android Chrome: Stimmen müssen initialisiert sein
-        window.onload = () => {
-            loadData();
-            // Android braucht oft einen User-Gesture um die Voices zu laden
-            synth.getVoices();
-        };
+        // ==================== LEVEL LOGIC ====================
+        function getUnlockedCRs() {
+            const unlocked = [];
+            for (const level of LEVELS) {
+                if (gameState.level >= level.level) {
+                    unlocked.push(level.unlockedCR);
+                }
+            }
+            return unlocked;
+        }
 
-        // Verhindert Abbruch bei Standby/Tab-Wechsel (versucht es zumindest)
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === 'visible' && ttsData.isPlaying) {
-                synth.resume();
+        function isTextUnlocked(text) { return getUnlockedCRs().includes(text.cr); }
+        function isTextCompleted(text) { return gameState.completedTexts.includes(text.id); }
+        function getNextLevelXP() { const nextLevel = LEVELS.find(l => l.level === gameState.level + 1); return nextLevel ? nextLevel.xpRequired : LEVELS[LEVELS.length - 1].xpRequired; }
+        function getCurrentLevelXP() { const currentLevel = LEVELS.find(l => l.level === gameState.level); return currentLevel ? currentLevel.xpRequired : 0; }
+
+        function checkLevelUp() {
+            for (let i = LEVELS.length - 1; i >= 0; i--) {
+                if (gameState.xp >= LEVELS[i].xpRequired && gameState.level < LEVELS[i].level) {
+                    gameState.level = LEVELS[i].level;
+                    saveState();
+                    showLevelUp(LEVELS[i]);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function showLevelUp(levelData) {
+            document.getElementById('newLevel').textContent = levelData.level;
+            const crDisplay = levelData.unlockedCR < 1 ? (levelData.unlockedCR === 0.25 ? '¼' : '½') : levelData.unlockedCR;
+            document.getElementById('unlockText').textContent = `Textes de FP ${crDisplay} débloqués !`;
+            const overlay = document.getElementById('levelUpOverlay');
+            overlay.classList.add('show');
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                updateUI();
+                renderTexts();
+            }, 2500);
+        }
+
+        // ==================== COMPLETE TEXT ====================
+        function completeText(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text || isTextCompleted(text)) return;
+            gameState.completedTexts.push(textId);
+            gameState.xp += text.xp;
+            saveState();
+            if (!checkLevelUp()) {
+                updateUI();
+                renderTexts();
+            }
+        }
+
+        // ==================== UI ====================
+        function updateUI() {
+            const currentLevelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+            document.getElementById('currentLevel').textContent = gameState.level;
+            document.getElementById('levelTitle').textContent = currentLevelData.title;
+            document.getElementById('currentXP').textContent = gameState.xp;
+            const nextXP = getNextLevelXP();
+            const currentXP = getCurrentLevelXP();
+            document.getElementById('nextLevelXP').textContent = nextXP;
+            const progress = nextXP > currentXP ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 : 100;
+            document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
+        }
+
+        function renderTexts() {
+            const container = document.getElementById('textContainer');
+            let filtered = TEXTS;
+            if (activeWorldFilter !== 'all') { filtered = filtered.filter(t => t.world === activeWorldFilter); }
+            if (activeCrFilter !== 'all') { filtered = filtered.filter(t => t.cr === parseFloat(activeCrFilter)); }
+            filtered.sort((a, b) => a.cr - b.cr);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="loading">Aucun texte ne correspond à vos filtres.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(text => {
+                const unlocked = isTextUnlocked(text);
+                const completed = isTextCompleted(text);
+                const crDisplay = text.cr < 1 ? (text.cr === 0.25 ? '¼' : '½') : text.cr;
+                const vocabList = text.vocab && text.vocab.length > 0 ? `
+                    <div class="vocab-section">
+                        <div class="section-title">📚 Nouveaux Mots</div>
+                        <div class="vocab-list">${text.vocab.map(v => `<div class="vocab-item"><span class="vocab-word">${v[0]}</span><span class="vocab-meaning">— ${v[1]}</span></div>`).join('')}</div>
+                    </div>` : '';
+
+                return `
+                    <div class="text-card ${unlocked ? '' : 'locked'} ${completed ? 'completed' : ''}" data-id="${text.id}">
+                        <div class="card-header" onclick="${unlocked ? `toggleCard('${text.id}')` : ''}">
+                            <div class="card-title-section">
+                                <div class="card-title">${text.title}</div>
+                                <div class="card-meta">
+                                    <span class="world-badge ${text.world}">${text.world}</span>
+                                    <span class="cr-badge">FP ${crDisplay}</span>
+                                    <span class="xp-badge">+${text.xp} XP</span>
+                                    <span>${text.type}</span>
+                                </div>
+                            </div>
+                            <div class="card-status">${!unlocked ? '<span class="lock-icon">🔒</span>' : (completed ? '✅' : '📖')}</div>
+                        </div>
+                        ${unlocked ? `
+                            <div class="card-content" id="content-${text.id}">
+                                <div class="reading-text" id="text-${text.id}">${text.text}</div>
+                                
+                                <!-- NEU: Platzhalter für die Übersetzung -->
+                                <div class="translation-text" id="translation-${text.id}"></div>
+                                
+                                <!-- NEU: Button zum Umschalten der Übersetzung -->
+                                <button class="translation-btn" id="trans-btn-${text.id}" onclick="toggleTranslation('${text.id}')">🔎 Afficher la traduction</button>
+
+                                ${vocabList}
+                                
+                                <div class="questions-section">
+                                    <div class="section-title">❓ Questions</div>
+                                    <ul class="questions-list">${text.questions.map(q => `<li>${q}</li>`).join('')}</ul>
+                                </div>
+                                
+                                <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')"><span class="read-icon">🔊</span> Lire à voix haute</button>
+                                <div class="speed-control">
+                                    <span>🐢</span>
+                                    <input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="1.2" step="0.1" value="0.8">
+                                    <span>🐇</span>
+                                    <span id="speed-display-${text.id}">0.8x</span>
+                                </div>
+                                <button class="complete-btn" onclick="completeText('${text.id}')" ${completed ? 'disabled' : ''}>${completed ? '✅ Terminé' : '✓ Marquer comme lu'}</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            applyZoom();
+        }
+
+        function toggleCard(id) { const content = document.getElementById(`content-${id}`); if (content) { content.classList.toggle('open'); } }
+        function applyZoom() { const size = document.getElementById('zoomSlider').value; document.querySelectorAll('.reading-text').forEach(el => { el.style.fontSize = size + 'px'; }); }
+
+        // --- NEU: Funktion zum Anzeigen/Verbergen der Übersetzung ---
+        function toggleTranslation(textId) {
+            const transContainer = document.getElementById(`translation-${textId}`);
+            const transBtn = document.getElementById(`trans-btn-${textId}`);
+            if (!transContainer || !transBtn) return;
+
+            const textData = TEXTS.find(t => t.id === textId);
+            if (!textData) return;
+
+            // Wenn der Container leer ist, füllen und anzeigen
+            if (transContainer.innerHTML === '') {
+                transContainer.innerHTML = textData.text_de;
+                transContainer.style.display = 'block';
+                transBtn.textContent = '🙈 Cacher la traduction';
+                transBtn.classList.add('active');
+            } else { // Sonst nur die Sichtbarkeit umschalten
+                const isVisible = transContainer.style.display === 'block';
+                transContainer.style.display = isVisible ? 'none' : 'block';
+                transBtn.textContent = isVisible ? '🔎 Afficher la traduction' : '🙈 Cacher la traduction';
+                transBtn.classList.toggle('active');
+            }
+        }
+
+        // ==================== LOAD TEXTS ====================
+        async function loadTexts() {
+            const container = document.getElementById('textContainer');
+            try {
+                const response = await fetch(TEXTS_JSON_URL);
+                if (!response.ok) throw new Error('Échec de la récupération des textes');
+                TEXTS = await response.json();
+                generateLevels();
+                loadState();
+                updateUI();
+                renderTexts();
+            } catch (error) {
+                console.error('Erreur lors du chargement des textes:', error);
+                container.innerHTML = `<div class="error">Échec du chargement des textes.<br><small>${error.message}</small></div>`;
+            }
+        }
+
+        // ==================== CONTROLS ====================
+        document.getElementById('zoomSlider').addEventListener('input', applyZoom);
+        document.getElementById('fullscreenBtn').addEventListener('click', () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { document.exitFullscreen(); } });
+        document.addEventListener('fullscreenchange', () => { document.getElementById('fullscreenBtn').classList.toggle('active', !!document.fullscreenElement); });
+        let wakeLock = null;
+        const wakeLockBtn = document.getElementById('wakeLockBtn');
+        async function requestWakeLock() { try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); wakeLockBtn.classList.add('active'); wakeLock.addEventListener('release', () => { wakeLockBtn.classList.remove('active'); }); } } catch (err) { console.log('Erreur Wake Lock:', err); } }
+        async function releaseWakeLock() { if (wakeLock) { await wakeLock.release(); wakeLock = null; } }
+        wakeLockBtn.addEventListener('click', async () => { if (wakeLock) { await releaseWakeLock(); } else { await requestWakeLock(); } });
+        document.addEventListener('visibilitychange', async () => { if (document.visibilityState === 'visible' && wakeLockBtn.classList.contains('active')) { await requestWakeLock(); } });
+        document.getElementById('resetBtn').addEventListener('click', resetProgress);
+
+        // ==================== INIT (vor TTS, damit Texte IMMER geladen werden) ====================
+        loadTexts();
+
+        // ==================== TEXT-TO-SPEECH (FRANÇAIS) ====================
+        // Mit Opera/Chromium-Android-Fixes: Dummy-Utterance, Keepalive, Watchdog
+        let currentReadingId = null;
+        let currentSentenceIndex = 0;
+        let ttsInitialized = false;   // Dummy-Utterance wurde abgefeuert
+        let resumeTimer = null;       // Chromium-Keepalive
+        let watchdogTimer = null;     // Fallback wenn onend nicht feuert
+
+        function splitTextIntoSentences(text) { const result = text.match(/[^.!?]+[.!?]+/g); return result || [text]; }
+
+        function prepareSentences(textId) {
+            const text = TEXTS.find(t => t.id === textId); if (!text) return;
+            const container = document.getElementById(`text-${textId}`); if (!container) return;
+            const sents = splitTextIntoSentences(text.text);
+            container.innerHTML = sents.map((s, i) => `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`).join(' ');
+        }
+
+        function restoreText(textId) {
+            if (!textId) return;
+            const text = TEXTS.find(t => t.id === textId); if (!text) return;
+            const container = document.getElementById(`text-${textId}`); if (container) { container.innerHTML = text.text; }
+        }
+
+        function getVoiceForLanguage(langCode) {
+            try {
+                const voices = speechSynthesis.getVoices();
+                if (!voices.length) return null;
+                return voices.find(v => v.lang === langCode && v.name.toLowerCase().includes('google')) || voices.find(v => v.lang === langCode) || voices.find(v => v.lang.startsWith(langCode.split('-')[0] + '-')) || voices.find(v => v.lang === langCode.split('-')[0]) || null;
+            } catch (e) { return null; }
+        }
+
+        // --- Chromium-Keepalive: pause()/resume() alle 5s gegen den 15s-Stopp-Bug ---
+        function startResumeTimer() {
+            stopResumeTimer();
+            resumeTimer = setInterval(() => {
+                try {
+                    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+                        speechSynthesis.pause();
+                        speechSynthesis.resume();
+                    }
+                } catch (e) {}
+            }, 5000);
+        }
+        function stopResumeTimer() { if (resumeTimer) { clearInterval(resumeTimer); resumeTimer = null; } }
+
+        // --- Watchdog: erkennt wenn onend nicht feuert (häufig auf Opera Android) ---
+        function startWatchdog(textId, index, text) {
+            stopWatchdog();
+            const charCount = text.length;
+            const timeout = Math.max(charCount * 120 + 3000, 6000); // ~120ms/Zeichen + Puffer
+            watchdogTimer = setTimeout(() => {
+                if (currentReadingId === textId && !speechSynthesis.speaking) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
+            }, timeout);
+        }
+        function stopWatchdog() { if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; } }
+
+        function stopReading(andCleanup) {
+            stopResumeTimer();
+            stopWatchdog();
+            try { speechSynthesis.cancel(); } catch (e) {}
+            if (andCleanup && currentReadingId) {
+                const btn = document.getElementById(`read-btn-${currentReadingId}`);
+                if (btn) { btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute'; btn.classList.remove('playing'); }
+                restoreText(currentReadingId);
+                currentReadingId = null;
+            }
+        }
+
+        function clearHighlights(textId) { const container = document.getElementById(`text-${textId}`); if (container) { container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active')); } }
+        function highlightSentence(textId, index) { clearHighlights(textId); const sent = document.getElementById(`sent-${textId}-${index}`); if (sent) { sent.classList.add('active'); sent.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
+
+        function speakSentence(textId, index) {
+            if (currentReadingId !== textId) { restoreText(textId); return; }
+            const text = TEXTS.find(t => t.id === textId); if (!text) return;
+            const sents = splitTextIntoSentences(text.text);
+            if (index >= sents.length) {
+                stopReading(true);
+                return;
+            }
+
+            try {
+                // Kurze Pause nach cancel() — Opera braucht das
+                speechSynthesis.cancel();
+                setTimeout(() => {
+                    if (currentReadingId !== textId) return;
+                    const speedSlider = document.getElementById(`speed-${textId}`);
+                    const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+                    const sentText = sents[index].trim();
+                    const utterance = new SpeechSynthesisUtterance(sentText);
+                    utterance.lang = 'fr-FR';
+                    const voice = getVoiceForLanguage('fr-FR');
+                    if (voice) { utterance.voice = voice; }
+                    utterance.rate = speed;
+                    utterance.pitch = 1;
+
+                    let endFired = false;
+                    utterance.onstart = () => { highlightSentence(textId, index); };
+                    const continueReading = () => {
+                        if (endFired) return; // Doppel-Aufruf verhindern (onend + watchdog)
+                        endFired = true;
+                        stopWatchdog();
+                        if (currentReadingId === textId) {
+                            currentSentenceIndex = index + 1;
+                            speakSentence(textId, currentSentenceIndex);
+                        }
+                    };
+                    utterance.onend = continueReading;
+                    utterance.onerror = (event) => { if (event.error !== 'canceled') continueReading(); };
+
+                    speechSynthesis.speak(utterance);
+                    startWatchdog(textId, index, sentText);
+                }, 50);
+            } catch (e) {
+                console.warn('TTS speakSentence error:', e);
+                stopReading(true);
+            }
+        }
+
+        // --- Dummy-Utterance: weckt die TTS-Engine auf Opera/Chrome Android auf ---
+        function initTTSEngine(callback) {
+            if (ttsInitialized) { callback(); return; }
+            try {
+                const dummy = new SpeechSynthesisUtterance('');
+                dummy.volume = 0;
+                dummy.onend = () => { ttsInitialized = true; callback(); };
+                dummy.onerror = () => { ttsInitialized = true; callback(); };
+                speechSynthesis.speak(dummy);
+                // Fallback falls onend nicht feuert
+                setTimeout(() => { if (!ttsInitialized) { ttsInitialized = true; callback(); } }, 300);
+            } catch (e) { ttsInitialized = true; callback(); }
+        }
+
+        function toggleReadAloud(textId) {
+            if (!window.speechSynthesis || /OPR\//.test(navigator.userAgent)) {
+                alert('Die Sprachausgabe funktioniert in diesem Browser leider nicht. Bitte öffne die Seite in Chrome oder Firefox.');
+                return;
+            }
+            const btn = document.getElementById(`read-btn-${textId}`);
+            if (!btn) return;
+            try {
+                // Stopp wenn gleicher Text läuft
+                if (currentReadingId === textId) {
+                    stopReading(true);
+                    return;
+                }
+                // Stopp wenn anderer Text läuft
+                if (currentReadingId) {
+                    stopReading(true);
+                }
+
+                // Engine initialisieren (Dummy), dann starten
+                initTTSEngine(() => {
+                    currentReadingId = textId;
+                    currentSentenceIndex = 0;
+                    prepareSentences(textId);
+                    btn.innerHTML = '<span class="read-icon">⏹</span> Arrêter';
+                    btn.classList.add('playing');
+                    startResumeTimer();
+                    speakSentence(textId, 0);
+                });
+            } catch (e) {
+                console.warn('TTS toggleReadAloud error:', e);
+                btn.innerHTML = '<span class="read-icon">🔊</span> Lire à voix haute';
+                btn.classList.remove('playing');
+                restoreText(textId);
+                currentReadingId = null;
+            }
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('speed-slider')) {
+                const textId = e.target.id.replace('speed-', '');
+                const display = document.getElementById(`speed-display-${textId}`);
+                if (display) { display.textContent = e.target.value + 'x'; }
             }
         });
+
+        // TTS aufräumen wenn Seite verlassen wird
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && currentReadingId) { stopReading(true); } });
+
+        try { if (window.speechSynthesis) { speechSynthesis.onvoiceschanged = () => { getVoiceForLanguage('fr-FR'); }; } } catch (e) { /* TTS nicht verfügbar */ }
     </script>
 </body>
 </html>
