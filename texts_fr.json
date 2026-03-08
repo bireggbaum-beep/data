@@ -1,0 +1,354 @@
+[
+  {
+    "id": "fr_cr025_1",
+    "title": "Mon mercredi",
+    "title_de": "Mein Mittwoch",
+    "text": "Le mercredi, j'aime mes loisirs. Je joue dehors. Je fais du vélo. J'écoute de la musique sur mon ordinateur. J'adore lire une BD. C'est chouette. Je suis un garçon.",
+    "text_de": "Am Mittwoch mag ich meine Hobbys. Ich spiele draussen. Ich fahre Velo. Ich höre Musik auf meinem Computer. Ich liebe es, ein Comic zu lesen. Das ist toll. Ich bin ein Junge.",
+    "cr": 0.25, "xp": 10, "world": "real", "type": "Journal",
+    "vocab": [],
+    "questions": [ "Qu'est-ce que tu aimes faire le mercredi?", "Tu écoutes de la musique?", "Tu es un garçon ou une fille?" ]
+  },
+  {
+    "id": "fr_cr025_2",
+    "title": "La famille de Léo",
+    "title_de": "Léos Familie",
+    "text": "Voici la famille de Léo. Le père s'appelle Marc. La mère s'appelle Sophie. Léo a une sœur. Elle s'appelle Nathalie. Ils ont un bébé. Ce sont les parents de Léo. C'est une famille.",
+    "text_de": "Hier ist die Familie von Léo. Der Vater heisst Marc. Die Mutter heisst Sophie. Léo hat eine Schwester. Sie heisst Nathalie. Sie haben ein Baby. Das sind die Eltern von Léo. Das ist eine Familie.",
+    "cr": 0.25, "xp": 15, "world": "real", "type": "Description",
+    "vocab": [],
+    "questions": [ "Comment s'appelle le père de Léo?", "Léo a un frère?", "Qui est Nathalie?" ]
+  },
+  {
+    "id": "fr_cr025_3",
+    "title": "À l'école",
+    "title_de": "In der Schule",
+    "text": "Le lundi, j'ai les maths. J'aime calculer. Le mardi, j'ai le français. Je parle français. Je dessine une table et une chaise. Ouvre le livre! Range le cahier! J'adore l'école.",
+    "text_de": "Am Montag habe ich Mathe. Ich mag es zu rechnen. Am Dienstag habe ich Französisch. Ich spreche Französisch. Ich zeichne einen Tisch und einen Stuhl. Öffne das Buch! Räum das Heft weg! Ich liebe die Schule.",
+    "cr": 0.25, "xp": 15, "world": "real", "type": "École",
+    "vocab": [],
+    "questions": [ "Quelles matières as-tu le lundi?", "Est-ce que tu aimes dessiner?", "Parles-tu français?" ]
+  },
+  {
+    "id": "fr_cr025_4",
+    "title": "La cuisine",
+    "title_de": "Die Küche",
+    "text": "J'adore faire la cuisine. Ma mère et moi, nous sommes dans la cuisine. J'ouvre le livre de cuisine. C'est un grand livre. La cuisine, c'est mon hobby. C'est chouette.",
+    "text_de": "Ich liebe es zu kochen. Meine Mutter und ich, wir sind in der Küche. Ich öffne das Kochbuch. Es ist ein grosses Buch. Kochen ist mein Hobby. Das ist toll.",
+    "cr": 0.25, "xp": 15, "world": "real", "type": "Activité",
+    "vocab": [],
+    "questions": [ "Tu aimes faire la cuisine?", "Avec qui es-tu dans la cuisine?", "Le livre est grand ou petit?" ]
+  },
+  {
+    "id": "fr_cr025_5",
+    "title": "Mon frère",
+    "title_de": "Mein Bruder",
+    "text": "Voici mon frère. Il s'appelle Lionel. Il adore faire du foot. Il est le fils de mon père. Il est aussi le fils de ma mère. Lionel est mon grand frère. J'aime mon frère.",
+    "text_de": "Hier ist mein Bruder. Er heisst Lionel. Er liebt es, Fussball zu spielen. Er ist der Sohn meines Vaters. Er ist auch der Sohn meiner Mutter. Lionel ist mein grosser Bruder. Ich mag meinen Bruder.",
+    "cr": 0.25, "xp": 10, "world": "real", "type": "Famille",
+    "vocab": [],
+    "questions": [ "Comment s'appelle ton frère?", "Quel est son hobby?", "Lionel est ton petit ou grand frère?" ]
+  },
+  {
+    "id": "fr_cr05_1",
+    "title": "Le sport, c'est super!",
+    "title_de": "Sport ist super!",
+    "text": "J'adore le sport. Le mardi, je fais du foot avec mes amis. Le dimanche, je fais du vélo. Mon sport favori, c'est le foot. J'aime aussi nager. C'est super!",
+    "text_de": "Ich liebe Sport. Am Dienstag spiele ich Fussball mit meinen Freunden. Am Sonntag fahre ich Velo. Mein Lieblingssport ist Fussball. Ich mag es auch zu schwimmen. Das ist super!",
+    "cr": 0.5, "xp": 20, "world": "real", "type": "Hobby",
+    "vocab": [
+      ["avec", "mit"],
+      ["mon sport favori", "mein Lieblingssport"],
+      ["super", "super"]
+    ],
+    "questions": [ "Tu aimes le sport?", "Qu'est-ce que tu fais le mardi?", "Quel est ton sport favori?" ]
+  },
+  {
+    "id": "fr_cr05_2",
+    "title": "Mes animaux",
+    "title_de": "Meine Tiere",
+    "text": "J'adore les animaux. J'ai un chien et un chat. Le chien aime jouer dehors. Le chat est sur la table. Je suis fan de mes animaux, mais le chien est mon favori.",
+    "text_de": "Ich liebe Tiere. Ich habe einen Hund und eine Katze. Der Hund spielt gerne draussen. Die Katze ist auf dem Tisch. Ich bin ein Fan von meinen Tieren, aber der Hund ist mein Liebling.",
+    "cr": 0.5, "xp": 25, "world": "real", "type": "Description",
+    "vocab": [
+      ["le chien", "der Hund"],
+      ["le chat", "die Katze"],
+      ["mais", "aber"]
+    ],
+    "questions": [ "Tu as des animaux?", "Où est le chat?", "Quel est ton animal favori?" ]
+  },
+  {
+    "id": "fr_cr05_3",
+    "title": "Shopping pour l'école",
+    "title_de": "Einkaufen für die Schule",
+    "text": "Le samedi, je fais du shopping pour l'école. Je cherche un nouveau stylo et une gomme. J'aime les classeurs. Ma sœur cherche une trousse. C'est chouette!",
+    "text_de": "Am Samstag gehe ich für die Schule einkaufen. Ich suche einen neuen Kuli und einen Radiergummi. Ich mag Ordner. Meine Schwester sucht ein Etui. Das ist toll!",
+    "cr": 0.5, "xp": 25, "world": "real", "type": "Activité",
+    "vocab": [
+      ["pour", "für"],
+      ["chercher", "suchen"],
+      ["nouveau / nouvelle", "neu"]
+    ],
+    "questions": [ "Quand fais-tu du shopping?", "Qu'est-ce que tu cherches?", "Qu'est-ce que ta sœur cherche?" ]
+  },
+  {
+    "id": "fr_cr05_4",
+    "title": "La console de jeux",
+    "title_de": "Die Spielkonsole",
+    "text": "Mon frère a une nouvelle console. Il adore jouer. Le mercredi, je joue avec lui. C'est un bon jeu, mais c'est difficile. J'aime la console!",
+    "text_de": "Mein Bruder hat eine neue Konsole. Er liebt es zu spielen. Am Mittwoch spiele ich mit ihm. Es ist ein gutes Spiel, aber es ist schwierig. Ich mag die Konsole!",
+    "cr": 0.5, "xp": 30, "world": "dungeon", "type": "Médias",
+    "vocab": [
+      ["le jeu", "das Spiel"],
+      ["difficile", "schwierig"],
+      ["bon / bonne", "gut"]
+    ],
+    "questions": [ "Qui a une nouvelle console?", "Est-ce que le jeu est facile?", "Quand joues-tu avec ton frère?" ]
+  },
+  {
+    "id": "fr_cr05_5",
+    "title": "Mon oncle et ma tante",
+    "title_de": "Mein Onkel und meine Tante",
+    "text": "Voici mon oncle et ma tante. Ils sont les parents de ma cousine. Mon oncle s'appelle Paul. Ma tante s'appelle Marie. Ils sont très gentils. J'aime beaucoup ma famille.",
+    "text_de": "Hier sind mein Onkel und meine Tante. Sie sind die Eltern meiner Cousine. Mein Onkel heisst Paul. Meine Tante heisst Marie. Sie sind sehr nett. Ich mag meine Familie sehr.",
+    "cr": 0.5, "xp": 25, "world": "real", "type": "Famille",
+    "vocab": [
+      ["gentil / gentille", "nett"],
+      ["beaucoup", "sehr, viel"]
+    ],
+    "questions": [ "Qui sont Paul et Marie?", "Ils sont les parents de qui?", "Tu aimes ta famille?" ]
+  },
+  {
+    "id": "fr_cr05_6",
+    "title": "Le bricolage",
+    "title_de": "Das Basteln",
+    "text": "J'adore le bricolage. Le samedi, je bricole. Je fais un bricolage pour ma grand-mère. C'est chouette! Le bricolage, c'est mieux que la télé.",
+    "text_de": "Ich liebe das Basteln. Am Samstag bastle ich. Ich mache ein Bastelwerk für meine Grossmutter. Das ist toll! Basteln ist besser als der Fernseher.",
+    "cr": 0.5, "xp": 30, "world": "real", "type": "Créativité",
+    "vocab": [
+      ["bricoler", "basteln"],
+      ["mieux que", "besser als"]
+    ],
+    "questions": [ "Tu aimes le bricolage?", "Pour qui est le bricolage?", "C'est mieux que la télé?" ]
+  },
+  {
+    "id": "fr_cr05_dungeon_1",
+    "title": "La porte secrète",
+    "title_de": "Die geheime Tür",
+    "text": "Je suis dans un donjon. Il y a une grande porte. Je cherche une clé. Voilà une clé sur la table! J'ouvre la porte. C'est chouette!",
+    "text_de": "Ich bin in einem Kerker. Es gibt eine grosse Tür. Ich suche einen Schlüssel. Da ist ein Schlüssel auf dem Tisch! Ich öffne die Tür. Das ist toll!",
+    "cr": 0.5, "xp": 25, "world": "dungeon", "type": "Exploration",
+    "vocab": [
+      ["un donjon", "ein Kerker"],
+      ["une porte", "eine Tür"],
+      ["une clé", "ein Schlüssel"]
+    ],
+    "questions": [ "Où es-tu?", "Qu'est-ce que tu cherches?", "Qu'est-ce qu'il y a sur la table?" ]
+  },
+  {
+    "id": "fr_cr05_dungeon_2",
+    "title": "Le coffre au trésor",
+    "title_de": "Die Schatztruhe",
+    "text": "Il y a un grand coffre. C'est un coffre au trésor! J'adore les trésors. Mais le coffre est fermé. Je n'ai pas la clé!",
+    "text_de": "Es gibt eine grosse Truhe. Es ist eine Schatztruhe! Ich liebe Schätze. Aber die Truhe ist verschlossen. Ich habe den Schlüssel nicht!",
+    "cr": 0.5, "xp": 30, "world": "dungeon", "type": "Découverte",
+    "vocab": [
+      ["un coffre", "eine Truhe"],
+      ["un trésor", "ein Schatz"],
+      ["fermé / fermée", "geschlossen, verschlossen"]
+    ],
+    "questions": [ "Qu'est-ce qu'il y a?", "Le coffre est ouvert?", "Tu as la clé?" ]
+  },
+  {
+    "id": "fr_cr05_dungeon_3",
+    "title": "Le monstre endormi",
+    "title_de": "Das schlafende Monster",
+    "text": "Attention! Il y a un monstre. Le monstre est grand. Il dort. Chouette! Je marche doucement. C'est une aventure!",
+    "text_de": "Achtung! Es gibt ein Monster. Das Monster ist gross. Es schläft. Toll! Ich gehe leise. Das ist ein Abenteuer!",
+    "cr": 0.5, "xp": 30, "world": "dungeon", "type": "Danger",
+    "vocab": [
+      ["un monstre", "ein Monster"],
+      ["il dort (dormir)", "es schläft (schlafen)"],
+      ["doucement", "leise, sanft"]
+    ],
+    "questions": [ "Qu'est-ce qu'il y a?", "Le monstre est réveillé?", "Pourquoi marches-tu doucement?" ]
+  },
+  {
+    "id": "fr_cr05_dungeon_4",
+    "title": "L'épée magique",
+    "title_de": "Das magische Schwert",
+    "text": "Voici une épée. C'est une épée magique! Avec cette épée, je suis fort. Je ne suis plus un novice. C'est super!",
+    "text_de": "Hier ist ein Schwert. Es ist ein magisches Schwert! Mit diesem Schwert bin ich stark. Ich bin kein Anfänger mehr. Das ist super!",
+    "cr": 0.5, "xp": 35, "world": "dungeon", "type": "Objet",
+    "vocab": [
+      ["une épée", "ein Schwert"],
+      ["magique", "magisch"],
+      ["fort / forte", "stark"]
+    ],
+    "questions": [ "Qu'est-ce que tu trouves?", "L'épée est normale?", "Tu es fort maintenant?" ]
+  },
+  {
+    "id": "fr_cr05_dungeon_5",
+    "title": "Le passage secret",
+    "title_de": "Der Geheimgang",
+    "text": "Il y a une torche sur le mur. Le mur bouge! C'est un passage secret. Le passage est sombre. Mais je suis un aventurier!",
+    "text_de": "Es gibt eine Fackel an der Wand. Die Wand bewegt sich! Es ist ein Geheimgang. Der Gang ist dunkel. Aber ich bin ein Abenteurer!",
+    "cr": 0.5, "xp": 30, "world": "dungeon", "type": "Exploration",
+    "vocab": [
+      ["une torche", "eine Fackel"],
+      ["un passage secret", "ein Geheimgang"],
+      ["sombre", "dunkel"]
+    ],
+    "questions": [ "Qu'est-ce qu'il y a sur le mur?", "Le passage est sombre?", "Tu as peur?" ]
+  },
+  {
+    "id": "fr_cr1_1",
+    "title": "La passion de Nathalie",
+    "title_de": "Nathalies Leidenschaft",
+    "text": "Mon amie Nathalie a une passion. C'est l'équitation. Le vendredi, elle va au manège. Elle adore les chevaux. Moi, je déteste l'équitation, mais j'aime mon amie.",
+    "text_de": "Meine Freundin Nathalie hat eine Leidenschaft. Es ist das Reiten. Am Freitag geht sie in die Reitschule. Sie liebt Pferde. Ich, ich hasse Reiten, aber ich mag meine Freundin.",
+    "cr": 1, "xp": 35, "world": "real", "type": "Portrait",
+    "vocab": [
+      ["l'équitation (f)", "das Reiten"],
+      ["le manège", "die Reitschule"],
+      ["le cheval / les chevaux", "das Pferd / die Pferde"],
+      ["détester", "hassen"]
+    ],
+    "questions": [ "Quelle est la passion de Nathalie?", "Qu'est-ce qu'elle fait le vendredi?", "Tu aimes l'équitation?" ]
+  },
+  {
+    "id": "fr_cr1_2",
+    "title": "Au théâtre",
+    "title_de": "Im Theater",
+    "text": "Mes amis et moi, nous aimons le théâtre. Nous jouons une petite pièce. Je suis un acteur et mon amie est une actrice. J'adore jouer du théâtre parce que c'est ma passion.",
+    "text_de": "Meine Freunde und ich, wir mögen das Theater. Wir spielen ein kleines Stück. Ich bin ein Schauspieler und meine Freundin ist eine Schauspielerin. Ich liebe es, Theater zu spielen, weil es meine Leidenschaft ist.",
+    "cr": 1, "xp": 40, "world": "real", "type": "Activité",
+    "vocab": [
+      ["le théâtre", "das Theater"],
+      ["une pièce", "ein Theaterstück"],
+      ["un acteur / une actrice", "ein Schauspieler / eine Schauspielerin"],
+      ["parce que", "weil"]
+    ],
+    "questions": [ "Tu aimes le théâtre?", "Quel est ton rôle?", "Pourquoi aimes-tu le théâtre?" ]
+  },
+  {
+    "id": "fr_cr1_3",
+    "title": "Le hockey sur glace",
+    "title_de": "Das Eishockey",
+    "text": "Mon sport favori, c'est le hockey sur glace. C'est un sport rapide. Je joue dans une équipe. Le mercredi et le vendredi, j'ai un entraînement. J'adore le hockey!",
+    "text_de": "Mein Lieblingssport ist Eishockey. Es ist ein schneller Sport. Ich spiele in einer Mannschaft. Am Mittwoch und am Freitag habe ich ein Training. Ich liebe Eishockey!",
+    "cr": 1, "xp": 45, "world": "real", "type": "Sport",
+    "vocab": [
+      ["le hockey sur glace", "das Eishockey"],
+      ["rapide", "schnell"],
+      ["une équipe", "eine Mannschaft"],
+      ["un entraînement", "ein Training"]
+    ],
+    "questions": [ "Quel est ton sport favori?", "Quand as-tu l'entraînement?", "Tu joues dans une équipe?" ]
+  },
+  {
+    "id": "fr_cr1_4",
+    "title": "Le cirque",
+    "title_de": "Der Zirkus",
+    "text": "Le samedi, je vais au cirque avec ma famille. J'adore le cirque! Les acrobates grimpent et sautent. Un garçon fait du jonglage. C'est chouette!",
+    "text_de": "Am Samstag gehe ich mit meiner Familie in den Zirkus. Ich liebe den Zirkus! Die Akrobaten klettern und springen. Ein Junge jongliert. Das ist toll!",
+    "cr": 1, "xp": 50, "world": "dungeon", "type": "Aventure",
+    "vocab": [
+      ["le cirque", "der Zirkus"],
+      ["les acrobates", "die Akrobaten"],
+      ["grimper", "klettern"],
+      ["sauter", "springen"],
+      ["le jonglage", "das Jonglieren"]
+    ],
+    "questions": [ "Où vas-tu le samedi?", "Qu'est-ce que les acrobates font?", "Tu aimes le cirque?" ]
+  },
+  {
+    "id": "fr_cr1_5",
+    "title": "Garder des enfants",
+    "title_de": "Kinder hüten",
+    "text": "Parfois, je garde les enfants de ma tante. C'est mon petit cousin et ma petite cousine. Nous jouons dehors ou nous faisons du bricolage. J'aime beaucoup mes cousins.",
+    "text_de": "Manchmal hüte ich die Kinder meiner Tante. Es sind mein kleiner Cousin und meine kleine Cousine. Wir spielen draussen oder wir basteln. Ich mag meine Cousins sehr.",
+    "cr": 1, "xp": 40, "world": "real", "type": "Job",
+    "vocab": [
+      ["garder des enfants", "Kinder hüten"],
+      ["parfois", "manchmal"],
+      ["petit / petite", "klein"]
+    ],
+    "questions": [ "Qu'est-ce que tu fais parfois?", "Avec qui joues-tu?", "Tu aimes garder des enfants?" ]
+  },
+  {
+    "id": "fr_cr2_1",
+    "title": "Un dimanche au lac",
+    "title_de": "Ein Sonntag am See",
+    "text": "Dimanche, je vais à la pêche avec mon grand-père. Nous allons à un grand lac. Les poissons sont timides. Mon grand-père est patient. Quand un poisson mord, c'est très excitant! Mon grand-père est le meilleur!",
+    "text_de": "Am Sonntag gehe ich mit meinem Grossvater fischen. Wir gehen an einen grossen See. Die Fische sind schüchtern. Mein Grossvater ist geduldig. Wenn ein Fisch anbeisst, ist das sehr aufregend! Mein Grossvater ist der Beste!",
+    "cr": 2, "xp": 60, "world": "real", "type": "Histoire",
+    "vocab": [
+      ["la pêche", "das Fischen"],
+      ["un lac", "ein See"],
+      ["un poisson", "ein Fisch"],
+      ["timide", "schüchtern"],
+      ["patient / patiente", "geduldig"],
+      ["quand", "wenn"],
+      ["mordre / il mord", "beissen / er beisst"],
+      ["excitant", "aufregend"]
+    ],
+    "questions": [ "Qu'est-ce que tu fais le dimanche?", "Pourquoi faut-il être patient?", "Ton grand-père est un bon pêcheur?" ]
+  },
+  {
+    "id": "fr_cr2_2",
+    "title": "Visite au musée",
+    "title_de": "Besuch im Museum",
+    "text": "Aujourd'hui, notre classe visite un musée. On peut voir des choses anciennes. Il y a un arbre généalogique d'une grande famille. C'est intéressant, mais je préfère la gym parce que j'aime sauter et grimper.",
+    "text_de": "Heute besucht unsere Klasse ein Museum. Man kann alte Dinge sehen. Es hat einen Stammbaum einer grossen Familie. Das ist interessant, aber ich bevorzuge Turnen, weil ich gerne springe und klettere.",
+    "cr": 2, "xp": 70, "world": "dungeon", "type": "Sortie",
+    "vocab": [
+      ["visiter", "besuchen"],
+      ["un musée", "ein Museum"],
+      ["voir", "sehen"],
+      ["ancien / ancienne", "alt, antik"],
+      ["un arbre généalogique", "ein Stammbaum"],
+      ["intéressant", "interessant"],
+      ["je préfère", "ich bevorzuge"]
+    ],
+    "questions": [ "Où va la classe aujourd'hui?", "Qu'est-ce qu'on peut voir?", "Pourquoi préfères-tu la gym?" ]
+  },
+  {
+    "id": "fr_cr2_3",
+    "title": "Mon acteur favori",
+    "title_de": "Mein Lieblingsschauspieler",
+    "text": "Mon acteur favori joue dans des films. Il ne parle pas beaucoup, mais avec son visage il exprime tout. Je trouve que c'est difficile. Un jour, je veux être acteur aussi.",
+    "text_de": "Mein Lieblingsschauspieler spielt in Filmen. Er spricht nicht viel, aber mit seinem Gesicht drückt er alles aus. Ich finde, dass das schwierig ist. Eines Tages will ich auch Schauspieler sein.",
+    "cr": 2, "xp": 75, "world": "real", "type": "Culture",
+    "vocab": [
+      ["un acteur", "ein Schauspieler"],
+      ["un film", "ein Film"],
+      ["le visage", "das Gesicht"],
+      ["exprimer", "ausdrücken"],
+      ["tout", "alles"],
+      ["je trouve que", "ich finde, dass"],
+      ["un jour", "eines Tages"],
+      ["je veux", "ich will"]
+    ],
+    "questions": [ "Qu'est-ce que ton acteur favori fait?", "Comment exprime-t-il tout?", "Tu veux être acteur?" ]
+  },
+  {
+    "id": "fr_cr2_4",
+    "title": "Le secret de la forêt",
+    "title_de": "Das Geheimnis des Waldes",
+    "text": "Il y a une grande forêt. Un jour, j'explore la forêt avec mon frère. Nous marchons longtemps. Soudain, nous trouvons une vieille cabane. La porte est ouverte! Qu'est-ce qu'il y a à l'intérieur?",
+    "text_de": "Es gibt einen grossen Wald. Eines Tages erkunde ich den Wald mit meinem Bruder. Wir laufen lange. Plötzlich finden wir eine alte Hütte. Die Tür ist offen! Was ist im Inneren?",
+    "cr": 2, "xp": 80, "world": "dungeon", "type": "Aventure",
+    "vocab": [
+      ["une forêt", "ein Wald"],
+      ["explorer", "erkunden"],
+      ["marcher", "gehen, laufen"],
+      ["longtemps", "lange"],
+      ["soudain", "plötzlich"],
+      ["trouver", "finden"],
+      ["vieux / vieille", "alt"],
+      ["une cabane", "eine Hütte"]
+    ],
+    "questions": [ "Qu'est-ce qu'il y a?", "Avec qui explores-tu la forêt?", "Qu'est-ce que vous trouvez?" ]
+  }
+]
