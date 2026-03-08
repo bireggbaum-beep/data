@@ -1,0 +1,20 @@
+der progress wird aktuell nur lokal gespeichert und geht immer wieder verloren. ich möchte, dass er auf github gespeichert wird:
+In einer progress.json in meinem GitHub-Repository gespeichert wird.
+
+Erstelle eine Funktion in meinem JS-Teil, die das JSON-Objekt per GitHub-API hochlädt.
+
+Nutze einen Platzhalter für meinen GitHub-Token, den ich später einsetze.
+
+Füge eine Lade-Funktion hinzu, die beim Start der App den aktuellen Stand aus der progress.json von GitHub abruft. Das abrufen kann per rawlink funktionieren, nicht per api. 
+
+was brauchst du dazuder progress wird aktuell nur lokal gespeichert und geht immer wieder verloren. ich möchte, dass er auf github gespeichert wird:
+
+In einer progress.json in meinem GitHub-Repository gespeichert wird.
+
+Erstelle eine Funktion in meinem JS-Teil, die das JSON-Objekt per GitHub-API hochlädt.
+
+Nutze einen Platzhalter für meinen GitHub-Token, den ich später einsetze.
+
+Füge eine Lade-Funktion hinzu, die beim Start der App den aktuellen Stand aus der progress.json von GitHub abruft. Das abrufen kann per rawlink funktionieren, nicht per api. 
+
+was brauchst du dazu
