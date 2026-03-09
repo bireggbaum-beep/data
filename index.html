@@ -563,8 +563,11 @@
         // ╔════════════════════════════════════════════════════════════════╗
         // ║  GITHUB CONFIG - Progress Sync                                  ║
         // ╚════════════════════════════════════════════════════════════════╝
-        // TODO: Token vor Veröffentlichung entfernen!
-        const GITHUB_TOKEN = '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'; 
+        // Token NICHT im Repository speichern.
+        // Lege ihn lokal ab, z.B. in der Browser-Konsole:
+        // localStorage.setItem('github_token_b64', btoa('YOUR_PERSONAL_ACCESS_TOKEN'))
+        const encoded = localStorage.getItem('github_token_b64') || '';
+        const GITHUB_TOKEN = encoded ? atob(encoded) : '';
         const GITHUB_REPO = 'bireggbaum-beep/data';
         const PROGRESS_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/progress.json`;
         const PROGRESS_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/progress.json`;
