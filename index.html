@@ -561,19 +561,12 @@
         const TEXTS_JSON_URL = 'https://raw.githubusercontent.com/bireggbaum-beep/data/main/texts.json';
 
         // ╔════════════════════════════════════════════════════════════════╗
-        // ║  GITHUB CONFIG - Progress Sync                                  ║
+        // ║  AIRTABLE CONFIG - Progress Sync                               ║
         // ╚════════════════════════════════════════════════════════════════╝
-        // Token NICHT im Repository speichern.
-        // Lege ihn lokal ab, z.B. in der Browser-Konsole:
-        // localStorage.setItem('github_token_b64', btoa('YOUR_PERSONAL_ACCESS_TOKEN'))
-        const encoded = localStorage.getItem('github_token_b64') || '';
-        const GITHUB_TOKEN = encoded ? atob(encoded) : '';
-        const GITHUB_REPO = 'bireggbaum-beep/data';
-        const PROGRESS_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/progress.json`;
-        const PROGRESS_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/progress.json`;
-
-        // ==================== GITHUB SYNC STATE ====================
-        let lastSavedHash = '';
+        const AIRTABLE_API_URL = 'https://api.airtable.com/v0/appgWZEpl9pGBmZbk/progress';
+        const AIRTABLE_TOKEN = 'patPLnPw8FTuQVPWw.bd0bc8db1415af5f2f7b16fd5cd20971cc637ca21681b6933843fb04deaa9f0e';
+        
+        let currentRecordId = null;
         let saveIndicatorTimeout = null;
         
         function showSaveIndicator(success, message) {
@@ -590,106 +583,95 @@
             }, 3000);
         }
 
-        // ==================== GITHUB LOAD ====================
-        async function loadProgressFromGitHub() {
+        // ==================== AIRTABLE SAVE ====================
+        async function saveProgressToAirtable() {
             try {
-                const response = await fetch(PROGRESS_RAW_URL);
-                if (!response.ok) {
-                    console.log('No progress found on GitHub, using local state');
-                    return false;
-                }
-                
-                const data = await response.json();
-                
-                // Validate and merge data
-                if (data && typeof data.xp === 'number' && Array.isArray(data.completedTexts)) {
-                    // Compare with local state - prefer higher progress
-                    if (data.xp > gameState.xp || (data.completedTexts.length > gameState.completedTexts.length)) {
-                        gameState.xp = Math.max(gameState.xp, data.xp || 0);
-                        gameState.level = Math.max(gameState.level, data.level || 1);
-                        
-                        // Merge completed texts (union)
-                        const localCompleted = new Set(gameState.completedTexts);
-                        (data.completedTexts || []).forEach(id => localCompleted.add(id));
-                        gameState.completedTexts = Array.from(localCompleted);
-                        
-                        console.log('Progress loaded from GitHub:', gameState);
-                        return true;
-                    }
-                }
-                return false;
-            } catch (error) {
-                console.error('Failed to load progress from GitHub:', error);
-                return false;
-            }
-        }
-
-        // ==================== GITHUB SAVE ====================
-        async function saveProgressToGitHub() {
-            try {
-                // First, get the current file info to get SHA
-                let sha = lastSavedHash;
-                
-                if (!sha) {
-                    try {
-                        const getResponse = await fetch(PROGRESS_API_URL, {
-                            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-                        });
-                        if (getResponse.ok) {
-                            const fileData = await getResponse.json();
-                            sha = fileData.sha;
-                        }
-                    } catch (e) {
-                        console.log('No existing progress file, will create new one');
-                    }
-                }
-                
                 const progressData = {
-                    xp: gameState.xp,
-                    level: gameState.level,
-                    completedTexts: gameState.completedTexts,
-                    lastSaved: new Date().toISOString()
+                    fields: {
+                        "Level": gameState.level,
+                        "Score": gameState.xp,
+                        "Datum": new Date().toISOString(),
+                        "completedTexts": JSON.stringify(gameState.completedTexts || [])
+                    }
                 };
                 
-                const content = btoa(JSON.stringify(progressData, null, 2));
+                let url = AIRTABLE_API_URL;
+                let method = 'POST';
                 
-                const saveOptions = {
-                    method: 'PUT',
+                // If we have a record ID, use PATCH to update
+                if (currentRecordId) {
+                    url = `${AIRTABLE_API_URL}/${currentRecordId}`;
+                    method = 'PATCH';
+                }
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        message: 'Update progress',
-                        content: content,
-                        sha: sha || undefined
-                    })
-                };
-                
-                const response = await fetch(PROGRESS_API_URL, saveOptions);
+                    body: JSON.stringify(progressData)
+                });
                 
                 if (response.ok) {
                     const result = await response.json();
-                    lastSavedHash = result.content.sha;
-                    showSaveIndicator(true, 'Saved!');
-                    console.log('Progress saved to GitHub:', progressData);
+                    // Store the record ID for future updates
+                    if (!currentRecordId && result.id) {
+                        currentRecordId = result.id;
+                    }
+                    showSaveIndicator(true, 'Saved to Airtable!');
+                    console.log('Progress saved to Airtable:', progressData);
                     return true;
                 } else {
                     const error = await response.text();
-                    console.error('GitHub save failed:', error);
+                    console.error('Airtable save failed:', error);
                     showSaveIndicator(false, 'Save failed');
                     return false;
                 }
             } catch (error) {
-                console.error('Failed to save to GitHub:', error);
+                console.error('Failed to save to Airtable:', error);
                 showSaveIndicator(false, 'Save failed');
                 return false;
             }
         }
 
+        // ==================== AIRTABLE LOAD ====================
+        async function loadProgressFromAirtable() {
+            try {
+                const response = await fetch(`${AIRTABLE_API_URL}?maxRecords=1&sort[0][field]=Datum&sort[0][direction]=desc`, {
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log('No progress found in Airtable, using local state');
+                    return false;
+                }
+                
+                const data = await response.json();
+                if (data.records && data.records.length > 0) {
+                    const record = data.records[0].fields;
+                    gameState.level = record.Level || 1;
+                    gameState.xp = record.Score || 0;
+                    try {
+                        gameState.completedTexts = record.completedTexts ? JSON.parse(record.completedTexts) : [];
+                    } catch (e) {
+                        gameState.completedTexts = [];
+                    }
+                    currentRecordId = data.records[0].id;
+                    
+                    console.log('Progress loaded from Airtable:', gameState, 'Record ID:', currentRecordId);
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Failed to load progress from Airtable:', error);
+                return false;
+            }
+        }
+
         // ==================== CONFIG ====================
-        // Fixe XP-Schwellen basierend auf verfügbaren Texten pro CR
-        // CR ¼: 70 XP | CR ½: 195 XP | CR 1: 485 XP | CR 2: 790 XP | CR 3: 600 XP
         const FIXED_LEVELS = [
             { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
             { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprentice" },
@@ -710,24 +692,18 @@
 
         // ==================== STORAGE ====================
         function saveState() {
-            localStorage.setItem('codex_of_shadows_progress', JSON.stringify(gameState));
+            // Progress is stored in Airtable only
         }
 
         function loadState() {
-            const saved = localStorage.getItem('codex_of_shadows_progress');
-            if (saved) {
-                try {
-                    gameState = JSON.parse(saved);
-                } catch (e) {
-                    console.error('Failed to load state:', e);
-                }
-            }
+            gameState = { xp: 0, level: 1, completedTexts: [] };
         }
 
         function resetProgress() {
             if (confirm('Reset all progress? XP and completed texts will be lost!')) {
                 gameState = { xp: 0, level: 1, completedTexts: [] };
                 saveState();
+                saveProgressToAirtable();
                 updateUI();
                 renderTexts();
             }
@@ -737,10 +713,7 @@
         function generateLevels() {
             CR_LEVELS = [...new Set(TEXTS.map(t => t.cr))].sort((a, b) => a - b);
             WORLDS = [...new Set(TEXTS.map(t => t.world))];
-
-            // Verwende fixe Levels
             LEVELS = FIXED_LEVELS;
-
             generateFilterButtons();
         }
 
@@ -822,12 +795,10 @@
         async function checkLevelUp() {
             for (let i = LEVELS.length - 1; i >= 0; i--) {
                 if (gameState.xp >= LEVELS[i].xpRequired && gameState.level < LEVELS[i].level) {
-                    const oldLevel = gameState.level;
                     gameState.level = LEVELS[i].level;
                     saveState();
                     showLevelUp(LEVELS[i]);
-                    // Save to GitHub on level up
-                    saveProgressToGitHub();
+                    saveProgressToAirtable();
                     return true;
                 }
             }
@@ -860,13 +831,12 @@
             gameState.xp += text.xp;
             saveState();
             
-            if (!checkLevelUp()) {
+            if (!(await checkLevelUp())) {
                 updateUI();
                 renderTexts();
             }
             
-            // Save progress to GitHub after marking as read
-            saveProgressToGitHub();
+            saveProgressToAirtable();
         }
 
         // ==================== UI ====================
@@ -999,9 +969,8 @@
                 TEXTS = await response.json();
                 generateLevels();
                 
-                // First load local state, then try to merge with GitHub
                 loadState();
-                await loadProgressFromGitHub();
+                await loadProgressFromAirtable();
                 
                 updateUI();
                 renderTexts();
@@ -1071,7 +1040,6 @@
         let currentSentenceIndex = 0;
 
         function splitTextIntoSentences(text) {
-            // Splittet bei . ! ? aber behält die Satzzeichen
             const result = text.match(/[^.!?]+[.!?]+/g);
             return result || [text];
         }
@@ -1102,7 +1070,6 @@
         function getEnglishVoice() {
             const voices = speechSynthesis.getVoices();
             
-            // Priorisierte Suche nach englischer Stimme
             const englishVoice = 
                 voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('google')) ||
                 voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('google')) ||
@@ -1131,7 +1098,6 @@
         }
 
         function speakSentence(textId, index) {
-            // Abbruchbedingung: Wenn der aktuelle Vorlese-Job nicht mehr dieser Text ist, stoppen.
             if (currentReadingId !== textId) {
                 restoreText(textId);
                 return;
@@ -1142,7 +1108,6 @@
 
             const sents = splitTextIntoSentences(text.text);
             if (index >= sents.length) {
-                // Ende der Wiedergabe erreicht
                 const btn = document.getElementById(`read-btn-${textId}`);
                 if (btn) {
                     btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
@@ -1157,7 +1122,7 @@
             const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
 
             const utterance = new SpeechSynthesisUtterance(sents[index].trim());
-            utterance.lang = 'en-GB'; // Sprache explizit setzen
+            utterance.lang = 'en-GB';
 
             const voice = getEnglishVoice();
             if (voice) {
@@ -1171,10 +1136,7 @@
                 highlightSentence(textId, index);
             };
 
-            // WICHTIG: Diese Funktion wird aufgerufen, wenn der Satz fertig ist ODER ein Fehler auftrat.
-            // Dies stellt sicher, dass die Wiedergabe zum nächsten Satz übergeht.
             const continueReading = () => {
-                // Nur fortfahren, wenn der Vorlese-Job noch aktiv ist
                 if (currentReadingId === textId) {
                     currentSentenceIndex = index + 1;
                     speakSentence(textId, currentSentenceIndex);
@@ -1184,18 +1146,15 @@
             utterance.onend = continueReading;
             utterance.onerror = (event) => {
                 console.error('SpeechSynthesis Error:', event.error);
-                // Trotz Fehler versuchen, mit dem nächsten Satz fortzufahren
                 continueReading();
             };
 
             speechSynthesis.speak(utterance);
         }
 
-
         function toggleReadAloud(textId) {
             const btn = document.getElementById(`read-btn-${textId}`);
             
-            // Wenn gerade dieser Text vorgelesen wird -> stoppen
             if (currentReadingId === textId && speechSynthesis.speaking) {
                 speechSynthesis.cancel();
                 btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
@@ -1205,7 +1164,6 @@
                 return;
             }
             
-            // Anderen Text stoppen falls einer läuft
             if (speechSynthesis.speaking) {
                 speechSynthesis.cancel();
                 const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
@@ -1216,7 +1174,6 @@
                 restoreText(currentReadingId);
             }
             
-            // Start - erst jetzt Text in Sätze aufteilen
             currentReadingId = textId;
             currentSentenceIndex = 0;
             prepareSentences(textId);
@@ -1225,7 +1182,6 @@
             speakSentence(textId, 0);
         }
 
-        // Speed slider event listeners
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('speed-slider')) {
                 const textId = e.target.id.replace('speed-', '');
@@ -1236,7 +1192,6 @@
             }
         });
 
-        // Voices laden
         speechSynthesis.onvoiceschanged = () => {
             getEnglishVoice();
         };
