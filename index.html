@@ -1058,6 +1058,12 @@
         let currentReadingId = null;
         let currentSentenceIndex = 0;
 
+        const speechSynthesisApi = 'speechSynthesis' in window ? window.speechSynthesis : null;
+
+        function isSpeechSynthesisSupported() {
+            return !!speechSynthesisApi;
+        }
+
         function splitTextIntoSentences(text) {
             const result = text.match(/[^.!?]+[.!?]+/g);
             return result || [text];
@@ -1087,6 +1093,7 @@
         }
 
         function getEnglishVoice() {
+            if (!speechSynthesisApi) return null;
             const voices = speechSynthesis.getVoices();
             
             const englishVoice = 
@@ -1117,6 +1124,7 @@
         }
 
         function speakSentence(textId, index) {
+            if (!speechSynthesisApi) return;
             if (currentReadingId !== textId) {
                 restoreText(textId);
                 return;
@@ -1168,11 +1176,14 @@
                 continueReading();
             };
 
-            speechSynthesis.speak(utterance);
+            speechSynthesisApi.speak(utterance);
         }
 
         function toggleReadAloud(textId) {
             const btn = document.getElementById(`read-btn-${textId}`);
+            if (!isSpeechSynthesisSupported() || !btn) {
+                return;
+            }
             
             if (currentReadingId === textId && speechSynthesis.speaking) {
                 speechSynthesis.cancel();
