@@ -689,6 +689,8 @@
         let gameState = { xp: 0, level: 1, completedTexts: [] };
         let activeWorldFilter = 'all';
         let activeCrFilter = 'all';
+        let isLoading = true;
+        let isInitialized = false;
 
         // ==================== STORAGE ====================
         function saveState() {
@@ -824,6 +826,11 @@
 
         // ==================== COMPLETE TEXT ====================
         async function completeText(textId) {
+            if (isLoading || !isInitialized) {
+                console.warn('Cannot complete text while loading');
+                return;
+            }
+            
             const text = TEXTS.find(t => t.id === textId);
             if (!text || isTextCompleted(text)) return;
 
@@ -945,6 +952,11 @@
         }
 
         function toggleCard(id) {
+            if (isLoading || !isInitialized) {
+                console.warn('Cannot toggle card while loading');
+                return;
+            }
+            
             const content = document.getElementById(`content-${id}`);
             if (content) {
                 content.classList.toggle('open');
@@ -963,6 +975,8 @@
             const container = document.getElementById('textContainer');
             
             try {
+                container.innerHTML = '<div class="loading">Loading texts...</div>';
+                
                 const response = await fetch(TEXTS_JSON_URL);
                 if (!response.ok) throw new Error('Failed to fetch texts');
                 
@@ -974,9 +988,14 @@
                 
                 updateUI();
                 renderTexts();
+                isLoading = false;
+                isInitialized = true;
+                return true;
             } catch (error) {
                 console.error('Error loading texts:', error);
                 container.innerHTML = `<div class="error">Failed to load texts.<br><small>${error.message}</small></div>`;
+                isLoading = false;
+                return false;
             }
         }
 
