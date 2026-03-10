@@ -977,7 +977,7 @@
             try {
                 container.innerHTML = '<div class="loading">Loading texts...</div>';
                 
-                const response = await fetch(TEXTS_JSON_URL);
+                const response = await fetch(TEXTS_JSON_URL + '?v=' + Date.now());
                 if (!response.ok) throw new Error('Failed to fetch texts');
                 
                 TEXTS = await response.json();
@@ -1216,7 +1216,7 @@
         };
 
         // ==================== INIT ====================
-        loadTexts();
+        window.addEventListener('DOMContentLoaded', loadTexts);
     </script>
 </body>
 </html>
