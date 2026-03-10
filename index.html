@@ -565,6 +565,7 @@
         // ╚════════════════════════════════════════════════════════════════╝
         const AIRTABLE_API_URL = 'https://api.airtable.com/v0/appgWZEpl9pGBmZbk/progress';
         const AIRTABLE_TOKEN = 'patPLnPw8FTuQVPWw.bd0bc8db1415af5f2f7b16fd5cd20971cc637ca21681b6933843fb04deaa9f0e';
+        window.addEventListener('DOMContentLoaded', loadTexts);
         
         let currentRecordId = null;
         let saveIndicatorTimeout = null;
@@ -1124,59 +1125,63 @@
         }
 
         function speakSentence(textId, index) {
-            if (!speechSynthesisApi) return;
-            if (currentReadingId !== textId) {
-                restoreText(textId);
-                return;
-            }
-
-            const text = TEXTS.find(t => t.id === textId);
-            if (!text) return;
-
-            const sents = splitTextIntoSentences(text.text);
-            if (index >= sents.length) {
-                const btn = document.getElementById(`read-btn-${textId}`);
-                if (btn) {
-                    btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-                    btn.classList.remove('playing');
+            try {
+                if (!speechSynthesisApi) return;
+                const voice = getEnglishVoice();
+                if (currentReadingId !== textId) {
+                    restoreText(textId);
+                    return;
                 }
-                restoreText(textId);
-                currentReadingId = null;
-                return;
-            }
 
-            const speedSlider = document.getElementById(`speed-${textId}`);
-            const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+                const text = TEXTS.find(t => t.id === textId);
+                if (!text) return;
 
-            const utterance = new SpeechSynthesisUtterance(sents[index].trim());
-            utterance.lang = 'en-GB';
-
-            const voice = getEnglishVoice();
-            if (voice) {
-                utterance.voice = voice;
-            }
-
-            utterance.rate = speed;
-            utterance.pitch = 1;
-
-            utterance.onstart = () => {
-                highlightSentence(textId, index);
-            };
-
-            const continueReading = () => {
-                if (currentReadingId === textId) {
-                    currentSentenceIndex = index + 1;
-                    speakSentence(textId, currentSentenceIndex);
+                const sents = splitTextIntoSentences(text.text);
+                if (index >= sents.length) {
+                    const btn = document.getElementById(`read-btn-${textId}`);
+                    if (btn) {
+                        btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                        btn.classList.remove('playing');
+                    }
+                    restoreText(textId);
+                    currentReadingId = null;
+                    return;
                 }
-            };
 
-            utterance.onend = continueReading;
-            utterance.onerror = (event) => {
-                console.error('SpeechSynthesis Error:', event.error);
-                continueReading();
-            };
+                const speedSlider = document.getElementById(`speed-${textId}`);
+                const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
 
-            speechSynthesisApi.speak(utterance);
+                const utterance = new SpeechSynthesisUtterance(sents[index].trim());
+                utterance.lang = 'en-GB';
+
+                if (voice) {
+                    utterance.voice = voice;
+                }
+
+                utterance.rate = speed;
+                utterance.pitch = 1;
+
+                utterance.onstart = () => {
+                    highlightSentence(textId, index);
+                };
+
+                const continueReading = () => {
+                    if (currentReadingId === textId) {
+                        currentSentenceIndex = index + 1;
+                        speakSentence(textId, currentSentenceIndex);
+                    }
+                };
+
+                utterance.onend = continueReading;
+                utterance.onerror = (event) => {
+                    console.error('SpeechSynthesis Error:', event.error);
+                    continueReading();
+                };
+
+                speechSynthesisApi.speak(utterance);
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         function toggleReadAloud(textId) {
@@ -1222,12 +1227,8 @@
             }
         });
 
-        speechSynthesis.onvoiceschanged = () => {
-            getEnglishVoice();
-        };
-
         // ==================== INIT ====================
-        window.addEventListener('DOMContentLoaded', loadTexts);
+        // Removed; listener now registered closer to TEXTS consts.
     </script>
 </body>
 </html>
