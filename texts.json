@@ -385,64 +385,64 @@
       "What can the different eyes do?"
     ]
   },
-{
-    "id": "fallen_pillar",
-    "title": "The Fallen Pillar",
+ {
+    "id": "pit_trap_victim",
+    "title": "The Pit Trap Victim",
     "type": "Encounter",
     "world": "dungeon",
     "unit": "YW3_U3",
-    "cr": 0.25,
-    "xp": 29,
-    "text": "There is a man in the dungeon. He is under a big stone pillar. The pillar is on his leg. He is hurt and has pain. His face is white. He cannot move.\n\nThis is an emergency. You must stay calm and help him. You push the pillar. It is heavy. You push again and again. It moves. The man is free.\n\nHis leg is injured but he is safe now. You help him walk out. He is slow but he can move. Someone must look at his injury.",
-    "vocab": [["pillar", "Säule"], ["to push", "stossen"], ["heavy", "schwer"]],
-    "questions": ["Where is the pillar?", "Why is the man's face white?", "What do you do when someone is hurt?"]
-  },
-  {
-    "id": "bike_crash",
-    "title": "The Bike Crash",
-    "type": "Daily Life",
-    "world": "real",
-    "unit": "YW3_U3",
     "cr": 0.5,
-    "xp": 58,
-    "text": "It is Monday morning. You ride your bike to school. A cyclist rides next to you. He is very fast. If he does not stop, there is an accident.\n\nThe cyclist hits a stone and falls. He is on the ground. His arm is injured and there is blood on his knee. He has pain. \"Don't panic,\" you say. \"Stay calm!\"\n\nYou take your mobile phone and call for help. You call an ambulance. \"A cyclist is hurt,\" you tell them. An adult stops and helps too. Everyone waits.\n\nThe ambulance arrives. The driver asks: \"What happened?\" You say: \"He fell from his bike.\" The cyclist is safe now.",
-    "vocab": [["to hit", "treffen/aufprallen"], ["ground", "Boden"], ["to arrive", "ankommen"]],
-    "questions": ["What is injured on the cyclist?", "Why is it important to stay calm after an accident?", "What would you do if you see an accident on the way to school?"]
+    "xp": 60,
+    "text": "You hear a voice from below. There is a pit in the floor. The wooden cover is broken. You look down. A halfling sits at the bottom. His leg is injured and there is blood on his knee. 'Help me,' he says. 'My leg is broken. I cannot climb out.' The pit is three metres deep. If you have a rope, you can pull him up. But you must be careful. If you pull too fast, his leg gets worse. 'Stay calm,' you tell him. He nods. His face is white with pain.",
+    "vocab": [["pit", "Grube"], ["halfling", "Halbling"], ["rope", "Seil"], ["nod", "nicken"]],
+    "questions": ["How deep is the pit?", "Why can the halfling not climb out?", "What happens if you pull the rope too fast?"]
   },
   {
-    "id": "dungeon_collapse",
-    "title": "The Dungeon Collapse",
-    "type": "Encounter",
+    "id": "acid_pool",
+    "title": "The Acid Pool",
+    "type": "Environmental Hazard",
     "world": "dungeon",
     "unit": "YW3_U3",
     "cr": 1,
     "xp": 115,
-    "text": "You walked through the dungeon with your friend. The walls were old and the ceiling was low. \"Be careful,\" you said. \"This place is dangerous.\"\n\nThen it happened. A big rock fell from the ceiling and hit the ground. Dust was everywhere. When you looked around, your friend was on the floor. She was injured. There was blood on her arm and she had terrible pain.\n\n\"Don't panic,\" you said. \"Stay calm. I will help you.\" You checked her injury. Her arm was hurt but not broken. \"You should not move it,\" you told her. \"Someone must help us.\"\n\nYou called for help. After a long time, you heard voices. \"What happened?\" someone asked. \"A rock fell on my friend,\" you said. Everyone worked together. They carried your friend to safety.",
-    "vocab": [["ceiling", "Decke"], ["dust", "Staub"], ["careful", "vorsichtig"], ["to check", "überprüfen"], ["to carry", "tragen"]],
-    "questions": ["What fell from the ceiling?", "Why did the narrator say 'You should not move it'?", "How do you stay calm in a dangerous situation?"]
+    "text": "The room smelled terrible. Green liquid covered the floor. Brin walked in first. After three steps, he screamed. The liquid was acid. It burned through his boots into his skin. He ran back but the damage was done. His feet were badly injured and the skin was red and raw.\n\n'How bad is it?' Maren asked. Brin sat down on a dry stone. 'Bad,' he said through his teeth. Maren poured water over his feet and wrapped them in cloth. 'You should not walk on these,' she said.\n\nBut they were deep in the dungeon. No one came to help them. Brin looked at the dark corridor ahead. 'Give me a stick,' he said. 'I can walk.'",
+    "vocab": [["acid", "Säure"], ["liquid", "Flüssigkeit"], ["raw", "wund, offen"], ["pour", "giessen"], ["wrap", "wickeln, einwickeln"]],
+    "questions": ["What burned Brin's feet?", "What did Maren do to help Brin?", "Why does Brin ask for a stick?"]
   },
   {
-    "id": "temple_fire",
-    "title": "Fire at the Temple",
+    "id": "wounded_runner",
+    "title": "The Wounded Runner",
     "type": "Encounter",
     "world": "greece",
     "unit": "YW3_U3",
     "cr": 1,
     "xp": 115,
-    "text": "A fire started at the old temple in the city. The smoke was thick and people ran in all directions. \"Call for help!\" someone shouted. \"Where is the fire brigade?\"\n\nAn old priest was still inside the temple. He was hurt. A young girl saw him through the smoke. \"I have to help him,\" she said. She ran into the temple because no one else moved.\n\nInside, she found the priest on the floor. He was injured and could not walk. \"Stay calm,\" she told him. \"I will get you out.\" She put his arm around her shoulder and they walked slowly to the door.\n\nOutside, everyone waited. An adult called for the fire brigade. The girl was tired but the priest was safe. \"Thank you,\" he said. \"You saved my life.\"",
-    "vocab": [["smoke", "Rauch"], ["thick", "dicht"], ["shoulder", "Schulter"], ["to save", "retten"]],
-    "questions": ["Who was still inside the temple?", "Why did the girl run into the burning temple?", "Do you think the girl was brave or foolish? Why?"]
+    "text": "A man ran through the gate of the village. His clothes were torn and there was blood on his arm. He fell on his knees. 'The Persians,' he said. 'They burned Eretria. Everyone is dead.'\n\nThe elder came to him. 'What happened?' he asked.\n\n'An arrow,' the man said. He turned. The arrow was still in his shoulder. The wound looked dangerous.\n\n'Someone get the healer!' the elder shouted. No one moved. Then a girl ran to the well and came back with water. The healer arrived with herbs and a knife. 'You have to stay still,' she told the man. 'If you move, the arrow goes deeper.'\n\nThe man closed his eyes. 'Tell Athens,' he said. 'They must know.'",
+    "vocab": [["torn", "zerrissen"], ["elder", "Dorfältester"], ["arrow", "Pfeil"], ["wound", "Wunde"], ["herbs", "Kräuter"], ["well", "Brunnen"]],
+    "questions": ["Where is the arrow in the man's body?", "What happened to the city of Eretria?", "Why must the man not move?"]
   },
   {
-    "id": "mountain_fall",
-    "title": "Mountain Rescue",
-    "type": "Daily Life",
-    "world": "real",
+    "id": "crashed_chariot",
+    "title": "The Crashed Chariot",
+    "type": "Encounter",
+    "world": "greece",
     "unit": "YW3_U3",
     "cr": 2,
     "xp": 230,
-    "text": "Last Saturday, our class went on a trip to the mountains. The weather was nice and everyone was happy. We were walking on a narrow path when it happened.\n\nTom slipped on a wet rock and fell. He screamed. When we reached him, his ankle looked strange. He was injured and had terrible pain. \"Something is broken,\" said our teacher. \"No one should move him.\"\n\nShe called an ambulance on her mobile phone. She said that a boy was hurt and could not walk. While we waited, she told us what to do. \"Stay calm. Someone give me a jacket. It is better to keep him warm.\"\n\nThe ambulance came after twenty minutes. The driver checked Tom's injury. \"You should not walk on this,\" he said. They carried him down the mountain.\n\nTom was safe. At school on Monday, everyone signed his cast. He said it was the worst and the best day of his life.",
-    "vocab": [["narrow", "eng/schmal"], ["path", "Weg"], ["to slip", "ausrutschen"], ["ankle", "Knöchel"], ["to scream", "schreien"], ["cast", "Gips"]],
-    "questions": ["What happened to Tom on the mountain path?", "Why did the teacher say 'No one should move him'?", "Tom said it was 'the best day' — what do you think he meant?"]
+    "text": "The chariot race was almost over when Demetrios lost control. His wheel hit a stone and the chariot flipped. The horses ran free. Demetrios was lying in the dust. He was not moving.\n\nThe crowd went silent. Then everyone started shouting. 'Someone help him!' a woman cried. A man jumped over the wall and ran to the track. 'Don't move him!' he called. 'His back might be injured.'\n\nA physician pushed through the crowd. While everyone else was panicking, he knelt beside Demetrios and checked his body. The arm was broken and there was a deep wound on his head. Blood ran down his face.\n\n'Is he unconscious?' the man asked.\n\n'No,' said the physician. 'He is awake. But he is in shock.' He turned to the crowd. 'I need clean cloth, water, and two straight sticks for his arm. Now.'\n\nDemetrios opened one eye. 'Did I win?' he asked.\n\n'You are alive,' said the physician. 'That is enough.'",
+    "vocab": [["chariot", "Streitwagen"], ["wheel", "Rad"], ["flip", "umkippen, überschlagen"], ["crowd", "Menschenmenge"], ["physician", "Arzt"], ["knelt", "kniete"], ["shock", "Schock"], ["straight", "gerade"]],
+    "questions": ["What caused the chariot to crash?", "What does the physician need to help Demetrios?", "What does Demetrios ask when he opens his eye?"]
+  },
+  {
+    "id": "troll_bridge",
+    "title": "The Troll Bridge",
+    "type": "Environmental Hazard",
+    "world": "dungeon",
+    "unit": "YW3_U3",
+    "cr": 2,
+    "xp": 230,
+    "text": "The bridge over the underground river was made of old rope and rotten wood. The troll that once guarded it was dead. Its body was still lying at the entrance.\n\nHalvard went first. The bridge held. Kessa followed. Halfway across, a rope snapped. The bridge tilted and Kessa grabbed the remaining rope with both hands. Her sword fell into the dark water below.\n\n'Don't let go!' Halvard shouted. He crawled back while the bridge was shaking. Another rope snapped. The bridge was falling apart.\n\nHe reached Kessa and grabbed her wrist. They crawled together to the other side. The bridge collapsed behind them into the river.\n\nKessa's hands were bleeding and her shoulder was injured. 'Can you move your arm?' Halvard asked. 'Yes,' she said. 'But my sword is gone.' She looked at the black water. 'I liked that sword.'\n\nThey had no way back now. The only path was forward, deeper into the mountain.",
+    "vocab": [["rotten", "morsch, verfault"], ["snap", "reissen"], ["tilt", "kippen"], ["grab", "packen, greifen"], ["wrist", "Handgelenk"], ["crawl", "kriechen"], ["collapse", "einstürzen"]],
+    "questions": ["What happened to the troll that guarded the bridge?", "What does Kessa lose when the bridge breaks?", "Why can Halvard and Kessa not go back?"]
   }
 ]
