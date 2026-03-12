@@ -390,5 +390,65 @@
     "text": "The bridge over the underground river was made of old rope and rotten wood. The troll that once guarded it was dead. Its body was still lying at the entrance.\n\nHalvard went first. The bridge held. Kessa followed. Halfway across, a rope snapped. The bridge tilted and Kessa grabbed the remaining rope with both hands. Her sword fell into the dark water below.\n\n'Don't let go!' Halvard shouted. He crawled back while the bridge was shaking. Another rope snapped. The bridge was falling apart.\n\nHe reached Kessa and grabbed her wrist. They crawled together to the other side. The bridge collapsed behind them into the river.\n\nKessa's hands were bleeding and her shoulder was injured. 'Can you move your arm?' Halvard asked. 'Yes,' she said. 'But my sword is gone.' She looked at the black water. 'I liked that sword.'\n\nThey had no way back now. The only path was forward, deeper into the mountain.",
     "vocab": [["rotten", "morsch, verfault"], ["snap", "reissen"], ["tilt", "kippen"], ["grab", "packen, greifen"], ["wrist", "Handgelenk"], ["crawl", "kriechen"], ["collapse", "einstürzen"]],
     "questions": ["What happened to the troll that guarded the bridge?", "What does Kessa lose when the bridge breaks?", "Why can Halvard and Kessa not go back?"]
-  }  
+  },
+  {
+    "id": "hurt_dwarf",
+    "title": "The Hurt Dwarf",
+    "type": "Encounter",
+    "world": "dungeon",
+    "unit": "YW3_U3",
+    "cr": 0.25,
+    "xp": 30,
+    "text": "You hear a voice in the dark. Someone calls for help. You walk into the room. A dwarf sits by the wall. He is hurt. His arm is injured. There is blood on his hand. He has a lot of pain.\n\n'Something lives here,' he says. 'It has sharp claws.' You look around. Nothing moves. The room is quiet.\n\n'Stay calm,' you say. 'I can help you.' The dwarf looks at you. 'We are not safe here. Help me. We must go.'",
+    "vocab": [["dwarf", "Zwerg"], ["sharp", "scharf, spitz"], ["claws", "Krallen"]],
+    "questions": ["What does the dwarf say lives in the room?", "Why does the dwarf want to leave?", "What do you think has sharp claws?"]
+  },
+  {
+    "id": "fire_below",
+    "title": "The Fire Below",
+    "type": "Environmental Hazard",
+    "world": "dungeon",
+    "unit": "YW3_U3",
+    "cr": 0.5,
+    "xp": 60,
+    "text": "There is smoke in the tunnel below. The air is hot. Something is wrong. If you go down, it will be dangerous. But someone calls for help. 'I am trapped!' a voice shouts.\n\nThis is an emergency. Don't panic. If the fire gets bigger, no one can help. You put your shirt over your face. You go into the smoke.\n\nYou find a woman. A big beam is on her leg. She is trapped under it. If you move the beam, she is free. You pull hard and it moves. She is hurt but alive.\n\nYou help her walk to safety. 'No one else comes here,' she says.",
+    "vocab": [["smoke", "Rauch"], ["beam", "Balken"], ["trapped", "eingeklemmt"], ["alive", "am Leben"]],
+    "questions": ["What is on the woman's leg?", "Why does no one else come to help the woman?", "Why is this situation an emergency?"]
+  },
+  {
+    "id": "black_car",
+    "title": "The Black Car",
+    "type": "Daily Life",
+    "world": "real",
+    "unit": "YW3_U3",
+    "cr": 1,
+    "xp": 115,
+    "text": "On Tuesday evening, Liam walked home from basketball. The street was quiet. Then he heard a loud bang. A car hit a pedestrian at the crossing and drove away.\n\nLiam ran to the man on the ground. He was injured and there was blood on his forehead. He did not move. He was unconscious.\n\nLiam took his mobile phone and called the police. 'What happened?' the woman asked. 'A car hit a pedestrian,' Liam said. 'He is hurt and unconscious.' 'Where are you?' 'Park Street.' 'When did it happen?' 'Two minutes ago.' 'Stay with him. An ambulance is coming.'\n\nThe police and an ambulance arrived ten minutes later. The driver checked the man. 'His injuries are not dangerous,' she said.\n\nA police officer asked Liam about the car. 'I saw the licence plate,' he said.",
+    "vocab": [["bang", "Knall"], ["crossing", "Fussgängerstreifen"], ["forehead", "Stirn"], ["officer", "Beamtin, Polizistin"], ["licence plate", "Nummernschild"]],
+    "questions": ["What did Liam see on the back of the car?", "How long did it take for help to arrive?", "Why do the police want to talk to Liam?"]
+  },
+  {
+    "id": "collapsed_stairs",
+    "title": "The Collapsed Stairs",
+    "type": "Environmental Hazard",
+    "world": "dungeon",
+    "unit": "YW3_U3",
+    "cr": 2,
+    "xp": 230,
+    "text": "The party was walking down the stone stairs when the steps broke under their feet. Maren held the wall, but Jorik fell into the darkness below.\n\n'Jorik!' she called. She could hear him breathing, although she could not see him.\n\n'I am alive,' he said. His voice was weak. 'Something is wrong with my leg. It might be broken.'\n\nWhile Maren was looking for a rope in her bag, she heard something move below. Jorik heard it too. 'There is something down here,' he whispered.\n\n'Don't move,' Maren said. 'Don't make a sound.' She put the rope around a stone and let it fall. 'Can you hold it?'\n\n'I cannot stand,' Jorik said.\n\nThe creature below moved closer. Although Maren was terrified, she climbed down the rope herself. She put Jorik's arm around her shoulder and together they climbed while the creature growled in the dark.\n\nThey reached the top. Jorik was badly injured and almost unconscious from the pain. But they were alive.",
+    "vocab": [["rope", "Seil"], ["whispered", "flüsterte"], ["creature", "Kreatur, Wesen"], ["terrified", "verängstigt"], ["growled", "knurrte"], ["alive", "am Leben"], ["shoulder", "Schulter"]],
+    "questions": ["What does Jorik hear in the darkness below him?", "Why does Maren climb down the rope herself?", "What tells you that Maren is brave even though she is scared?"]
+  },
+  {
+    "id": "shipwreck_naxos",
+    "title": "The Shipwreck at Naxos",
+    "type": "Encounter",
+    "world": "greece",
+    "unit": "YW3_U3",
+    "cr": 3,
+    "xp": 345,
+    "text": "The ship had been caught in a storm for two days before it broke apart on the rocks near Naxos. When Theron woke on the beach, he could not remember how he had survived. His shoulder was injured and his ribs hurt with every breath.\n\nBodies lay in the sand. Some of the sailors who had been on the ship were dead. Others were badly injured and calling for help. If Theron had not been a healer, he would not have known what to do.\n\nHe found a man whose leg had been crushed by a piece of wreckage. The bone was broken and the wound was full of sand. 'If I do not clean this, it will get infected,' Theron thought. He washed the wound with sea water, although he knew it would cause terrible pain. The man screamed but Theron held his leg still.\n\nA woman who had been unconscious started breathing again. Theron checked her injuries. Nothing was broken, but she had swallowed water. He turned her on her side.\n\nBy evening, Theron had helped eleven people. Three had not survived. He sat on the dark beach and stared at the sea.",
+    "vocab": [["ribs", "Rippen"], ["breath", "Atem, Atemzug"], ["sailors", "Seeleute, Matrosen"], ["wreckage", "Wrackteile"], ["crushed", "zerquetscht"], ["bone", "Knochen"], ["infected", "infiziert, entzündet"], ["swallowed", "geschluckt"], ["stared", "starrte"]],
+    "questions": ["How many people did Theron save by evening?", "Why does Theron use sea water on the wound even though it causes pain?", "What do the last two sentences tell you about how Theron feels?"]
+  } 
 ]
