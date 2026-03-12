@@ -515,6 +515,7 @@
         <div class="xp-section">
             <div class="xp-header">
                 <span class="level-display">Level <span id="currentLevel">1</span> — <span id="levelTitle">Novice</span></span>
+                <span id="unitDisplay" style="color: #87ceeb; font-size: 0.82em; opacity: 0.85;"></span>
                 <span class="xp-display"><span id="currentXP">0</span> / <span id="nextLevelXP">50</span> XP</span>
             </div>
             <div class="xp-bar-container">
@@ -638,6 +639,18 @@
 
         // ==================== AIRTABLE LOAD ====================
         async function loadProgressFromAirtable() {
+            // When loading from Airtable, also sort texts by unit
+            function resortTexts() {
+                const sortedTexts = [...TEXTS].sort(compareUnitAndCR);
+                TEXTS = sortedTexts;
+            }
+
+            function compareUnitAndCR(a, b) {
+                const unitA = UNIT_ORDER.indexOf(a.unit);
+                const unitB = UNIT_ORDER.indexOf(b.unit);
+                if (unitA !== unitB) return unitA - unitB;
+                return a.cr - b.cr;
+            }
             try {
                 const response = await fetch(`${AIRTABLE_API_URL}?maxRecords=1&sort[0][field]=Datum&sort[0][direction]=desc`, {
                     headers: {
@@ -677,9 +690,25 @@
             { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
             { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprentice" },
             { level: 3, xpRequired: 200,  unlockedCR: 1,    title: "Adventurer" },
-            { level: 4, xpRequired: 550,  unlockedCR: 2,    title: "Veteran" },
-            { level: 5, xpRequired: 1200, unlockedCR: 3,    title: "Master" }
+            { level: 4, xpRequired: 600,  unlockedCR: 2,    title: "Veteran" },
+            { level: 5, xpRequired: 1600, unlockedCR: 3,    title: "Master" }
         ];
+
+        const UNIT_ORDER = ["YW3_U2", "YW3_U3", "YW3_U4", "YW3_U5"];
+
+        const UNIT_UNLOCK = {
+            "YW3_U2": { required: 0,  from: null },
+            "YW3_U3": { required: 16, from: "YW3_U2" },
+            "YW3_U4": { required: 9,  from: "YW3_U3" },
+            "YW3_U5": { required: 7,  from: "YW3_U4" }
+        };
+
+        const UNIT_LABELS = {
+            "YW3_U2": "Unit 2 — Friendship",
+            "YW3_U3": "Unit 3 — Help",
+            "YW3_U4": "Unit 4 — Festivals",
+            "YW3_U5": "Unit 5 — Sports"
+        };
 
         // ==================== STATE ====================
         let TEXTS = [];
@@ -777,8 +806,56 @@
             return unlocked;
         }
 
+        function getMaxUnlockedUnit() {
+            let maxUnit = UNIT_ORDER[0];
+            for (let i = 1; i < UNIT_ORDER.length; i++) {
+                const unit = UNIT_ORDER[i];
+                const rule = UNIT_UNLOCK[unit];
+                if (!rule.from) { maxUnit = unit; continue; }
+                const completed = TEXTS
+                    .filter(t => t.unit === rule.from)
+                    .filter(t => gameState.completedTexts.includes(t.id))
+                    .length;
+                if (completed >= rule.required) {
+                    maxUnit = unit;
+                } else {
+                    break;
+                }
+            }
+            return maxUnit;
+        }
+
+        function getUnitCompletionInfo() {
+            const maxUnit = getMaxUnlockedUnit();
+            const maxIdx = UNIT_ORDER.indexOf(maxUnit);
+            const nextUnit = maxIdx < UNIT_ORDER.length - 1 ? UNIT_ORDER[maxIdx + 1] : null;
+            
+            if (!nextUnit) return { current: maxUnit, label: UNIT_LABELS[maxUnit], next: null, completed: 0, required: 0 };
+            
+            const rule = UNIT_UNLOCK[nextUnit];
+            const completed = TEXTS
+                .filter(t => t.unit === rule.from)
+                .filter(t => gameState.completedTexts.includes(t.id))
+                .length;
+            const total = TEXTS.filter(t => t.unit === rule.from).length;
+            
+            return {
+                current: maxUnit,
+                label: UNIT_LABELS[maxUnit],
+                next: nextUnit,
+                nextLabel: UNIT_LABELS[nextUnit],
+                completed: completed,
+                required: rule.required,
+                total: total
+            };
+        }
+
         function isTextUnlocked(text) {
-            return getUnlockedCRs().includes(text.cr);
+            const crUnlocked = getUnlockedCRs().includes(text.cr);
+            const textUnitIdx = UNIT_ORDER.indexOf(text.unit);
+            const maxUnitIdx = UNIT_ORDER.indexOf(getMaxUnlockedUnit());
+            const unitUnlocked = textUnitIdx !== -1 && textUnitIdx <= maxUnitIdx;
+            return crUnlocked && unitUnlocked;
         }
 
         function isTextCompleted(text) {
@@ -844,6 +921,10 @@
                 renderTexts();
             }
             
+            // Check if a new unit was unlocked
+            const newMaxUnit = getMaxUnlockedUnit();
+            // (Unit unlock is automatic through getMaxUnlockedUnit, UI updates via updateUI/renderTexts)
+            
             saveProgressToAirtable();
         }
 
@@ -862,6 +943,19 @@
                 ? ((gameState.xp - currentXP) / (nextXP - currentXP)) * 100 
                 : 100;
             document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
+
+            // Unit Progress (compact single line)
+            const unitInfo = getUnitCompletionInfo();
+            const unitDisplay = document.getElementById('unitDisplay');
+            if (unitDisplay) {
+                unitDisplay.textContent = '\u{1F4D6} ' + unitInfo.label;
+                if (unitInfo.next) {
+                    unitDisplay.textContent += ' • ' + unitInfo.completed + '/' + unitInfo.required + ' → ' + unitInfo.nextLabel;
+                } else {
+                    unitDisplay.textContent += ' • All units unlocked! \u{1F389}';
+                }
+            }
+
         }
 
         function renderTexts() {
@@ -877,7 +971,12 @@
                 filtered = filtered.filter(t => t.cr === parseFloat(activeCrFilter));
             }
 
-            filtered.sort((a, b) => a.cr - b.cr);
+            filtered.sort((a, b) => {
+                const unitA = UNIT_ORDER.indexOf(a.unit);
+                const unitB = UNIT_ORDER.indexOf(b.unit);
+                if (unitA !== unitB) return unitA - unitB;
+                return a.cr - b.cr;
+            });
 
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="loading">No texts match your filters.</div>';
@@ -896,13 +995,22 @@
                                 <div class="card-title">${text.title}</div>
                                 <div class="card-meta">
                                     <span class="world-badge ${text.world}">${text.world}</span>
+                                    <span style="background: rgba(135,206,235,0.2); color: #87ceeb; padding: 2px 8px; border-radius: 10px; font-size: 0.75em;">${text.unit ? text.unit.replace('YW3_', '') : ''}</span>
                                     <span class="cr-badge">CR ${crDisplay}</span>
                                     <span class="xp-badge">+${text.xp} XP</span>
                                     <span>${text.type}</span>
                                 </div>
                             </div>
                             <div class="card-status">
-                                ${!unlocked ? '<span class="lock-icon">🔒</span>' : (completed ? '✅' : '📖')}
+                                ${!unlocked ? (() => {
+                                    const crLocked = !getUnlockedCRs().includes(text.cr);
+                                    const unitIdx = UNIT_ORDER.indexOf(text.unit);
+                                    const maxIdx = UNIT_ORDER.indexOf(getMaxUnlockedUnit());
+                                    const unitLocked = unitIdx === -1 || unitIdx > maxIdx;
+                                    if (unitLocked && crLocked) return '<span class="lock-icon" title="CR & Unit locked">🔒</span>';
+                                    if (unitLocked) return '<span class="lock-icon" title="Unit locked">📖🔒</span>';
+                                    return '<span class="lock-icon" title="CR locked">⚔️🔒</span>';
+                                })() : (completed ? '✅' : '📜')}
                             </div>
                         </div>
                         ${unlocked ? `
