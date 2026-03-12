@@ -1,0 +1,233 @@
+Aufgabe: Implementiere ein 2-Dimensionen-Progressionssystem (CR × Unit) in index.html. Die Datei nutzt aktuell nur CR/XP-basiertes Leveling. Neu soll es zusätzlich ein Unit-Lock-System geben.
+KONTEXT: Dies ist eine Englisch-Lese-Lern-App für 5. Klässler. Texte haben ein cr-Feld (Schwierigkeit) und ein unit-Feld (z.B. "YW3_U2", "YW3_U3"). Ein Text ist nur spielbar wenn BEIDE Locks offen sind: CR-Lock (XP-basiert) UND Unit-Lock (Completion-basiert).
+Lies zuerst die gesamte index.html und texts.json, dann führe folgende Änderungen durch:
+SCHRITT 1: Konstanten ändern/ergänzen (im <script>-Block, nach TEXTS_JSON_URL)
+Ersetze FIXED_LEVELS durch:
+javascript
+
+
+const FIXED_LEVELS = [
+    { level: 1, xpRequired: 0,    unlockedCR: 0.25, title: "Novice" },
+    { level: 2, xpRequired: 50,   unlockedCR: 0.5,  title: "Apprentice" },
+    { level: 3, xpRequired: 200,  unlockedCR: 1,    title: "Adventurer" },
+    { level: 4, xpRequired: 600,  unlockedCR: 2,    title: "Veteran" },
+    { level: 5, xpRequired: 1600, unlockedCR: 3,    title: "Master" }
+];
+Füge direkt darunter ein:
+javascript
+
+
+const UNIT_ORDER = ["YW3_U2", "YW3_U3", "YW3_U4", "YW3_U5"];
+
+const UNIT_UNLOCK = {
+    "YW3_U2": { required: 0,  from: null },
+    "YW3_U3": { required: 16, from: "YW3_U2" },
+    "YW3_U4": { required: 9,  from: "YW3_U3" },
+    "YW3_U5": { required: 7,  from: "YW3_U4" }
+};
+
+const UNIT_LABELS = {
+    "YW3_U2": "Unit 2 — Friendship",
+    "YW3_U3": "Unit 3 — Help",
+    "YW3_U4": "Unit 4 — Festivals",
+    "YW3_U5": "Unit 5 — Sports"
+};
+SCHRITT 2: Neue Funktionen hinzufügen (nach getUnlockedCRs())
+javascript
+
+
+function getMaxUnlockedUnit() {
+    let maxUnit = UNIT_ORDER[0];
+    for (let i = 1; i < UNIT_ORDER.length; i++) {
+        const unit = UNIT_ORDER[i];
+        const rule = UNIT_UNLOCK[unit];
+        if (!rule.from) { maxUnit = unit; continue; }
+        const completed = TEXTS
+            .filter(t => t.unit === rule.from)
+            .filter(t => gameState.completedTexts.includes(t.id))
+            .length;
+        if (completed >= rule.required) {
+            maxUnit = unit;
+        } else {
+            break;
+        }
+    }
+    return maxUnit;
+}
+
+function getUnitCompletionInfo() {
+    const maxUnit = getMaxUnlockedUnit();
+    const maxIdx = UNIT_ORDER.indexOf(maxUnit);
+    const nextUnit = maxIdx < UNIT_ORDER.length - 1 ? UNIT_ORDER[maxIdx + 1] : null;
+    
+    if (!nextUnit) return { current: maxUnit, label: UNIT_LABELS[maxUnit], next: null, completed: 0, required: 0 };
+    
+    const rule = UNIT_UNLOCK[nextUnit];
+    const completed = TEXTS
+        .filter(t => t.unit === rule.from)
+        .filter(t => gameState.completedTexts.includes(t.id))
+        .length;
+    const total = TEXTS.filter(t => t.unit === rule.from).length;
+    
+    return {
+        current: maxUnit,
+        label: UNIT_LABELS[maxUnit],
+        next: nextUnit,
+        nextLabel: UNIT_LABELS[nextUnit],
+        completed: completed,
+        required: rule.required,
+        total: total
+    };
+}
+SCHRITT 3: isTextUnlocked() ersetzen
+Ersetze die bestehende isTextUnlocked Funktion durch:
+javascript
+
+
+function isTextUnlocked(text) {
+    const crUnlocked = getUnlockedCRs().includes(text.cr);
+    const textUnitIdx = UNIT_ORDER.indexOf(text.unit);
+    const maxUnitIdx = UNIT_ORDER.indexOf(getMaxUnlockedUnit());
+    const unitUnlocked = textUnitIdx !== -1 && textUnitIdx <= maxUnitIdx;
+    return crUnlocked && unitUnlocked;
+}
+SCHRITT 4: Unit-Progress-Anzeige im Header
+Im HTML, direkt NACH dem <div class="xp-section">...</div> Block und VOR <div class="filters">, füge ein:
+html
+
+
+<div class="unit-section" id="unitSection" style="margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px;">
+        <span id="unitDisplay" style="color: #87ceeb; font-weight: 600;">Unit 2 — Friendship</span>
+        <span id="unitProgress" style="color: #aaa;">0/16 for next unit</span>
+    </div>
+    <div style="background: rgba(0,0,0,0.4); border-radius: 10px; height: 6px; overflow: hidden;">
+        <div id="unitBar" style="background: linear-gradient(90deg, #87ceeb, #4682b4); height: 100%; border-radius: 10px; transition: width 0.5s ease; width: 0%;"></div>
+    </div>
+</div>
+SCHRITT 5: updateUI() erweitern
+Am ENDE der bestehenden updateUI() Funktion (vor der schliessenden }), füge hinzu:
+javascript
+
+
+    // Unit Progress
+    const unitInfo = getUnitCompletionInfo();
+    const unitDisplay = document.getElementById('unitDisplay');
+    const unitProgress = document.getElementById('unitProgress');
+    const unitBar = document.getElementById('unitBar');
+    
+    if (unitDisplay) unitDisplay.textContent = '📖 ' + unitInfo.label;
+    
+    if (unitInfo.next) {
+        if (unitProgress) unitProgress.textContent = `${unitInfo.completed}/${unitInfo.required} for ${unitInfo.nextLabel}`;
+        if (unitBar) unitBar.style.width = Math.min(100, (unitInfo.completed / unitInfo.required) * 100) + '%';
+    } else {
+        if (unitProgress) unitProgress.textContent = 'All units unlocked! 🎉';
+        if (unitBar) unitBar.style.width = '100%';
+    }
+SCHRITT 6: renderTexts() — Unit-Badge anzeigen
+In der renderTexts() Funktion, in der card-meta div, füge einen Unit-Badge hinzu. Suche diese Zeile:
+javascript
+
+
+<span class="world-badge ${text.world}">${text.world}</span>
+Füge direkt DANACH hinzu:
+javascript
+
+
+<span style="background: rgba(135,206,235,0.2); color: #87ceeb; padding: 2px 8px; border-radius: 10px; font-size: 0.75em;">${text.unit ? text.unit.replace('YW3_', '') : ''}</span>
+SCHRITT 7: Lock-Icon Logik erweitern
+In renderTexts(), suche den Lock-Status-Bereich. Finde:
+javascript
+
+
+${!unlocked ? '<span class="lock-icon">🔒</span>' : (completed ? '✅' : '📜')}
+(Die Emojis könnten als Unicode-Escapes dastehen.)
+Ersetze es durch:
+javascript
+
+
+${!unlocked ? (() => {
+    const crLocked = !getUnlockedCRs().includes(text.cr);
+    const unitIdx = UNIT_ORDER.indexOf(text.unit);
+    const maxIdx = UNIT_ORDER.indexOf(getMaxUnlockedUnit());
+    const unitLocked = unitIdx === -1 || unitIdx > maxIdx;
+    if (unitLocked && crLocked) return '<span class="lock-icon" title="CR & Unit locked">🔒</span>';
+    if (unitLocked) return '<span class="lock-icon" title="Unit locked">📖🔒</span>';
+    return '<span class="lock-icon" title="CR locked">⚔️🔒</span>';
+})() : (completed ? '✅' : '📜')}
+SCHRITT 8: completeText() — Unit-Unlock-Check nach Completion
+In completeText(), nach if (!(await checkLevelUp())), füge hinzu:
+javascript
+
+
+    // Check if a new unit was unlocked
+    const newMaxUnit = getMaxUnlockedUnit();
+    // (Unit unlock is automatic through getMaxUnlockedUnit, UI updates via updateUI/renderTexts)
+(Die eigentliche Unit-Unlock-Logik passiert schon automatisch durch getMaxUnlockedUnit() bei jedem Render. Kein separater Check nötig.)
+SCHRITT 9: Sortierung in renderTexts() verbessern
+Ersetze die Sortierzeile:
+javascript
+
+
+filtered.sort((a, b) => a.cr - b.cr);
+durch:
+javascript
+
+
+filtered.sort((a, b) => {
+    const unitA = UNIT_ORDER.indexOf(a.unit);
+    const unitB = UNIT_ORDER.indexOf(b.unit);
+    if (unitA !== unitB) return unitA - unitB;
+    return a.cr - b.cr;
+});
+SCHRITT 10: Unit-Filter hinzufügen
+Im HTML, in der <div class="filters">, NACH dem worldFilters div und VOR dem crFilters div, füge ein:
+html
+
+
+<div class="filter-group" id="unitFilters">
+    <span class="filter-label">Unit:</span>
+    <button class="filter-btn active" data-unit="all">All</button>
+</div>
+Im JavaScript:
+Füge let activeUnitFilter = 'all'; bei den anderen State-Variablen hinzu (neben activeWorldFilter und activeCrFilter).
+In generateFilterButtons(), NACH dem CR-Filter-Block, füge hinzu:
+javascript
+
+
+    const unitContainer = document.getElementById('unitFilters');
+    unitContainer.innerHTML = '<span class="filter-label">Unit:</span><button class="filter-btn active" data-unit="all">All</button>';
+    const units = [...new Set(TEXTS.map(t => t.unit))].sort();
+    units.forEach(unit => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.unit = unit;
+        btn.textContent = unit.replace('YW3_', '');
+        unitContainer.appendChild(btn);
+    });
+In attachFilterListeners(), füge hinzu:
+javascript
+
+
+    document.querySelectorAll('#unitFilters .filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#unitFilters .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeUnitFilter = btn.dataset.unit;
+            renderTexts();
+        });
+    });
+In renderTexts(), bei den Filtern (wo activeWorldFilter und activeCrFilter geprüft werden), füge DANACH hinzu:
+javascript
+
+
+    if (activeUnitFilter !== 'all') {
+        filtered = filtered.filter(t => t.unit === activeUnitFilter);
+    }
+WICHTIG — Nicht ändern:
+Airtable-Integration (save/load) bleibt unverändert
+TTS/Read-Aloud bleibt unverändert
+Wake Lock / Fullscreen bleibt unverändert
+Zoom-Slider bleibt unverändert
+texts.json wird NICHT verändert

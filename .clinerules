@@ -1,0 +1,8 @@
+# 🎯 EFFIZIENZ- & KOSTEN-REGELN
+
+- **Chirurgische Präzision:** Bearbeite NIEMALS die ganze Datei, wenn nur eine Funktion betroffen ist. Nutze gezielte Search-and-Replace Blöcke für die spezifischen Zeilen.
+- **Kontext-Minimum:** Wenn eine Datei (wie index.html) groß ist, lies und analysiere nur die relevanten Code-Abschnitte. Ignoriere HTML/CSS, wenn es um JS-Logik geht.
+- **Radikale Kürze:** Antworte ohne Einleitung, ohne Höflichkeitsfloskeln und ohne Zusammenfassungen am Ende. Nur der Code und ein minimaler Satz zum Status.
+- **Kein "Gelaber":** Erkläre nicht, WARUM du etwas tust, es sei denn, ich frage explizit danach. 
+- **Modell-Wahl:** Bevorzuge für reine Schreib-Aufgaben (Act-Phase) immer das günstigste verfügbare Modell (z.B. Qwen 2.5 Coder 32B), außer die Logik ist zu komplex.
+- **Direkte Ausführung:** Schlage Änderungen sofort vor, anstatt erst einen Plan zu diskutieren, wenn die Anweisung eindeutig ist.

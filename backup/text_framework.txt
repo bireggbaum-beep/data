@@ -1,0 +1,364 @@
+================================================================================
+CR-FRAMEWORK v2 — CODEX OF SHADOWS
+Lesetexte Englisch, 5. Klasse, Kanton Zug
+Basierend auf Young World 1–3 (Klett und Balmer)
+================================================================================
+
+GRUNDPRINZIP
+================================================================================
+
+Jeder Text hat eine CR (Challenge Rating). Die CR bestimmt die Schwierigkeit
+des Textes. Schwierigkeit ist eine MISCHUNG aus:
+
+  - Satzbau / Grammatik:       40%
+  - Textlänge:                  25%
+  - Off-Vocab-Dichte:           20%
+  - Thematische Komplexität:    15%
+
+WICHTIG: Alle Texte sind für 5. Klässler geschrieben. Höhere CR bedeutet
+NICHT literarischer Stil oder Erwachsenen-Niveau. Es bedeutet längere Sätze,
+mehr Nebensätze, mehr unbekannte Wörter — aber immer altersgerecht und
+interessant zu lesen.
+
+
+UNIT-ZUORDNUNG (PFLICHTFELD)
+================================================================================
+
+Jeder Text MUSS ein unit-Feld haben. Es definiert, welcher YW-Wortschatz
+zum Zeitpunkt dieses Textes als "im Unterricht gelernt" gilt.
+
+  unit        Bekannter Wortschatz (kumulativ)
+  ─────────── ──────────────────────────────────────────────
+  YW1_U3      YW1 Units 0–3 (Classroom, You and Me, Body, Food)
+  YW1_U6      YW1 Units 0–6 (+ Seasons, House, Animals)
+  YW2_U2      YW1 komplett + YW2 Units 0–2 (Senses, Town)
+  YW2_U5      YW1 + YW2 komplett (+ Colour, Animals/Nature, Transport)
+  YW3_U1      YW1 + YW2 + YW3 Unit 1 (Schools around the World)
+  YW3_U2      YW1 + YW2 + YW3 Units 1–2 (+ Friendship)
+  YW3_U3      YW1 + YW2 + YW3 Units 1–3 (+ Help)
+  YW3_U4      YW1 + YW2 + YW3 Units 1–4 (+ Festivals)
+  YW3_U5      YW1 + YW2 + YW3 komplett (+ Sports)
+
+Regel: Ein Wort, das in einer Unit vorkommt die <= dem unit-Feld des Textes
+ist, gilt als BEKANNT und wird NICHT in der Vocab-Liste erklärt.
+
+
+OFF-VOCAB: DEFINITION UND REGELN
+================================================================================
+
+Off-vocab = ein Wort im Text, das:
+  a) gar nicht im YW1–3 Lehrplan vorkommt, ODER
+  b) erst in einer SPÄTEREN Unit vorkommt als das unit-Feld des Textes
+
+Regeln:
+
+  1. Off-vocab wird IMMER in der Vocab-Liste übersetzt.
+     Auch wenn dasselbe Wort in einem früheren Text schon erklärt wurde.
+     Off-vocab wird NIE als "gelernt" angenommen.
+
+  2. Unit-Vocab (Wörter aus Units <= unit-Feld) wird NIE übersetzt.
+     Das lernt der Schüler im Unterricht.
+
+  3. Maximum 8 off-vocab Wörter pro Text. Absolute Obergrenze.
+
+  4. Die Anzahl VARIIERT. Nicht jeder schwierige Text braucht viele
+     off-vocab Wörter. Die Schwierigkeit kann auch aus Grammatik kommen.
+
+  5. Off-vocab Wörter sollen aus dem Kontext teilweise erschliessbar sein.
+     Die Vocab-Liste bestätigt/ergänzt, was der Schüler erraten kann.
+
+  6. Triviale englische Wörter, die dem deutschen Wort sehr ähnlich sind
+     (z.B. "monster", "tunnel", "hammer"), zählen NICHT als off-vocab
+     und brauchen keine Übersetzung, sofern sie im Kontext klar sind.
+
+
+CR-STUFEN
+================================================================================
+
+--- CR 0.25 ---
+
+  Textlänge:        60–90 Wörter
+  Off-vocab:        2–4 Wörter
+  XP:               20–30
+  Fragen:           3
+
+  Grammatik:
+    - Simple Present (is, has, lives, eats)
+    - sein / haben (is, are, has, have)
+    - Kurze SVO-Hauptsätze (3–8 Wörter pro Satz)
+    - Einfache Konjunktionen: and, but, or
+    - Einfachstes "when" (When you see one, they run.)
+
+  NICHT erlaubt:
+    - Past Tense
+    - Dialog
+    - Nebensätze mit who/that/which
+    - if-Konditionalsätze
+
+  Stil:
+    - Kurz, direkt, beschreibend
+    - Jeder Satz = eine klare Information
+    - Wie ein Steckbrief oder eine einfache Beschreibung
+
+
+--- CR 0.50 ---
+
+  Textlänge:        85–125 Wörter
+  Off-vocab:        2–5 Wörter
+  XP:               40–55
+  Fragen:           3
+
+  Grammatik:
+    - Alles von CR 0.25, plus:
+    - if/when-Nebensätze (einfach): If it screams, don't open it.
+    - Imperative: Don't touch it! Listen carefully!
+    - Sätze bis ~12 Wörter
+    - "might" für einfache Vermutung: It might be hungry.
+
+  Neu erlaubt:
+    - Einfacher Dialog (1–2 kurze Sätze in wörtlicher Rede)
+    - Einfache Aufzählungen
+
+  NICHT erlaubt:
+    - Past Simple (ausser "said" in wörtlicher Rede)
+    - Relativsätze mit who/that
+    - Verschachtelte Nebensätze
+
+  Stil:
+    - Kann eine kleine Handlung haben (Warnung, Anleitung, Begegnung)
+    - Direkte Ansprache (you) erlaubt
+    - Spannung durch kurze Sätze möglich
+
+
+--- CR 1.00 ---
+
+  Textlänge:        110–150 Wörter
+  Off-vocab:        3–6 Wörter
+  XP:               80–110
+  Fragen:           3
+
+  Grammatik:
+    - Alles von CR 0.50, plus:
+    - Past Simple (regelmässig + häufige unregelmässige: was, had, came,
+      said, went, found, took, saw, ran, got, made)
+    - that/who-Relativsätze: The skeleton was wearing armour that was
+      once beautiful.
+    - because, so, after, before als Konjunktionen
+    - Dialog mit 2–3 Sprechern
+
+  Neu erlaubt:
+    - Erzählende Texte (etwas ist passiert)
+    - Perspektivwechsel (Ich-Erzähler oder Du-Ansprache)
+    - Einfache Vergleiche: bigger than, as cold as
+
+  NICHT erlaubt:
+    - Past Progressive (was walking)
+    - Past Perfect (had gone)
+    - Indirekte Rede
+    - Partizipialkonstruktionen
+
+  Stil:
+    - Kleine Geschichten mit Anfang und Ende
+    - Kann Spannung aufbauen
+    - Humor möglich (einfach, situativ)
+
+
+--- CR 2.00 ---
+
+  Textlänge:        130–165 Wörter
+  Off-vocab:        3–7 Wörter
+  XP:               170–220
+  Fragen:           3
+
+  Grammatik:
+    - Alles von CR 1.00, plus:
+    - Past Progressive: She was walking when it happened.
+    - Einfache indirekte Rede: She said she heard singing.
+    - while, although, unless (einfache Verwendung)
+    - Sätze bis ~18 Wörter (gelegentlich)
+
+  Neu erlaubt:
+    - Tagebuch/Logbuch-Stil (Day 3, Day 47...)
+    - Humor und leichte Ironie
+    - Perspektivwechsel innerhalb des Textes
+    - Mehrere Absätze / Zeitsprünge
+
+  NICHT erlaubt:
+    - Past Perfect (had done) — ausser in sehr einfacher Form
+    - Passiv (was built, were seen)
+    - Partizipialkonstruktionen (Walking through the forest, he saw...)
+    - Literarischer Stil, Em-Dashes, poetische Sprache
+
+  Stil:
+    - Längere zusammenhängende Erzählungen
+    - Kann mehrere Figuren haben
+    - Darf überraschen (Plottwist am Ende)
+    - Altersgerechter Humor (5. Klasse)
+
+
+--- CR 3.00 ---
+
+  Textlänge:        140–180 Wörter (MAXIMUM — nicht mehr!)
+  Off-vocab:        4–8 Wörter
+  XP:               270–320
+  Fragen:           3
+
+  Grammatik:
+    - Alles von CR 2.00, plus:
+    - if + would (einfacher Konditional): If you answered wrong,
+      he would attack.
+    - Mehr Dialog, mehrere Sprecher, Dialog treibt Handlung
+    - Komplexere Nebensätze (ein Nebensatz im Nebensatz, gelegentlich)
+    - Sätze bis ~20 Wörter (gelegentlich)
+
+  Neu erlaubt:
+    - Spannungsbogen über den ganzen Text
+    - Cliffhanger-Ende
+    - Charaktere mit Persönlichkeit (durch Dialog zeigen)
+    - Einfaches Past Perfect: He had killed 973 heroes.
+
+  NICHT erlaubt:
+    - Partizipialkonstruktionen
+    - Em-Dashes für Einschübe
+    - Literarisch-poetische Sprache
+    - Passiv-Konstruktionen (ausser sehr einfach: It was called...)
+    - Sätze über 22 Wörter
+
+  Stil:
+    - Spannende, fesselnde Texte mit klarem Handlungsbogen
+    - Charaktere sprechen und handeln
+    - Darf gruselig, lustig oder überraschend sein
+    - Liest sich wie eine gute Kurzgeschichte für 10–11-Jährige
+    - NICHT wie Literatur, NICHT wie ein Roman für Erwachsene
+
+
+--- CR 4.00+ (für zukünftige Texte) ---
+
+  Textlänge:        120–170 Wörter (KÜRZER als CR 3!)
+  Off-vocab:        3–8 Wörter
+  XP:               350+
+  Fragen:           3
+
+  Grammatik:
+    - Alles von CR 3.00, plus:
+    - Einfaches Passiv: It was built. They were seen.
+    - Vergleiche: as...as, more...than, the most...
+    - Komplexere indirekte Rede
+    - Modals: could have, should have (einfach)
+
+  Schwierigkeit kommt aus:
+    - Grammatik und Satzbau (NICHT aus Textlänge)
+    - Abstraktere Themen (Moral, Entscheidungen, Konsequenzen)
+    - Mehr off-vocab in dichterer Verteilung
+    - Text muss genauer gelesen werden um alles zu verstehen
+
+  NICHT erlaubt:
+    - Partizipialkonstruktionen
+    - Literarischer Stil
+    - Sätze über 22 Wörter
+    - Textlänge über 180 Wörter
+
+  Stil:
+    - Dicht, jedes Wort zählt
+    - Weniger Ausschmückung, mehr Inhalt pro Satz
+    - Immer noch 5.-Klasse-gerecht und interessant
+
+
+XP-FORMEL
+================================================================================
+
+  XP ≈ CR × 100 (±15% Variation)
+
+  CR 0.25  →  20–30 XP
+  CR 0.50  →  40–55 XP
+  CR 1.00  →  80–110 XP
+  CR 2.00  →  170–220 XP
+  CR 3.00  →  270–320 XP
+  CR 4.00  →  350–420 XP
+
+  Variation erlaubt: Ein besonders langer/schwieriger Text innerhalb
+  seiner CR-Stufe darf am oberen Ende liegen, ein kürzerer am unteren.
+
+
+FRAGEN
+================================================================================
+
+  Jeder Text hat EXAKT 3 Fragen.
+
+  Frage 1: Direkte Verständnisfrage (Antwort steht wörtlich im Text)
+  Frage 2: Einfache Schlussfolgerung (Antwort ergibt sich aus dem Text)
+  Frage 3: Offene / persönliche Frage (Meinung oder Bewertung)
+
+  Fragen auf Englisch. Antworten dürfen auf Deutsch oder Englisch sein.
+
+  Fragekomplexität passt sich der CR an:
+    CR 0.25: What colour...? How many...? Where does it live?
+    CR 1.00: Why did...? What happened when...?
+    CR 2.00: Why do you think...? What might happen next?
+    CR 3.00: What would you do if...? Why is [character] different from...?
+
+
+TEXTTYPEN (type-Feld)
+================================================================================
+
+  Bestiary          Beschreibung eines Monsters/Wesens
+  Item              Beschreibung eines magischen Gegenstands
+  Encounter         Begegnung mit NPCs / Situationen
+  Combat Scene      Kampfszene
+  Quest Document    Auftragstext (Kopfgeld, Mission)
+  Adventurer's Note Notiz eines anderen Abenteurers
+  Dungeon Log       Tagebuch aus einem Dungeon
+  Found Document    Gefundenes Schriftstück
+  Boss Encounter    Begegnung mit einem Endgegner
+  Environmental Hazard  Beschreibung einer Umgebungsgefahr
+  Daily Life        Alltagsszene (reale Welt)
+  Warning           Warntext / Aufklärungstext
+
+
+WELTEN (world-Feld)
+================================================================================
+
+  dungeon   Fantasy-Dungeon (D&D-inspiriert)
+  greece    Antikes Griechenland
+  real      Reale Welt / Alltag eines 5.-Klässlers
+
+
+DATENSTRUKTUR (JSON)
+================================================================================
+
+  {
+    "id":        "string — eindeutige ID, snake_case",
+    "title":     "string — Titel des Textes",
+    "type":      "string — einer der definierten Texttypen",
+    "world":     "string — dungeon | greece | real",
+    "unit":      "string — z.B. YW1_U3, YW2_U5, YW3_U2",
+    "cr":        "number — 0.25, 0.5, 1, 2, 3, 4",
+    "xp":        "number — gemäss XP-Formel",
+    "text":      "string — der Lesetext",
+    "vocab":     [["wort", "deutsche Übersetzung/Erklärung"], ...],
+    "questions": ["Frage 1", "Frage 2", "Frage 3"]
+  }
+
+
+CHECKLISTE FÜR NEUE TEXTE
+================================================================================
+
+  [ ] unit-Feld gesetzt? Welcher YW-Wortschatz ist bekannt?
+  [ ] Alle Wörter im Text geprüft gegen YW-Vokabelliste bis unit?
+  [ ] Jedes unbekannte Wort in vocab erklärt?
+  [ ] Off-vocab Anzahl im erlaubten Bereich für diese CR?
+  [ ] Off-vocab <= 8?
+  [ ] Textlänge im erlaubten Bereich?
+  [ ] Grammatik passt zur CR-Stufe? Keine verbotenen Konstruktionen?
+  [ ] Keine Partizipialkonstruktionen? Keine Em-Dashes?
+  [ ] Keine literarisch-poetische Sprache?
+  [ ] Sätze nicht zu lang? (Max ~20 Wörter, bei CR 4 max ~22)
+  [ ] 3 Fragen: 1× direkt, 1× Schlussfolgerung, 1× offen?
+  [ ] XP im erlaubten Bereich?
+  [ ] Text ist interessant und spannend für 10–11-Jährige?
+  [ ] Triviale Kognaten (monster, tunnel etc.) NICHT in vocab?
+
+
+================================================================================
+Ende CR-Framework v2
+================================================================================

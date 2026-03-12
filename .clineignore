@@ -1,0 +1,13 @@
+# Ordner ignorieren
+backup/
+vocabulary/
+
+# Große Dateien ignorieren
+vokabelliste_bis_5_klasse.txt
+setup_seatable.py
+text_to_seatable.py
+texts_fr.json
+
+# Optionale weitere Tipps für die Zukunft:
+# node_modules/
+# .git/
