@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📜 Codex of Shadows</title>
+    
+    <!-- Edge TTS Import -->
+    <script type="module">
+        import { synthesize } from 'https://esm.sh/@edge-tts/universal@1.0.3';
+        window.edgeTTS = { synthesize };
+        console.log("Edge TTS Module loaded");
+    </script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -501,15 +509,6 @@
             color: #ff6b6b;
         }
     </style>
-    <!-- ResponsiveVoice.js - Cross-browser TTS -->
-    <!-- disableWelcome=true unterdrückt die Begrüßungsnachricht -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=b08U7IYJ&disableWelcome=true"></script>
-    <!-- Edge TTS Module -->
-    <script type="module">
-    import { synthesize } from 'https://esm.sh/@edge-tts/universal@1.0.3';
-    window.edgeTTS = { synthesize };
-    </script>
-
 </head>
 <body>
     <header class="header">
@@ -575,6 +574,7 @@
         // ╚════════════════════════════════════════════════════════════════╝
         const AIRTABLE_API_URL = 'https://api.airtable.com/v0/appgWZEpl9pGBmZbk/progress';
         const AIRTABLE_TOKEN = 'patPLnPw8FTuQVPWw.bd0bc8db1415af5f2f7b16fd5cd20971cc637ca21681b6933843fb04deaa9f0e';
+        window.addEventListener('DOMContentLoaded', loadTexts);
         
         let currentRecordId = null;
         let saveIndicatorTimeout = null;
@@ -608,6 +608,7 @@
                 let url = AIRTABLE_API_URL;
                 let method = 'POST';
 
+                // If we have a record ID, use PATCH to update
                 if (currentRecordId) {
                     url = `${AIRTABLE_API_URL}/${currentRecordId}`;
                     method = 'PATCH';
@@ -624,12 +625,16 @@
 
                 if (response.ok) {
                     const result = await response.json();
+                    // Store the record ID for future updates
                     if (!currentRecordId && result.id) {
                         currentRecordId = result.id;
                     }
                     showSaveIndicator(true, 'Saved to Airtable!');
+                    console.log('Progress saved to Airtable:', progressData);
                     return true;
                 } else {
+                    const error = await response.text();
+                    console.error('Airtable save failed:', error);
                     showSaveIndicator(false, 'Save failed');
                     return false;
                 }
@@ -642,13 +647,18 @@
 
         // ==================== AIRTABLE LOAD ====================
         async function loadProgressFromAirtable() {
+            // When loading from Airtable, also sort texts by unit
+            function resortTexts() {
+                const sortedTexts = [...TEXTS].sort(compareUnitAndCR);
+                TEXTS = sortedTexts;
+            }
+
             function compareUnitAndCR(a, b) {
                 const unitA = UNIT_ORDER.indexOf(a.unit);
                 const unitB = UNIT_ORDER.indexOf(b.unit);
                 if (unitA !== unitB) return unitA - unitB;
                 return a.cr - b.cr;
             }
-
             try {
                 const response = await fetch(`${AIRTABLE_API_URL}?maxRecords=1&sort[0][field]=Datum&sort[0][direction]=desc`, {
                     headers: {
@@ -672,6 +682,7 @@
                         gameState.completedTexts = [];
                     }
                     currentRecordId = data.records[0].id;
+
                     console.log('Progress loaded from Airtable:', gameState, 'Record ID:', currentRecordId);
                     return true;
                 }
@@ -918,6 +929,10 @@
                 renderTexts();
             }
 
+            // Check if a new unit was unlocked
+            const newMaxUnit = getMaxUnlockedUnit();
+            // (Unit unlock is automatic through getMaxUnlockedUnit, UI updates via updateUI/renderTexts)
+
             saveProgressToAirtable();
         }
 
@@ -937,6 +952,7 @@
                 : 100;
             document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
 
+            // Unit Progress (compact single line)
             const unitInfo = getUnitCompletionInfo();
             const unitDisplay = document.getElementById('unitDisplay');
             if (unitDisplay) {
@@ -947,6 +963,7 @@
                     unitDisplay.textContent += ' • All units unlocked! \uD83C\uDF89';
                 }
             }
+
         }
 
         function renderTexts() {
@@ -1154,212 +1171,214 @@
 
         document.getElementById('resetBtn').addEventListener('click', resetProgress);
 
-// ==================== TEXT-TO-SPEECH (Edge TTS) ====================
-let currentReadingId = null;
-let currentSentenceIndex = 0;
-let audioContext = null;
-let isPlaying = false;
-let abortController = null; // Zum sofortigen Stoppen
+        // ==================== TEXT-TO-SPEECH (Edge TTS) ====================
+        let currentReadingId = null;
+        let currentSentenceIndex = 0;
+        let isPlaying = false;
+        let abortController = null; // Zum sofortigen Stoppen
 
-// Konfiguration
-const VOICE_NAME = 'en-US-EmmaMultilingualNeural'; // Hochwertige englische Stimme
-const RATE_DEFAULT = 0.8;
+        // Konfiguration
+        const VOICE_NAME = 'en-US-EmmaMultilingualNeural'; // Hochwertige englische Stimme
+        const RATE_DEFAULT = 0.8;
 
-function isEdgeTTSReady() {
-    return typeof window.edgeTTS !== 'undefined' && typeof window.edgeTTS.synthesize === 'function';
-}
+        function isEdgeTTSReady() {
+            return typeof window.edgeTTS !== 'undefined' && typeof window.edgeTTS.synthesize === 'function';
+        }
 
-function splitTextIntoSentences(text) {
-    // Behält bestehende Logik bei
-    const result = text.match(/[^.!?]+[.!?]+/g);
-    return result || [text];
-}
+        function splitTextIntoSentences(text) {
+            // Behält bestehende Logik bei
+            const result = text.match(/[^.!?]+[.!?]+/g);
+            return result || [text];
+        }
 
-function prepareSentences(textId) {
-    const text = TEXTS.find(t => t.id === textId);
-    if (!text) return;
-    const container = document.getElementById(`text-${textId}`);
-    if (!container) return;
-    const sents = splitTextIntoSentences(text.text);
-    container.innerHTML = sents.map((s, i) =>
-        `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`
-    ).join(' ');
-}
+        function prepareSentences(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text) return;
+            const container = document.getElementById(`text-${textId}`);
+            if (!container) return;
+            const sents = splitTextIntoSentences(text.text);
+            container.innerHTML = sents.map((s, i) =>
+                `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`
+            ).join(' ');
+        }
 
-function restoreText(textId) {
-    const text = TEXTS.find(t => t.id === textId);
-    if (!text) return;
-    const container = document.getElementById(`text-${textId}`);
-    if (container) container.innerHTML = text.text;
-}
+        function restoreText(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text) return;
+            const container = document.getElementById(`text-${textId}`);
+            if (container) container.innerHTML = text.text;
+        }
 
-function clearHighlights(textId) {
-    const container = document.getElementById(`text-${textId}`);
-    if (container) {
-        container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
-    }
-}
+        function clearHighlights(textId) {
+            const container = document.getElementById(`text-${textId}`);
+            if (container) {
+                container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+            }
+        }
 
-function highlightSentence(textId, index) {
-    clearHighlights(textId);
-    const sent = document.getElementById(`sent-${textId}-${index}`);
-    if (sent) {
-        sent.classList.add('active');
-        sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
+        function highlightSentence(textId, index) {
+            clearHighlights(textId);
+            const sent = document.getElementById(`sent-${textId}-${index}`);
+            if (sent) {
+                sent.classList.add('active');
+                sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
 
-async function speakSentence(textId, index) {
-    if (!isPlaying || currentReadingId !== textId) return;
+        async function speakSentence(textId, index) {
+            if (!isPlaying || currentReadingId !== textId) return;
 
-    const textObj = TEXTS.find(t => t.id === textId);
-    if (!textObj) return;
+            const textObj = TEXTS.find(t => t.id === textId);
+            if (!textObj) return;
 
-    const sents = splitTextIntoSentences(textObj.text);
-    
-    // Ende erreicht?
-    if (index >= sents.length) {
-        finishReading(textId);
-        return;
-    }
-
-    const speedSlider = document.getElementById(`speed-${textId}`);
-    const rate = speedSlider ? parseFloat(speedSlider.value) : RATE_DEFAULT;
-
-    highlightSentence(textId, index);
-
-    const sentenceText = sents[index].trim();
-    
-    try {
-        // Abort Controller für sofortiges Stoppen
-        abortController = new AbortController();
-        
-        // Edge TTS Aufruf
-        const response = await window.edgeTTS.synthesize({
-            text: sentenceText,
-            voice: VOICE_NAME,
-            rate: rate, // Edge TTS akzeptiert Rate direkt
-            pitch: '0Hz',
-            volume: '+0%'
-        }, {
-            signal: abortController.signal
-        });
-
-        // Prüfen ob noch aktiv während des Fetchs
-        if (!isPlaying || currentReadingId !== textId) return;
-
-        // Audio abspielen
-        const audioBlob = new Blob([response.audioData], { type: 'audio/mp3' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-
-        await new Promise((resolve, reject) => {
-            audio.onended = () => {
-                URL.revokeObjectURL(audioUrl);
-                resolve();
-            };
-            audio.onerror = (e) => {
-                URL.revokeObjectURL(audioUrl);
-                console.error("Audio Play Error", e);
-                resolve(); // Weiter zum nächsten Satz auch bei Fehler
-            };
+            const sents = splitTextIntoSentences(textObj.text);
             
-            // Starten
-            audio.play().catch(e => {
-                console.error("Play blocked", e);
-                resolve();
-            });
+            // Ende erreicht?
+            if (index >= sents.length) {
+                finishReading(textId);
+                return;
+            }
+
+            const speedSlider = document.getElementById(`speed-${textId}`);
+            const rate = speedSlider ? parseFloat(speedSlider.value) : RATE_DEFAULT;
+
+            highlightSentence(textId, index);
+
+            const sentenceText = sents[index].trim();
+            
+            try {
+                // Abort Controller für sofortiges Stoppen
+                abortController = new AbortController();
+                
+                // Edge TTS Aufruf
+                const response = await window.edgeTTS.synthesize({
+                    text: sentenceText,
+                    voice: VOICE_NAME,
+                    rate: rate, // Edge TTS akzeptiert Rate direkt
+                    pitch: '0Hz',
+                    volume: '+0%'
+                }, {
+                    signal: abortController.signal
+                });
+
+                // Prüfen ob noch aktiv während des Fetchs
+                if (!isPlaying || currentReadingId !== textId) return;
+
+                // Audio abspielen
+                const audioBlob = new Blob([response.audioData], { type: 'audio/mp3' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+
+                await new Promise((resolve, reject) => {
+                    audio.onended = () => {
+                        URL.revokeObjectURL(audioUrl);
+                        resolve();
+                    };
+                    audio.onerror = (e) => {
+                        URL.revokeObjectURL(audioUrl);
+                        console.error("Audio Play Error", e);
+                        resolve(); // Weiter zum nächsten Satz auch bei Fehler
+                    };
+                    
+                    // Starten
+                    audio.play().catch(e => {
+                        console.error("Play blocked", e);
+                        resolve();
+                    });
+                });
+
+                // Nächster Satz
+                if (isPlaying && currentReadingId === textId) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log("Playback aborted");
+                    return;
+                }
+                console.error("Edge TTS Error:", error);
+                // Bei Fehler trotzdem weitermachen oder stoppen? Hier weitermachen:
+                if (isPlaying && currentReadingId === textId) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
+            }
+        }
+
+        function finishReading(textId) {
+            const btn = document.getElementById(`read-btn-${textId}`);
+            if (btn) {
+                btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                btn.classList.remove('playing');
+            }
+            restoreText(textId);
+            currentReadingId = null;
+            isPlaying = false;
+            abortController = null;
+        }
+
+        function toggleReadAloud(textId) {
+            // Prüfen ob Modul geladen ist
+            if (!isEdgeTTSReady()) {
+                // Kein Alert mehr, nur Console Log oder kurze UI Nachricht wenn nötig
+                console.warn("Edge TTS not ready yet, waiting...");
+                // Optional: Kurzes Timeout und Retry, aber meist ist es einfach nur noch nicht geladen
+                setTimeout(() => toggleReadAloud(textId), 500);
+                return;
+            }
+
+            const btn = document.getElementById(`read-btn-${textId}`);
+
+            // Wenn gerade dieser Text spielt -> STOPPEN
+            if (currentReadingId === textId && isPlaying) {
+                if (abortController) abortController.abort();
+                isPlaying = false;
+                currentReadingId = null;
+                
+                btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                btn.classList.remove('playing');
+                restoreText(textId);
+                return;
+            }
+
+            // Wenn ein anderer Text spielt -> Erst den stoppen
+            if (isPlaying && currentReadingId !== null) {
+                if (abortController) abortController.abort();
+                const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
+                if (oldBtn) {
+                    oldBtn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                    oldBtn.classList.remove('playing');
+                }
+                restoreText(currentReadingId);
+            }
+
+            // Neuen Start vorbereiten
+            currentReadingId = textId;
+            currentSentenceIndex = 0;
+            isPlaying = true;
+            
+            prepareSentences(textId);
+            btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
+            btn.classList.add('playing');
+            
+            speakSentence(textId, 0);
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('speed-slider')) {
+                const textId = e.target.id.replace('speed-', '');
+                const display = document.getElementById(`speed-display-${textId}`);
+                if (display) {
+                    display.textContent = e.target.value + 'x';
+                }
+                // Hinweis: Geschwindigkeitsänderung wirkt erst beim nächsten Satz
+            }
         });
 
-        // Nächster Satz
-        if (isPlaying && currentReadingId === textId) {
-            currentSentenceIndex = index + 1;
-            speakSentence(textId, currentSentenceIndex);
-        }
-
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            console.log("Playback aborted");
-            return;
-        }
-        console.error("Edge TTS Error:", error);
-        // Bei Fehler trotzdem weitermachen oder stoppen? Hier weitermachen:
-        if (isPlaying && currentReadingId === textId) {
-            currentSentenceIndex = index + 1;
-            speakSentence(textId, currentSentenceIndex);
-        }
-    }
-}
-
-function finishReading(textId) {
-    const btn = document.getElementById(`read-btn-${textId}`);
-    if (btn) {
-        btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-        btn.classList.remove('playing');
-    }
-    restoreText(textId);
-    currentReadingId = null;
-    isPlaying = false;
-    abortController = null;
-}
-
-function toggleReadAloud(textId) {
-    // Prüfen ob Modul geladen ist
-    if (!isEdgeTTSReady()) {
-        alert('Voice engine is loading... please wait a moment and try again.');
-        return;
-    }
-
-    const btn = document.getElementById(`read-btn-${textId}`);
-
-    // Wenn gerade dieser Text spielt -> STOPPEN
-    if (currentReadingId === textId && isPlaying) {
-        if (abortController) abortController.abort();
-        isPlaying = false;
-        currentReadingId = null;
-        
-        btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-        btn.classList.remove('playing');
-        restoreText(textId);
-        return;
-    }
-
-    // Wenn ein anderer Text spielt -> Erst den stoppen
-    if (isPlaying && currentReadingId !== null) {
-        if (abortController) abortController.abort();
-        const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
-        if (oldBtn) {
-            oldBtn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-            oldBtn.classList.remove('playing');
-        }
-        restoreText(currentReadingId);
-    }
-
-    // Neuen Start vorbereiten
-    currentReadingId = textId;
-    currentSentenceIndex = 0;
-    isPlaying = true;
-    
-    prepareSentences(textId);
-    btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
-    btn.classList.add('playing');
-    
-    speakSentence(textId, 0);
-}
-
-document.addEventListener('input', (e) => {
-    if (e.target.classList.contains('speed-slider')) {
-        const textId = e.target.id.replace('speed-', '');
-        const display = document.getElementById(`speed-display-${textId}`);
-        if (display) {
-            display.textContent = e.target.value + 'x';
-        }
-        // Hinweis: Geschwindigkeitsänderung wirkt erst beim nächsten Satz
-    }
-});
-
-        // Start loading
-        window.addEventListener('DOMContentLoaded', loadTexts);
+        // ==================== INIT ====================
+        // Removed; listener now registered closer to TEXTS consts.
     </script>
 </body>
 </html>
