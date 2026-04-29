@@ -501,8 +501,9 @@
             color: #ff6b6b;
         }
     </style>
-    <!-- ResponsiveVoice.js - Cross-browser TTS (free for non-commercial use) -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=b08U7IYJ"></script>
+    <!-- ResponsiveVoice.js - Cross-browser TTS -->
+    <!-- disableWelcome=true unterdrückt die Begrüßungsnachricht -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=b08U7IYJ&disableWelcome=true"></script>
 </head>
 <body>
     <header class="header">
@@ -568,7 +569,6 @@
         // ╚════════════════════════════════════════════════════════════════╝
         const AIRTABLE_API_URL = 'https://api.airtable.com/v0/appgWZEpl9pGBmZbk/progress';
         const AIRTABLE_TOKEN = 'patPLnPw8FTuQVPWw.bd0bc8db1415af5f2f7b16fd5cd20971cc637ca21681b6933843fb04deaa9f0e';
-        window.addEventListener('DOMContentLoaded', loadTexts);
         
         let currentRecordId = null;
         let saveIndicatorTimeout = null;
@@ -602,7 +602,6 @@
                 let url = AIRTABLE_API_URL;
                 let method = 'POST';
 
-                // If we have a record ID, use PATCH to update
                 if (currentRecordId) {
                     url = `${AIRTABLE_API_URL}/${currentRecordId}`;
                     method = 'PATCH';
@@ -619,16 +618,12 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    // Store the record ID for future updates
                     if (!currentRecordId && result.id) {
                         currentRecordId = result.id;
                     }
                     showSaveIndicator(true, 'Saved to Airtable!');
-                    console.log('Progress saved to Airtable:', progressData);
                     return true;
                 } else {
-                    const error = await response.text();
-                    console.error('Airtable save failed:', error);
                     showSaveIndicator(false, 'Save failed');
                     return false;
                 }
@@ -641,18 +636,13 @@
 
         // ==================== AIRTABLE LOAD ====================
         async function loadProgressFromAirtable() {
-            // When loading from Airtable, also sort texts by unit
-            function resortTexts() {
-                const sortedTexts = [...TEXTS].sort(compareUnitAndCR);
-                TEXTS = sortedTexts;
-            }
-
             function compareUnitAndCR(a, b) {
                 const unitA = UNIT_ORDER.indexOf(a.unit);
                 const unitB = UNIT_ORDER.indexOf(b.unit);
                 if (unitA !== unitB) return unitA - unitB;
                 return a.cr - b.cr;
             }
+
             try {
                 const response = await fetch(`${AIRTABLE_API_URL}?maxRecords=1&sort[0][field]=Datum&sort[0][direction]=desc`, {
                     headers: {
@@ -676,7 +666,6 @@
                         gameState.completedTexts = [];
                     }
                     currentRecordId = data.records[0].id;
-
                     console.log('Progress loaded from Airtable:', gameState, 'Record ID:', currentRecordId);
                     return true;
                 }
@@ -923,10 +912,6 @@
                 renderTexts();
             }
 
-            // Check if a new unit was unlocked
-            const newMaxUnit = getMaxUnlockedUnit();
-            // (Unit unlock is automatic through getMaxUnlockedUnit, UI updates via updateUI/renderTexts)
-
             saveProgressToAirtable();
         }
 
@@ -946,7 +931,6 @@
                 : 100;
             document.getElementById('xpBar').style.width = Math.min(100, Math.max(0, progress)) + '%';
 
-            // Unit Progress (compact single line)
             const unitInfo = getUnitCompletionInfo();
             const unitDisplay = document.getElementById('unitDisplay');
             if (unitDisplay) {
@@ -957,7 +941,6 @@
                     unitDisplay.textContent += ' • All units unlocked! \uD83C\uDF89';
                 }
             }
-
         }
 
         function renderTexts() {
@@ -1165,12 +1148,13 @@
 
         document.getElementById('resetBtn').addEventListener('click', resetProgress);
 
-        // ==================== TEXT-TO-SPEECH (ResponsiveVoice) ====================
+        // ==================== TEXT-TO-SPEECH (ResponsiveVoice Fixed) ====================
         let currentReadingId = null;
         let currentSentenceIndex = 0;
 
-        function isSpeechSynthesisSupported() {
-            return typeof responsiveVoice !== 'undefined' && responsiveVoice.isSupported();
+        // Robuste Prüfung ob ResponsiveVoice geladen ist
+        function isRVReady() {
+            return typeof responsiveVoice !== 'undefined';
         }
 
         function splitTextIntoSentences(text) {
@@ -1218,14 +1202,12 @@
         }
 
         function getVoiceForText(text) {
-            // Simple language detection: if text contains common French words, use French voice
             const frenchWords = ['le', 'la', 'les', 'un', 'une', 'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'est', 'sont', 'ai', 'as', 'a', 'avons', 'avez', 'ont', 'être', 'avoir', 'dans', 'sur', 'sous', 'avec', 'sans', 'pour', 'par', 'de', 'du', 'des', 'au', 'aux', 'que', 'qui', 'où', 'quoi', 'donc', 'mais', 'ou', 'et', 'à', 'ce', 'se', 'me', 'te', 'lui', 'leur', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'votre', 'leur', 'leurs', 'chouette', 'merci', 'bonjour', 'salut'];
             const words = text.toLowerCase().split(/\s+/);
             let frenchCount = 0;
             for (const word of words) {
                 if (frenchWords.includes(word)) frenchCount++;
             }
-            // If more than 30% of words are French, use French voice
             if (words.length > 0 && frenchCount / words.length > 0.3) {
                 return "French Female";
             }
@@ -1233,66 +1215,68 @@
         }
 
         function speakSentence(textId, index) {
-            try {
-                if (!isSpeechSynthesisSupported()) return;
-
-                if (currentReadingId !== textId) {
-                    restoreText(textId);
-                    return;
-                }
-
-                const text = TEXTS.find(t => t.id === textId);
-                if (!text) return;
-
-                const sents = splitTextIntoSentences(text.text);
-                if (index >= sents.length) {
-                    const btn = document.getElementById(`read-btn-${textId}`);
-                    if (btn) {
-                        btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-                        btn.classList.remove('playing');
-                    }
-                    restoreText(textId);
-                    currentReadingId = null;
-                    return;
-                }
-
-                const speedSlider = document.getElementById(`speed-${textId}`);
-                const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-
-                highlightSentence(textId, index);
-
-                const voice = getVoiceForText(sents[index]);
-                responsiveVoice.speak(sents[index].trim(), voice, {
-                    rate: speed,
-                    pitch: 1,
-                    volume: 1,
-                    onend: function() {
-                        if (currentReadingId === textId) {
-                            currentSentenceIndex = index + 1;
-                            speakSentence(textId, currentSentenceIndex);
-                        }
-                    },
-                    onerror: function(err) {
-                        console.error('ResponsiveVoice Error:', err);
-                        if (currentReadingId === textId) {
-                            currentSentenceIndex = index + 1;
-                            speakSentence(textId, currentSentenceIndex);
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        function toggleReadAloud(textId) {
-            const btn = document.getElementById(`read-btn-${textId}`);
-            if (!isSpeechSynthesisSupported() || !btn) {
-                alert('Text-to-Speech is not supported in your browser. Please try Chrome, Firefox, or Edge.');
+            if (!isRVReady()) {
+                console.warn("ResponsiveVoice not ready yet");
                 return;
             }
 
-            // Check if already playing this text - stop it
+            if (currentReadingId !== textId) {
+                restoreText(textId);
+                return;
+            }
+
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text) return;
+
+            const sents = splitTextIntoSentences(text.text);
+            if (index >= sents.length) {
+                const btn = document.getElementById(`read-btn-${textId}`);
+                if (btn) {
+                    btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                    btn.classList.remove('playing');
+                }
+                restoreText(textId);
+                currentReadingId = null;
+                return;
+            }
+
+            const speedSlider = document.getElementById(`speed-${textId}`);
+            const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
+
+            highlightSentence(textId, index);
+
+            const voice = getVoiceForText(sents[index]);
+            
+            // ResponsiveVoice speak Aufruf
+            responsiveVoice.speak(sents[index].trim(), voice, {
+                rate: speed,
+                pitch: 1,
+                volume: 1,
+                onend: function() {
+                    if (currentReadingId === textId) {
+                        currentSentenceIndex = index + 1;
+                        speakSentence(textId, currentSentenceIndex);
+                    }
+                },
+                onerror: function(err) {
+                    console.error('RV Error:', err);
+                    if (currentReadingId === textId) {
+                        currentSentenceIndex = index + 1;
+                        speakSentence(textId, currentSentenceIndex);
+                    }
+                }
+            });
+        }
+
+        function toggleReadAloud(textId) {
+            if (!isRVReady()) {
+                alert('Voice engine is still loading. Please wait a moment and try again.');
+                return;
+            }
+
+            const btn = document.getElementById(`read-btn-${textId}`);
+
+            // Stop logic
             if (currentReadingId === textId && currentReadingId !== null) {
                 responsiveVoice.cancel();
                 btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
@@ -1302,7 +1286,7 @@
                 return;
             }
 
-            // Stop any currently playing audio from other text
+            // Stop other text
             if (currentReadingId !== null) {
                 responsiveVoice.cancel();
                 const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
@@ -1331,8 +1315,8 @@
             }
         });
 
-        // ==================== INIT ====================
-        // Removed; listener now registered closer to TEXTS consts.
+        // Start loading
+        window.addEventListener('DOMContentLoaded', loadTexts);
     </script>
 </body>
 </html>
