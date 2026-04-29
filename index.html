@@ -504,6 +504,12 @@
     <!-- ResponsiveVoice.js - Cross-browser TTS -->
     <!-- disableWelcome=true unterdrückt die Begrüßungsnachricht -->
     <script src="https://code.responsivevoice.org/responsivevoice.js?key=b08U7IYJ&disableWelcome=true"></script>
+    <!-- Edge TTS Module -->
+    <script type="module">
+    import { synthesize } from 'https://esm.sh/@edge-tts/universal@1.0.3';
+    window.edgeTTS = { synthesize };
+    </script>
+
 </head>
 <body>
     <header class="header">
@@ -1148,172 +1154,209 @@
 
         document.getElementById('resetBtn').addEventListener('click', resetProgress);
 
-        // ==================== TEXT-TO-SPEECH (ResponsiveVoice Fixed) ====================
-        let currentReadingId = null;
-        let currentSentenceIndex = 0;
+// ==================== TEXT-TO-SPEECH (Edge TTS) ====================
+let currentReadingId = null;
+let currentSentenceIndex = 0;
+let audioContext = null;
+let isPlaying = false;
+let abortController = null; // Zum sofortigen Stoppen
 
-        // Robuste Prüfung ob ResponsiveVoice geladen ist
-        function isRVReady() {
-            return typeof responsiveVoice !== 'undefined';
-        }
+// Konfiguration
+const VOICE_NAME = 'en-US-EmmaMultilingualNeural'; // Hochwertige englische Stimme
+const RATE_DEFAULT = 0.8;
 
-        function splitTextIntoSentences(text) {
-            const result = text.match(/[^.!?]+[.!?]+/g);
-            return result || [text];
-        }
+function isEdgeTTSReady() {
+    return typeof window.edgeTTS !== 'undefined' && typeof window.edgeTTS.synthesize === 'function';
+}
 
-        function prepareSentences(textId) {
-            const text = TEXTS.find(t => t.id === textId);
-            if (!text) return;
+function splitTextIntoSentences(text) {
+    // Behält bestehende Logik bei
+    const result = text.match(/[^.!?]+[.!?]+/g);
+    return result || [text];
+}
 
-            const container = document.getElementById(`text-${textId}`);
-            if (!container) return;
+function prepareSentences(textId) {
+    const text = TEXTS.find(t => t.id === textId);
+    if (!text) return;
+    const container = document.getElementById(`text-${textId}`);
+    if (!container) return;
+    const sents = splitTextIntoSentences(text.text);
+    container.innerHTML = sents.map((s, i) =>
+        `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`
+    ).join(' ');
+}
 
-            const sents = splitTextIntoSentences(text.text);
-            container.innerHTML = sents.map((s, i) =>
-                `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`
-            ).join(' ');
-        }
+function restoreText(textId) {
+    const text = TEXTS.find(t => t.id === textId);
+    if (!text) return;
+    const container = document.getElementById(`text-${textId}`);
+    if (container) container.innerHTML = text.text;
+}
 
-        function restoreText(textId) {
-            const text = TEXTS.find(t => t.id === textId);
-            if (!text) return;
+function clearHighlights(textId) {
+    const container = document.getElementById(`text-${textId}`);
+    if (container) {
+        container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+    }
+}
 
-            const container = document.getElementById(`text-${textId}`);
-            if (container) {
-                container.innerHTML = text.text;
-            }
-        }
+function highlightSentence(textId, index) {
+    clearHighlights(textId);
+    const sent = document.getElementById(`sent-${textId}-${index}`);
+    if (sent) {
+        sent.classList.add('active');
+        sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
 
-        function clearHighlights(textId) {
-            const container = document.getElementById(`text-${textId}`);
-            if (container) {
-                container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
-            }
-        }
+async function speakSentence(textId, index) {
+    if (!isPlaying || currentReadingId !== textId) return;
 
-        function highlightSentence(textId, index) {
-            clearHighlights(textId);
-            const sent = document.getElementById(`sent-${textId}-${index}`);
-            if (sent) {
-                sent.classList.add('active');
-                sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
+    const textObj = TEXTS.find(t => t.id === textId);
+    if (!textObj) return;
 
-        function getVoiceForText(text) {
-            const frenchWords = ['le', 'la', 'les', 'un', 'une', 'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'est', 'sont', 'ai', 'as', 'a', 'avons', 'avez', 'ont', 'être', 'avoir', 'dans', 'sur', 'sous', 'avec', 'sans', 'pour', 'par', 'de', 'du', 'des', 'au', 'aux', 'que', 'qui', 'où', 'quoi', 'donc', 'mais', 'ou', 'et', 'à', 'ce', 'se', 'me', 'te', 'lui', 'leur', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'votre', 'leur', 'leurs', 'chouette', 'merci', 'bonjour', 'salut'];
-            const words = text.toLowerCase().split(/\s+/);
-            let frenchCount = 0;
-            for (const word of words) {
-                if (frenchWords.includes(word)) frenchCount++;
-            }
-            if (words.length > 0 && frenchCount / words.length > 0.3) {
-                return "French Female";
-            }
-            return "UK English Male";
-        }
+    const sents = splitTextIntoSentences(textObj.text);
+    
+    // Ende erreicht?
+    if (index >= sents.length) {
+        finishReading(textId);
+        return;
+    }
 
-        function speakSentence(textId, index) {
-            if (!isRVReady()) {
-                console.warn("ResponsiveVoice not ready yet");
-                return;
-            }
+    const speedSlider = document.getElementById(`speed-${textId}`);
+    const rate = speedSlider ? parseFloat(speedSlider.value) : RATE_DEFAULT;
 
-            if (currentReadingId !== textId) {
-                restoreText(textId);
-                return;
-            }
+    highlightSentence(textId, index);
 
-            const text = TEXTS.find(t => t.id === textId);
-            if (!text) return;
-
-            const sents = splitTextIntoSentences(text.text);
-            if (index >= sents.length) {
-                const btn = document.getElementById(`read-btn-${textId}`);
-                if (btn) {
-                    btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-                    btn.classList.remove('playing');
-                }
-                restoreText(textId);
-                currentReadingId = null;
-                return;
-            }
-
-            const speedSlider = document.getElementById(`speed-${textId}`);
-            const speed = speedSlider ? parseFloat(speedSlider.value) : 0.8;
-
-            highlightSentence(textId, index);
-
-            const voice = getVoiceForText(sents[index]);
-            
-            // ResponsiveVoice speak Aufruf
-            responsiveVoice.speak(sents[index].trim(), voice, {
-                rate: speed,
-                pitch: 1,
-                volume: 1,
-                onend: function() {
-                    if (currentReadingId === textId) {
-                        currentSentenceIndex = index + 1;
-                        speakSentence(textId, currentSentenceIndex);
-                    }
-                },
-                onerror: function(err) {
-                    console.error('RV Error:', err);
-                    if (currentReadingId === textId) {
-                        currentSentenceIndex = index + 1;
-                        speakSentence(textId, currentSentenceIndex);
-                    }
-                }
-            });
-        }
-
-        function toggleReadAloud(textId) {
-            if (!isRVReady()) {
-                alert('Voice engine is still loading. Please wait a moment and try again.');
-                return;
-            }
-
-            const btn = document.getElementById(`read-btn-${textId}`);
-
-            // Stop logic
-            if (currentReadingId === textId && currentReadingId !== null) {
-                responsiveVoice.cancel();
-                btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-                btn.classList.remove('playing');
-                restoreText(textId);
-                currentReadingId = null;
-                return;
-            }
-
-            // Stop other text
-            if (currentReadingId !== null) {
-                responsiveVoice.cancel();
-                const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
-                if (oldBtn) {
-                    oldBtn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
-                    oldBtn.classList.remove('playing');
-                }
-                restoreText(currentReadingId);
-            }
-
-            currentReadingId = textId;
-            currentSentenceIndex = 0;
-            prepareSentences(textId);
-            btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
-            btn.classList.add('playing');
-            speakSentence(textId, 0);
-        }
-
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('speed-slider')) {
-                const textId = e.target.id.replace('speed-', '');
-                const display = document.getElementById(`speed-display-${textId}`);
-                if (display) {
-                    display.textContent = e.target.value + 'x';
-                }
-            }
+    const sentenceText = sents[index].trim();
+    
+    try {
+        // Abort Controller für sofortiges Stoppen
+        abortController = new AbortController();
+        
+        // Edge TTS Aufruf
+        const response = await window.edgeTTS.synthesize({
+            text: sentenceText,
+            voice: VOICE_NAME,
+            rate: rate, // Edge TTS akzeptiert Rate direkt
+            pitch: '0Hz',
+            volume: '+0%'
+        }, {
+            signal: abortController.signal
         });
+
+        // Prüfen ob noch aktiv während des Fetchs
+        if (!isPlaying || currentReadingId !== textId) return;
+
+        // Audio abspielen
+        const audioBlob = new Blob([response.audioData], { type: 'audio/mp3' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+
+        await new Promise((resolve, reject) => {
+            audio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                resolve();
+            };
+            audio.onerror = (e) => {
+                URL.revokeObjectURL(audioUrl);
+                console.error("Audio Play Error", e);
+                resolve(); // Weiter zum nächsten Satz auch bei Fehler
+            };
+            
+            // Starten
+            audio.play().catch(e => {
+                console.error("Play blocked", e);
+                resolve();
+            });
+        });
+
+        // Nächster Satz
+        if (isPlaying && currentReadingId === textId) {
+            currentSentenceIndex = index + 1;
+            speakSentence(textId, currentSentenceIndex);
+        }
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log("Playback aborted");
+            return;
+        }
+        console.error("Edge TTS Error:", error);
+        // Bei Fehler trotzdem weitermachen oder stoppen? Hier weitermachen:
+        if (isPlaying && currentReadingId === textId) {
+            currentSentenceIndex = index + 1;
+            speakSentence(textId, currentSentenceIndex);
+        }
+    }
+}
+
+function finishReading(textId) {
+    const btn = document.getElementById(`read-btn-${textId}`);
+    if (btn) {
+        btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+        btn.classList.remove('playing');
+    }
+    restoreText(textId);
+    currentReadingId = null;
+    isPlaying = false;
+    abortController = null;
+}
+
+function toggleReadAloud(textId) {
+    // Prüfen ob Modul geladen ist
+    if (!isEdgeTTSReady()) {
+        alert('Voice engine is loading... please wait a moment and try again.');
+        return;
+    }
+
+    const btn = document.getElementById(`read-btn-${textId}`);
+
+    // Wenn gerade dieser Text spielt -> STOPPEN
+    if (currentReadingId === textId && isPlaying) {
+        if (abortController) abortController.abort();
+        isPlaying = false;
+        currentReadingId = null;
+        
+        btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+        btn.classList.remove('playing');
+        restoreText(textId);
+        return;
+    }
+
+    // Wenn ein anderer Text spielt -> Erst den stoppen
+    if (isPlaying && currentReadingId !== null) {
+        if (abortController) abortController.abort();
+        const oldBtn = document.getElementById(`read-btn-${currentReadingId}`);
+        if (oldBtn) {
+            oldBtn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+            oldBtn.classList.remove('playing');
+        }
+        restoreText(currentReadingId);
+    }
+
+    // Neuen Start vorbereiten
+    currentReadingId = textId;
+    currentSentenceIndex = 0;
+    isPlaying = true;
+    
+    prepareSentences(textId);
+    btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
+    btn.classList.add('playing');
+    
+    speakSentence(textId, 0);
+}
+
+document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('speed-slider')) {
+        const textId = e.target.id.replace('speed-', '');
+        const display = document.getElementById(`speed-display-${textId}`);
+        if (display) {
+            display.textContent = e.target.value + 'x';
+        }
+        // Hinweis: Geschwindigkeitsänderung wirkt erst beim nächsten Satz
+    }
+});
 
         // Start loading
         window.addEventListener('DOMContentLoaded', loadTexts);
