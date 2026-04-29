@@ -1015,4 +1015,346 @@
                                     if (unitLocked && crLocked) return '<span class="lock-icon" title="CR & Unit locked">🔒</span>';
                                     if (unitLocked) return '<span class="lock-icon" title="Unit locked">📖🔒</span>';
                                     return '<span class="lock-icon" title="CR locked">⚔️🔒</span>';
-                                })() : (completed
+                                })() : (completed ? '✅' : '📜')}
+                            </div>
+                        </div>
+                        ${unlocked ? `
+                            <div class="card-content" id="content-${text.id}">
+                                <div class="reading-text" id="text-${text.id}">${text.text}</div>
+
+                                <div class="vocab-section">
+                                    <div class="section-title">📚 New Words</div>
+                                    <div class="vocab-list">
+                                        ${text.vocab.map(v => `
+                                            <div class="vocab-item">
+                                                <span class="vocab-word">${v[0]}</span>
+                                                <span class="vocab-meaning">— ${v[1]}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="questions-section">
+                                    <div class="section-title">❓ Questions</div>
+                                    <ul class="questions-list">
+                                        ${text.questions.map(q => `<li>${q}</li>`).join('')}
+                                    </ul>
+                                </div>
+
+                                <button class="read-aloud-btn" id="read-btn-${text.id}" onclick="toggleReadAloud('${text.id}')">
+                                    <span class="read-icon">🔊</span> Read Aloud
+                                </button>
+                                <div class="speed-control">
+                                    <span>🐢</span>
+                                    <input type="range" class="speed-slider" id="speed-${text.id}" min="0.5" max="2.0" step="0.1" value="1.0">
+                                    <span>🐇</span>
+                                    <span id="speed-display-${text.id}">1.0x</span>
+                                </div>
+
+                                <button class="complete-btn"
+                                        onclick="completeText('${text.id}')"
+                                        ${completed ? 'disabled' : ''}>
+                                    ${completed ? '✅ Completed' : '✓ Mark as Read'}
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            applyZoom();
+        }
+
+        function toggleCard(id) {
+            if (isLoading || !isInitialized) {
+                console.warn('Cannot toggle card while loading');
+                return;
+            }
+
+            const content = document.getElementById(`content-${id}`);
+            if (content) {
+                content.classList.toggle('open');
+            }
+        }
+
+        function applyZoom() {
+            const size = document.getElementById('zoomSlider').value;
+            document.querySelectorAll('.reading-text').forEach(el => {
+                el.style.fontSize = size + 'px';
+            });
+        }
+
+        // ==================== LOAD TEXTS ====================
+        async function loadTexts() {
+            const container = document.getElementById('textContainer');
+
+            try {
+                container.innerHTML = '<div class="loading">Loading texts...</div>';
+
+                const response = await fetch(TEXTS_JSON_URL + '?v=' + Date.now());
+                if (!response.ok) throw new Error('Failed to fetch texts');
+
+                TEXTS = await response.json();
+                generateLevels();
+
+                loadState();
+                await loadProgressFromAirtable();
+
+                updateUI();
+                renderTexts();
+                isLoading = false;
+                isInitialized = true;
+                return true;
+            } catch (error) {
+                console.error('Error loading texts:', error);
+                container.innerHTML = `<div class="error">Failed to load texts.<br><small>${error.message}</small></div>`;
+                isLoading = false;
+                return false;
+            }
+        }
+
+        // ==================== CONTROLS ====================
+        document.getElementById('zoomSlider').addEventListener('input', applyZoom);
+
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            document.getElementById('fullscreenBtn').classList.toggle('active', !!document.fullscreenElement);
+        });
+
+        let wakeLock = null;
+        const wakeLockBtn = document.getElementById('wakeLockBtn');
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLockBtn.classList.add('active');
+                    wakeLock.addEventListener('release', () => {
+                        wakeLockBtn.classList.remove('active');
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock error:', err);
+            }
+        }
+
+        async function releaseWakeLock() {
+            if (wakeLock) {
+                await wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        wakeLockBtn.addEventListener('click', async () => {
+            if (wakeLock) {
+                await releaseWakeLock();
+            } else {
+                await requestWakeLock();
+            }
+        });
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && wakeLockBtn.classList.contains('active')) {
+                await requestWakeLock();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', resetProgress);
+
+        // ==================== EDGE TTS ====================
+        let currentReadingId = null;
+        let currentSentenceIndex = 0;
+        let isPlaying = false;
+        let currentAudio = null;
+
+        // Voice configuration
+        const VOICE_NAME = 'en-US-EmmaMultilingualNeural';
+        const DEFAULT_RATE = 1.0;
+
+        function splitTextIntoSentences(text) {
+            const result = text.match(/[^.!?]+[.!?]+/g);
+            return result || [text];
+        }
+
+        function prepareSentences(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text) return;
+            const container = document.getElementById(`text-${textId}`);
+            if (!container) return;
+            const sents = splitTextIntoSentences(text.text);
+            container.innerHTML = sents.map((s, i) =>
+                `<span class="sentence" id="sent-${textId}-${i}">${s.trim()}</span>`
+            ).join(' ');
+        }
+
+        function restoreText(textId) {
+            const text = TEXTS.find(t => t.id === textId);
+            if (!text) return;
+            const container = document.getElementById(`text-${textId}`);
+            if (container) container.innerHTML = text.text;
+        }
+
+        function clearHighlights(textId) {
+            const container = document.getElementById(`text-${textId}`);
+            if (container) {
+                container.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+            }
+        }
+
+        function highlightSentence(textId, index) {
+            clearHighlights(textId);
+            const sent = document.getElementById(`sent-${textId}-${index}`);
+            if (sent) {
+                sent.classList.add('active');
+                sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        async function speakSentence(textId, index) {
+            if (!isPlaying || currentReadingId !== textId) return;
+
+            const textObj = TEXTS.find(t => t.id === textId);
+            if (!textObj) return;
+
+            const sents = splitTextIntoSentences(textObj.text);
+            
+            if (index >= sents.length) {
+                finishReading(textId);
+                return;
+            }
+
+            const speedSlider = document.getElementById(`speed-${textId}`);
+            const rate = speedSlider ? parseFloat(speedSlider.value) : DEFAULT_RATE;
+
+            highlightSentence(textId, index);
+
+            const sentenceText = sents[index].trim();
+            
+            try {
+                const tts = new window.EdgeTTS();
+                
+                // Generate audio
+                const audioData = await tts.synthesize(sentenceText, VOICE_NAME, {
+                    rate: rate
+                });
+
+                if (!isPlaying || currentReadingId !== textId) return;
+
+                // Stop previous audio
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+
+                // Create and play audio
+                const blob = new Blob([audioData], { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                currentAudio = audio;
+
+                await new Promise((resolve, reject) => {
+                    audio.onended = () => {
+                        URL.revokeObjectURL(url);
+                        currentAudio = null;
+                        resolve();
+                    };
+                    audio.onerror = (e) => {
+                        URL.revokeObjectURL(url);
+                        currentAudio = null;
+                        console.error('Audio playback error:', e);
+                        resolve(); // Continue to next sentence
+                    };
+                    
+                    audio.play().catch(e => {
+                        URL.revokeObjectURL(url);
+                        currentAudio = null;
+                        console.error('Audio play failed:', e);
+                        resolve(); // Continue to next sentence
+                    });
+                });
+
+                // Speak next sentence
+                if (isPlaying && currentReadingId === textId) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
+
+            } catch (error) {
+                console.error('Edge TTS error:', error);
+                // Try next sentence on error
+                if (isPlaying && currentReadingId === textId) {
+                    currentSentenceIndex = index + 1;
+                    speakSentence(textId, currentSentenceIndex);
+                }
+            }
+        }
+
+        function finishReading(textId) {
+            const btn = document.getElementById(`read-btn-${textId}`);
+            if (btn) {
+                btn.innerHTML = '<span class="read-icon">🔊</span> Read Aloud';
+                btn.classList.remove('playing');
+            }
+            restoreText(textId);
+            currentReadingId = null;
+            isPlaying = false;
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+        }
+
+        function toggleReadAloud(textId) {
+            // Check if module is loaded
+            if (!window.EdgeTTS) {
+                alert('Edge TTS is still loading. Please wait a moment and try again.');
+                return;
+            }
+
+            const btn = document.getElementById(`read-btn-${textId}`);
+
+            // If this text is currently playing -> STOP
+            if (currentReadingId === textId && isPlaying) {
+                finishReading(textId);
+                return;
+            }
+
+            // If another text is playing -> Stop it first
+            if (isPlaying && currentReadingId !== null) {
+                finishReading(currentReadingId);
+            }
+
+            // Start new playback
+            currentReadingId = textId;
+            currentSentenceIndex = 0;
+            isPlaying = true;
+            
+            prepareSentences(textId);
+            btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
+            btn.classList.add('playing');
+            
+            speakSentence(textId, 0);
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('speed-slider')) {
+                const textId = e.target.id.replace('speed-', '');
+                const display = document.getElementById(`speed-display-${textId}`);
+                if (display) {
+                    display.textContent = e.target.value + 'x';
+                }
+            }
+        });
+
+        // Start loading
+        window.addEventListener('DOMContentLoaded', loadTexts);
+    </script>
+</body>
+</html>
