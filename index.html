@@ -567,6 +567,11 @@
         const AIRTABLE_API_URL = 'https://api.airtable.com/v0/appgWZEpl9pGBmZbk/progress';
         const AIRTABLE_TOKEN = 'patPLnPw8FTuQVPWw.bd0bc8db1415af5f2f7b16fd5cd20971cc637ca21681b6933843fb04deaa9f0e';
         
+        // ╔════════════════════════════════════════════════════════════════╗
+        // ║  PIPER TTS SERVER CONFIG                                        ║
+        // ╚════════════════════════════════════════════════════════════════╝
+        const PIPER_SERVER = 'http://192.168.1.17:5000'; // <-- DEINE SERVER-IP EINTRAGEN
+
         let currentRecordId = null;
         let saveIndicatorTimeout = null;
         
@@ -707,9 +712,7 @@
         function saveState() {
             try {
                 sessionStorage.setItem('codexGameState', JSON.stringify(gameState));
-            } catch (e) {
-                // Ignore storage errors
-            }
+            } catch (e) {}
         }
 
         function loadState() {
@@ -1152,19 +1155,14 @@
 
         document.getElementById('resetBtn').addEventListener('click', resetProgress);
 
-        // ==================== NATIVE EDGE TTS API (NO DEPENDENCIES) ====================
+        // ==================== PIPER TTS (LOKALER SERVER) ====================
         let currentReadingId = null;
         let currentSentenceIndex = 0;
         let isPlaying = false;
         let currentAudio = null;
         let abortController = null;
 
-        // Voice: Microsoft Server Speech Text to Speech Voice (en-US, EmmaMultilingualNeural)
-        const VOICE_NAME = 'en-US-EmmaMultilingualNeural';
         const DEFAULT_RATE = 1.0;
-
-        // Direct Microsoft Edge TTS endpoint (exact endpoint used by Edge browser)
-        const EDGE_TTS_ENDPOINT = 'https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1';
 
         function splitTextIntoSentences(text) {
             const result = text.match(/[^.!?]+[.!?]+/g);
@@ -1205,30 +1203,21 @@
             }
         }
 
-        // Direct Microsoft Edge TTS API using SSML and fetch
         async function synthesizeSpeech(text, rate) {
-            const ssml = `X-Request-Id:${crypto.randomUUID()}\r\nContent-Type:application/ssml+xml\r\nX-Microsoft-OutputFormat:audio-24khz-48kbitrate-mono-mp3\r\nUser-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0\r\n\r\n` +
-                `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'>` +
-                `<voice name='${VOICE_NAME}'>` +
-                `<prosody rate='${rate}' pitch='+0Hz'>` +
-                `${text}` +
-                `</prosody>` +
-                `</voice>` +
-                `</speak>`;
+            // Genau wie deine Web-App: POST / mit JSON {text: "..."}
+            const body = { text: text };
+            // Optional rate mitsenden – der Server kann es ignorieren
+            if (rate !== 1.0) body.rate = rate;
 
-            const response = await fetch(EDGE_TTS_ENDPOINT, {
+            const response = await fetch(PIPER_SERVER, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/ssml+xml',
-                    'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0'
-                },
-                body: ssml,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
                 signal: abortController.signal
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(`Piper server error: ${response.status}`);
             }
 
             return await response.arrayBuffer();
@@ -1241,7 +1230,6 @@
             if (!textObj) return;
 
             const sents = splitTextIntoSentences(textObj.text);
-            
             if (index >= sents.length) {
                 finishReading(textId);
                 return;
@@ -1253,48 +1241,41 @@
             highlightSentence(textId, index);
 
             const sentenceText = sents[index].trim();
-            
+
             try {
                 abortController = new AbortController();
-                
                 const audioBuffer = await synthesizeSpeech(sentenceText, rate);
 
                 if (!isPlaying || currentReadingId !== textId) return;
 
-                // Stop previous audio
                 if (currentAudio) {
                     currentAudio.pause();
                     currentAudio = null;
                 }
 
-                // Create and play audio
-                const blob = new Blob([audioBuffer], { type: 'audio/mp3' });
+                const blob = new Blob([audioBuffer], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
                 const audio = new Audio(url);
                 currentAudio = audio;
 
-                await new Promise((resolve, reject) => {
+                await new Promise((resolve) => {
                     audio.onended = () => {
                         URL.revokeObjectURL(url);
                         currentAudio = null;
                         resolve();
                     };
-                    audio.onerror = (e) => {
+                    audio.onerror = () => {
                         URL.revokeObjectURL(url);
                         currentAudio = null;
-                        console.error('Audio playback error:', e);
                         resolve();
                     };
-                    
-                    audio.play().catch(e => {
+                    audio.play().catch(() => {
                         URL.revokeObjectURL(url);
                         currentAudio = null;
-                        console.error('Audio play failed:', e);
                         resolve();
                     });
                 });
 
-                // Speak next sentence
                 if (isPlaying && currentReadingId === textId) {
                     currentSentenceIndex = index + 1;
                     speakSentence(textId, currentSentenceIndex);
@@ -1305,8 +1286,7 @@
                     console.log('Playback aborted');
                     return;
                 }
-                console.error('Edge TTS error:', error);
-                // Try next sentence on error
+                console.error('Piper TTS error:', error);
                 if (isPlaying && currentReadingId === textId) {
                     currentSentenceIndex = index + 1;
                     speakSentence(textId, currentSentenceIndex);
@@ -1336,32 +1316,25 @@
         function toggleReadAloud(textId) {
             const btn = document.getElementById(`read-btn-${textId}`);
 
-            // If this text is currently playing -> STOP
             if (currentReadingId === textId && isPlaying) {
-                if (abortController) {
-                    abortController.abort();
-                }
+                if (abortController) abortController.abort();
                 finishReading(textId);
                 return;
             }
 
-            // If another text is playing -> Stop it first
             if (isPlaying && currentReadingId !== null) {
-                if (abortController) {
-                    abortController.abort();
-                }
+                if (abortController) abortController.abort();
                 finishReading(currentReadingId);
             }
 
-            // Start new playback
             currentReadingId = textId;
             currentSentenceIndex = 0;
             isPlaying = true;
-            
+
             prepareSentences(textId);
             btn.innerHTML = '<span class="read-icon">⏹</span> Stop';
             btn.classList.add('playing');
-            
+
             speakSentence(textId, 0);
         }
 
